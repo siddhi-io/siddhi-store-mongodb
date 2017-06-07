@@ -54,4 +54,6 @@ public class MongoTableConstants {
     public static final String PLACEHOLDER_FIELD_NAME = "{{FIELD_NAME}}";
     public static final String PLACEHOLDER_COMPARE_OPERATOR = "{{COMPARE_OPERATOR}}";
 
+    private MongoTableConstants() {
+    }
 }
