@@ -39,6 +39,7 @@ public class MongoTableConstants {
     public static final String REG_EXPRESSION = "\\{.*}$";
     public static final String REG_SIMPLE_EXPRESSION = "^\\{(\\S*):\\{.*}}$";
     public static final String REG_STREAMVAR_OR_CONST = "^strVar\\d*|^const\\d*";
+    public static final String REG_INDEX_BY = "^(\\S*)\\s(1|-1)\\s(\\{.*})$";
 
     //Mongo filters for condition builder
     public static final String MONGO_AND_FILTER = "{$and:[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]}";
@@ -53,6 +54,30 @@ public class MongoTableConstants {
     public static final String PLACEHOLDER_OPERAND = "{{OPERAND}}";
     public static final String PLACEHOLDER_FIELD_NAME = "{{FIELD_NAME}}";
     public static final String PLACEHOLDER_COMPARE_OPERATOR = "{{COMPARE_OPERATOR}}";
+
+    public static final String CONNECTIONS_PER_HOST = "connectionsPerHost";
+    public static final String HEARTBEAT_SOCKET_TIMEOUT = "heartbeatSocketTimeout";
+    public static final String CONNECT_TIMEOUT = "connectTimeout";
+    public static final String HEARTBEAT_FREQUENCY = "heartbeatFrequency";
+    public static final String READ_CONCERN = "readConcern";
+    public static final String WRITE_CONCERN = "writeConcern";
+    public static final String HEARTBEAT_CONNECT_TIMEOUT = "heartbeatConnectTimeout";
+    public static final String LOCAL_THRESHOLD = "localThreshold";
+    public static final String MAX_CONNECTION_IDLE_TIME = "maxConnectionIdleTime";
+    public static final String MAX_CONNECTION_LIFE_TIME = "maxConnectionLifeTime";
+    public static final String MAX_WAIT_TIME = "maxWaitTime";
+    public static final String MIN_CONNECTIONS_PER_HOST = "minConnectionsPerHost";
+    public static final String MIN_HEARTBEAT_FREQUENCY = "minHeartbeatFrequency";
+    public static final String SERVER_SELECTION_TIMEOUT = "serverSelectionTimeout";
+    public static final String SOCKET_TIMEOUT = "socketTimeout";
+    public static final String THREADS_ALLOWED_TO_BLOCK = "threadsAllowedToBlockForConnectionMultiplier";
+    public static final String SOCKET_KEEP_ALIVE = "socketKeepAlive";
+    public static final String SSL_ENABLED = "sslEnabled";
+    public static final String CURSOR_FINALIZER_ENABLED = "cursorFinalizerEnabled";
+    public static final String REQUIRED_REPLICA_SET_NAME = "requiredReplicaSetName";
+    public static final String APPLICATION_NAME = "applicationName";
+    public static final String READ_PREFERENCE = "readPreference";
+
 
     private MongoTableConstants() {
     }
