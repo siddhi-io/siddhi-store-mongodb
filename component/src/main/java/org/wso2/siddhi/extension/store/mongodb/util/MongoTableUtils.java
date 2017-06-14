@@ -61,7 +61,7 @@ public class MongoTableUtils {
 
     /**
      * Utility method which can be used to check if the given primary key is valid i.e. non empty
-     * and is made up of attributes.
+     * and is made up of attributes and return an index model when PrimaryKey is valid.
      *
      * @param primaryKey the PrimaryKey annotation which contains the primary key attributes.
      * @param attributeNames List containing names of the attributes.
@@ -118,7 +118,7 @@ public class MongoTableUtils {
     }
 
     /**
-     * Utility method which can be used to populate single IndexModel.
+     * Utility method which can be used to create an IndexModel.
      *
      * @param fieldName   the attribute on which the index is to be created.
      * @param sortOrder   the sort order of the index to be created.
@@ -135,60 +135,61 @@ public class MongoTableUtils {
             try {
                 indexOptionDocument = Document.parse(indexOption);
                 for (Map.Entry<String, Object> indexEntry : indexOptionDocument.entrySet()) {
+                    Object value = indexEntry.getValue();
                     switch (indexEntry.getKey()) {
                         case "unique":
-                            indexOptions.unique(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            indexOptions.unique(Boolean.parseBoolean(value.toString()));
                             break;
                         case "background":
-                            indexOptions.background(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            indexOptions.background(Boolean.parseBoolean(value.toString()));
                             break;
                         case "name":
-                            indexOptions.name(indexEntry.getValue().toString());
+                            indexOptions.name(value.toString());
                             break;
                         case "sparse":
-                            indexOptions.sparse(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            indexOptions.sparse(Boolean.parseBoolean(value.toString()));
                             break;
                         case "expireAfterSeconds":
-                            indexOptions.expireAfter(Long.parseLong(indexEntry.getValue().toString()), TimeUnit.SECONDS);
+                            indexOptions.expireAfter(Long.parseLong(value.toString()), TimeUnit.SECONDS);
                             break;
                         case "version":
-                            indexOptions.version(Integer.parseInt(indexEntry.getValue().toString()));
+                            indexOptions.version(Integer.parseInt(value.toString()));
                             break;
                         case "weights":
-                            indexOptions.weights((Bson) indexEntry.getValue());
+                            indexOptions.weights((Bson) value);
                             break;
                         case "languageOverride":
-                            indexOptions.languageOverride(indexEntry.getValue().toString());
+                            indexOptions.languageOverride(value.toString());
                             break;
                         case "defaultLanguage":
-                            indexOptions.defaultLanguage(indexEntry.getValue().toString());
+                            indexOptions.defaultLanguage(value.toString());
                             break;
                         case "textVersion":
-                            indexOptions.textVersion(Integer.parseInt(indexEntry.getValue().toString()));
+                            indexOptions.textVersion(Integer.parseInt(value.toString()));
                             break;
                         case "sphereVersion":
-                            indexOptions.sphereVersion(Integer.parseInt(indexEntry.getValue().toString()));
+                            indexOptions.sphereVersion(Integer.parseInt(value.toString()));
                             break;
                         case "bits":
-                            indexOptions.bits(Integer.parseInt(indexEntry.getValue().toString()));
+                            indexOptions.bits(Integer.parseInt(value.toString()));
                             break;
                         case "min":
-                            indexOptions.min(Double.parseDouble(indexEntry.getValue().toString()));
+                            indexOptions.min(Double.parseDouble(value.toString()));
                             break;
                         case "max":
-                            indexOptions.max(Double.parseDouble(indexEntry.getValue().toString()));
+                            indexOptions.max(Double.parseDouble(value.toString()));
                             break;
                         case "bucketSize":
-                            indexOptions.bucketSize(Double.parseDouble(indexEntry.getValue().toString()));
+                            indexOptions.bucketSize(Double.parseDouble(value.toString()));
                             break;
                         case "partialFilterExpression":
-                            indexOptions.partialFilterExpression((Bson) indexEntry.getValue());
+                            indexOptions.partialFilterExpression((Bson) value);
                             break;
                         case "collation":
-                            DBObject collationOptions = (DBObject) indexEntry.getValue();
+                            DBObject collationOptions = (DBObject) value;
                             Collation.Builder builder = Collation.builder();
                             for (String collationKey : collationOptions.keySet()) {
-                                String collationObj = indexEntry.getValue().toString();
+                                String collationObj = value.toString();
                                 switch (collationKey) {
                                     case "locale":
                                         builder.locale(collationObj);
@@ -219,38 +220,38 @@ public class MongoTableUtils {
                                         break;
                                     default:
                                         log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains " +
-                                                "unknown 'Collation' Option key : '" + collationKey + "'. Please check " +
-                                                "your query and try again.");
+                                                "unknown 'Collation' Option key : '" + collationKey + "'. Please " +
+                                                "check your query and try again.");
                                         break;
                                 }
                             }
                             if (builder.build().getLocale() != null) {
                                 indexOptions.collation(builder.build());
                             } else {
-                                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' " +
-                                        "do not contain option for locale. Please check your query and try again.");
+                                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "'" +
+                                        " do not contain option for locale. Please check your query and try again.");
                             }
                             break;
                         case "storageEngine":
-                            indexOptions.storageEngine((Bson) indexOptionDocument.get("storageEngine"));
+                            indexOptions.storageEngine((Bson) value);
                             break;
                         default:
-                            log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains unknown option key" +
-                                    " : '" + indexEntry.getKey() + "'. Please check your query and try again.");
+                            log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains unknown option " +
+                                    "key : '" + indexEntry.getKey() + "'. Please check your query and try again.");
                             break;
                     }
                 }
             } catch (JsonParseException | NumberFormatException e) {
-                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' contains illegal " +
-                        "value(s) for index option. Please check your query and try again.", e);
+                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' contains " +
+                        "illegal value(s) for index option. Please check your query and try again.", e);
             }
             return new IndexModel(indexDocument, indexOptions);
         }
     }
 
     /**
-     * Utility method which can be resolve the condition with the runtime values and return a Document describing the
-     * filter.
+     * Utility method which can be used to resolve the condition with the runtime values and return a Document
+     * describing the filter.
      *
      * @param compiledCondition     the compiled condition which was built during compile time and now is being provided
      *                              by the Siddhi runtime.
@@ -293,13 +294,13 @@ public class MongoTableUtils {
 
 
     /**
-     * Utility method tp map the values to the respective attributes before database operations.
+     * Utility method tp map the values to the respective attributes before database writes.
      *
      * @param record              Object array of the runtime values.
      * @param attributesPositions Map containing the attribute position and name.
      * @return Document
      */
-    public static Map<String, Object> mapValuestoAttributes(Object[] record, Map<Integer, String> attributesPositions) {
+    public static Map<String, Object> mapValuesToAttributes(Object[] record, Map<Integer, String> attributesPositions) {
         Map<String, Object> attributesValuesMap = new HashMap<>();
         for (int i = 0; i < record.length; i++) {
             attributesValuesMap.put(attributesPositions.get(i), record[i]);
@@ -308,8 +309,8 @@ public class MongoTableUtils {
     }
 
     /**
-     * Utility method which can be used to check if the existing indices contains the expected indices
-     * defined by the annotation 'PrimaryKey' and 'IndexBy'
+     * Utility method which can be used to check if the existing indices contain the expected indices
+     * defined by the annotation 'PrimaryKey' and 'IndexBy' and log a warning when indices differs.
      *
      * @param existingIndices List of indices that the collection contains.
      * @param expectedIndices List of indices that are defined by the annotations.

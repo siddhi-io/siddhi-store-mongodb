@@ -21,7 +21,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.wso2.siddhi.core.table.record.RecordIterator;
-import org.wso2.siddhi.query.api.definition.Attribute;
 
 import java.io.IOException;
 import java.util.ArrayList;

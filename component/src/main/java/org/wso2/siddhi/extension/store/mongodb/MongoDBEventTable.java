@@ -20,7 +20,6 @@ package org.wso2.siddhi.extension.store.mongodb;
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -63,7 +62,7 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 
 
 /**
- * Class representing MongoDB Event Table implementation
+ * Class representing MongoDB Event Table implementation.
  */
 @Extension(
         name = "mongodb",
@@ -143,10 +142,10 @@ public class MongoDBEventTable extends AbstractRecordTable {
             try {
                 this.getDatabaseObject().createCollection(this.collectionName);
                 this.createIndices(expectedIndexModels);
-            } catch (MongoCommandException e) {
+            } catch (MongoException e) {
                 this.mongoClient.close();
-                throw new MongoTableException("Creating mongo collection is not successful " +
-                        "due to " + e.getLocalizedMessage(), e);
+                throw new MongoTableException("Creating mongo collection '" + this.collectionName
+                        + "' is not successful due to " + e.getLocalizedMessage(), e);
             }
         } else {
             MongoCursor<Document> existingIndicesIterator = this.getCollectionObject().listIndexes().iterator();
@@ -155,7 +154,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for initializing mongoClientURI and database name
+     * Method for initializing mongoClientURI and database name.
      *
      * @param storeAnnotation the source annotation which contains the needed parameters.
      * @throws MongoTableException when store annotation does not contain mongodb.uri or contains an illegal
@@ -179,22 +178,28 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for checking if the collection exists or not
+     * Method for checking if the collection exists or not.
      *
      * @return <code>true</code> if the collection exists
      * <code>false</code> otherwise
+     * @throws MongoTableException if lookup fails.
      */
     private boolean collectionExists() {
-        for (String collectionName : this.getDatabaseObject().listCollectionNames()) {
-            if (this.collectionName.equals(collectionName)) {
-                return true;
+        try {
+            for (String collectionName : this.getDatabaseObject().listCollectionNames()) {
+                if (this.collectionName.equals(collectionName)) {
+                    return true;
+                }
             }
+            return false;
+        } catch (MongoException e) {
+            throw new MongoTableException("Error in retrieving collection names from the database '"
+                    + this.databaseName + "' : " + e.getLocalizedMessage(), e);
         }
-        return false;
     }
 
     /**
-     * Method for returning a database object
+     * Method for returning a database object.
      *
      * @return a new {@link MongoDatabase} instance from the Mongo client.
      */
@@ -203,7 +208,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for returning a collection object
+     * Method for returning a collection object.
      *
      * @return a new {@link MongoCollection} instance from the Mongo client.
      */
@@ -212,7 +217,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for returning a mongo client
+     * Method for returning a mongo client.
      *
      * @return a {@link MongoClient} instance.
      * @throws MongoTableException when the mongodb.uri contain illegal value
@@ -233,7 +238,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for creating indexes on the collection
+     * Method for creating indices on the collection.
      */
     private void createIndices(List<IndexModel> indexModels) {
         if (!indexModels.isEmpty()) {
@@ -242,9 +247,10 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     /**
-     * Method for doing bulk write operations on the collection
+     * Method for doing bulk write operations on the collection.
      *
      * @param parsedRecords a List of WriteModels to be applied
+     * @throws MongoTableException if the write fails
      */
     private void bulkWrite(List<? extends WriteModel<Document>> parsedRecords) {
         try {
@@ -277,16 +283,19 @@ public class MongoDBEventTable extends AbstractRecordTable {
                     this.bulkWrite(parsedRecords.subList(failedIndex + 1, parsedRecords.size() - 1));
                 }
             }
+        } catch (MongoException e) {
+            throw new MongoTableException("Error in writing to the collection '"
+                    + this.collectionName + "' : " + e.getLocalizedMessage(), e);
         }
     }
 
     @Override
     protected void add(List<Object[]> records) {
         List<InsertOneModel<Document>> parsedRecords = records.stream().map(record -> {
-            Map<String, Object> insertMap = MongoTableUtils.mapValuestoAttributes(record, this.attributePositions);
+            Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributePositions);
             Document insertDocument = new Document(insertMap);
             if (log.isDebugEnabled()) {
-                log.debug("Event formatted as the document '" + insertDocument.toJson() + "' is used for building " +
+                log.debug("Event formatted as document '" + insertDocument.toJson() + "' is used for building " +
                         "Mongo Insert Model");
             }
             return new InsertOneModel<>(insertDocument);
@@ -297,18 +306,28 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected RecordIterator<Object[]> find(Map<String, Object> findConditionParameterMap,
                                             CompiledCondition compiledCondition) {
-        Document findFilter = MongoTableUtils
-                .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
-        MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
-        return new MongoIterator(mongoCollection.find(findFilter), this.attributeNames);
+        try {
+            Document findFilter = MongoTableUtils
+                    .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
+            MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
+            return new MongoIterator(mongoCollection.find(findFilter), this.attributeNames);
+        } catch (MongoException e) {
+            throw new MongoTableException("Error in retrieving documents from the collection '"
+                    + this.collectionName + "' : " + e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
     protected boolean contains(Map<String, Object> containsConditionParameterMap, CompiledCondition
             compiledCondition) {
-        Document containsFilter = MongoTableUtils
-                .resolveCondition((MongoCompiledCondition) compiledCondition, containsConditionParameterMap);
-        return this.getCollectionObject().count(containsFilter) > 0;
+        try {
+            Document containsFilter = MongoTableUtils
+                    .resolveCondition((MongoCompiledCondition) compiledCondition, containsConditionParameterMap);
+            return this.getCollectionObject().count(containsFilter) > 0;
+        } catch (MongoException e) {
+            throw new MongoTableException("Error in retrieving count of documents from the collection '"
+                    + this.collectionName + "' : " + e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
