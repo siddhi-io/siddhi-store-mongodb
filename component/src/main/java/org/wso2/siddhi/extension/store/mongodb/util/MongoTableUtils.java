@@ -46,6 +46,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_INDEX_BY;
+
 
 /**
  * Class which holds the utility methods which are used by various units in the MongoDB Event Table implementation.
@@ -93,10 +95,10 @@ public class MongoTableUtils {
      * @return List of IndexModel.
      */
     public static List<IndexModel> extractIndexModels(Annotation indices, List<Attribute> attributes) {
-        Pattern pattern = Pattern.compile("^(\\S*)\\s(1|-1)\\s(\\{.*})$");
         if (indices == null) {
             return new ArrayList<>();
         }
+        Pattern pattern = Pattern.compile(REG_INDEX_BY);
         List<String> attributesNames = attributes.stream().map(Attribute::getName).collect(Collectors.toList());
         return indices.getElements().stream().map(index -> {
             Matcher matcher = pattern.matcher(index.getValue());
@@ -108,6 +110,9 @@ public class MongoTableUtils {
                             "value(s). Please check your query and try again.");
                 }
             } else {
+                if (attributesNames.contains(index.getValue())) {
+                    return createIndexModel(index.getValue(), 1, null);
+                }
                 throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal value(s). " +
                         "Please check your query and try again.");
             }
@@ -124,121 +129,125 @@ public class MongoTableUtils {
      */
     private static IndexModel createIndexModel(String fieldName, Integer sortOrder, String indexOption) {
         Document indexDocument = new Document(fieldName, sortOrder);
-        IndexOptions indexOptions = new IndexOptions();
-        Document indexOptionDocument;
-        try {
-            indexOptionDocument = Document.parse(indexOption);
-            for (Map.Entry<String, Object> indexEntry : indexOptionDocument.entrySet()) {
-                switch (indexEntry.getKey()) {
-                    case "unique":
-                        indexOptions.unique(Boolean.parseBoolean(indexEntry.getValue().toString()));
-                        break;
-                    case "background":
-                        indexOptions.background(Boolean.parseBoolean(indexEntry.getValue().toString()));
-                        break;
-                    case "name":
-                        indexOptions.name(indexEntry.getValue().toString());
-                        break;
-                    case "sparse":
-                        indexOptions.sparse(Boolean.parseBoolean(indexEntry.getValue().toString()));
-                        break;
-                    case "expireAfterSeconds":
-                        indexOptions.expireAfter(Long.parseLong(indexEntry.getValue().toString()), TimeUnit.SECONDS);
-                        break;
-                    case "version":
-                        indexOptions.version(Integer.parseInt(indexEntry.getValue().toString()));
-                        break;
-                    case "weights":
-                        indexOptions.weights((Bson) indexEntry.getValue());
-                        break;
-                    case "languageOverride":
-                        indexOptions.languageOverride(indexEntry.getValue().toString());
-                        break;
-                    case "defaultLanguage":
-                        indexOptions.defaultLanguage(indexEntry.getValue().toString());
-                        break;
-                    case "textVersion":
-                        indexOptions.textVersion(Integer.parseInt(indexEntry.getValue().toString()));
-                        break;
-                    case "sphereVersion":
-                        indexOptions.sphereVersion(Integer.parseInt(indexEntry.getValue().toString()));
-                        break;
-                    case "bits":
-                        indexOptions.bits(Integer.parseInt(indexEntry.getValue().toString()));
-                        break;
-                    case "min":
-                        indexOptions.min(Double.parseDouble(indexEntry.getValue().toString()));
-                        break;
-                    case "max":
-                        indexOptions.max(Double.parseDouble(indexEntry.getValue().toString()));
-                        break;
-                    case "bucketSize":
-                        indexOptions.bucketSize(Double.parseDouble(indexEntry.getValue().toString()));
-                        break;
-                    case "partialFilterExpression":
-                        indexOptions.partialFilterExpression((Bson) indexEntry.getValue());
-                        break;
-                    case "collation":
-                        DBObject collationOptions = (DBObject) indexEntry.getValue();
-                        Collation.Builder builder = Collation.builder();
-                        for (String collationKey : collationOptions.keySet()) {
-                            String collationObj = indexEntry.getValue().toString();
-                            switch (collationKey) {
-                                case "locale":
-                                    builder.locale(collationObj);
-                                    break;
-                                case "caseLevel":
-                                    builder.caseLevel(Boolean.parseBoolean(collationObj));
-                                    break;
-                                case "caseFirst":
-                                    builder.collationCaseFirst(CollationCaseFirst.fromString(collationObj));
-                                    break;
-                                case "strength":
-                                    builder.collationStrength(CollationStrength.valueOf(collationObj));
-                                    break;
-                                case "numericOrdering":
-                                    builder.numericOrdering(Boolean.parseBoolean(collationObj));
-                                    break;
-                                case "normalization":
-                                    builder.normalization(Boolean.parseBoolean(collationObj));
-                                    break;
-                                case "backwards":
-                                    builder.backwards(Boolean.parseBoolean(collationObj));
-                                    break;
-                                case "alternate":
-                                    builder.collationAlternate(CollationAlternate.fromString(collationObj));
-                                    break;
-                                case "maxVariable":
-                                    builder.collationMaxVariable(CollationMaxVariable.fromString(collationObj));
-                                    break;
-                                default:
-                                    log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains " +
-                                            "unknown 'Collation' Option key : '" + collationKey + "'. Please check " +
-                                            "your query and try again.");
-                                    break;
+        if (indexOption == null) {
+            return new IndexModel(indexDocument);
+        } else {
+            IndexOptions indexOptions = new IndexOptions();
+            Document indexOptionDocument;
+            try {
+                indexOptionDocument = Document.parse(indexOption);
+                for (Map.Entry<String, Object> indexEntry : indexOptionDocument.entrySet()) {
+                    switch (indexEntry.getKey()) {
+                        case "unique":
+                            indexOptions.unique(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            break;
+                        case "background":
+                            indexOptions.background(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            break;
+                        case "name":
+                            indexOptions.name(indexEntry.getValue().toString());
+                            break;
+                        case "sparse":
+                            indexOptions.sparse(Boolean.parseBoolean(indexEntry.getValue().toString()));
+                            break;
+                        case "expireAfterSeconds":
+                            indexOptions.expireAfter(Long.parseLong(indexEntry.getValue().toString()), TimeUnit.SECONDS);
+                            break;
+                        case "version":
+                            indexOptions.version(Integer.parseInt(indexEntry.getValue().toString()));
+                            break;
+                        case "weights":
+                            indexOptions.weights((Bson) indexEntry.getValue());
+                            break;
+                        case "languageOverride":
+                            indexOptions.languageOverride(indexEntry.getValue().toString());
+                            break;
+                        case "defaultLanguage":
+                            indexOptions.defaultLanguage(indexEntry.getValue().toString());
+                            break;
+                        case "textVersion":
+                            indexOptions.textVersion(Integer.parseInt(indexEntry.getValue().toString()));
+                            break;
+                        case "sphereVersion":
+                            indexOptions.sphereVersion(Integer.parseInt(indexEntry.getValue().toString()));
+                            break;
+                        case "bits":
+                            indexOptions.bits(Integer.parseInt(indexEntry.getValue().toString()));
+                            break;
+                        case "min":
+                            indexOptions.min(Double.parseDouble(indexEntry.getValue().toString()));
+                            break;
+                        case "max":
+                            indexOptions.max(Double.parseDouble(indexEntry.getValue().toString()));
+                            break;
+                        case "bucketSize":
+                            indexOptions.bucketSize(Double.parseDouble(indexEntry.getValue().toString()));
+                            break;
+                        case "partialFilterExpression":
+                            indexOptions.partialFilterExpression((Bson) indexEntry.getValue());
+                            break;
+                        case "collation":
+                            DBObject collationOptions = (DBObject) indexEntry.getValue();
+                            Collation.Builder builder = Collation.builder();
+                            for (String collationKey : collationOptions.keySet()) {
+                                String collationObj = indexEntry.getValue().toString();
+                                switch (collationKey) {
+                                    case "locale":
+                                        builder.locale(collationObj);
+                                        break;
+                                    case "caseLevel":
+                                        builder.caseLevel(Boolean.parseBoolean(collationObj));
+                                        break;
+                                    case "caseFirst":
+                                        builder.collationCaseFirst(CollationCaseFirst.fromString(collationObj));
+                                        break;
+                                    case "strength":
+                                        builder.collationStrength(CollationStrength.valueOf(collationObj));
+                                        break;
+                                    case "numericOrdering":
+                                        builder.numericOrdering(Boolean.parseBoolean(collationObj));
+                                        break;
+                                    case "normalization":
+                                        builder.normalization(Boolean.parseBoolean(collationObj));
+                                        break;
+                                    case "backwards":
+                                        builder.backwards(Boolean.parseBoolean(collationObj));
+                                        break;
+                                    case "alternate":
+                                        builder.collationAlternate(CollationAlternate.fromString(collationObj));
+                                        break;
+                                    case "maxVariable":
+                                        builder.collationMaxVariable(CollationMaxVariable.fromString(collationObj));
+                                        break;
+                                    default:
+                                        log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains " +
+                                                "unknown 'Collation' Option key : '" + collationKey + "'. Please check " +
+                                                "your query and try again.");
+                                        break;
+                                }
                             }
-                        }
-                        if (builder.build().getLocale() != null) {
-                            indexOptions.collation(builder.build());
-                        } else {
-                            throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' " +
-                                    "do not contain option for locale. Please check your query and try again.");
-                        }
-                        break;
-                    case "storageEngine":
-                        indexOptions.storageEngine((Bson) indexOptionDocument.get("storageEngine"));
-                        break;
-                    default:
-                        log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains unknown option key" +
-                                " : '" + indexEntry.getKey() + "'. Please check your query and try again.");
-                        break;
+                            if (builder.build().getLocale() != null) {
+                                indexOptions.collation(builder.build());
+                            } else {
+                                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' " +
+                                        "do not contain option for locale. Please check your query and try again.");
+                            }
+                            break;
+                        case "storageEngine":
+                            indexOptions.storageEngine((Bson) indexOptionDocument.get("storageEngine"));
+                            break;
+                        default:
+                            log.warn("Annotation 'IndexBy' for the field '" + fieldName + "' contains unknown option key" +
+                                    " : '" + indexEntry.getKey() + "'. Please check your query and try again.");
+                            break;
+                    }
                 }
+            } catch (JsonParseException | NumberFormatException e) {
+                throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' contains illegal " +
+                        "value(s) for index option. Please check your query and try again.", e);
             }
-        } catch (JsonParseException | NumberFormatException e) {
-            throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' contains illegal " +
-                    "value(s) for index option. Please check your query and try again.", e);
+            return new IndexModel(indexDocument, indexOptions);
         }
-        return new IndexModel(indexDocument, indexOptions);
     }
 
     /**
