@@ -18,6 +18,11 @@
 package org.wso2.siddhi.extension.store.mongodb.util;
 
 import com.mongodb.DBObject;
+import com.mongodb.MongoClientOptions;
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadConcernLevel;
+import com.mongodb.ReadPreference;
+import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationAlternate;
@@ -31,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonParseException;
+import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.extension.store.mongodb.MongoCompiledCondition;
 import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -46,7 +52,29 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.APPLICATION_NAME;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CONNECTIONS_PER_HOST;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CONNECT_TIMEOUT;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CURSOR_FINALIZER_ENABLED;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_CONNECT_TIMEOUT;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_FREQUENCY;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_SOCKET_TIMEOUT;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.LOCAL_THRESHOLD;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_CONNECTION_IDLE_TIME;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_CONNECTION_LIFE_TIME;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_WAIT_TIME;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MIN_CONNECTIONS_PER_HOST;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MIN_HEARTBEAT_FREQUENCY;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.READ_CONCERN;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.READ_PREFERENCE;
 import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_INDEX_BY;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REQUIRED_REPLICA_SET_NAME;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SERVER_SELECTION_TIMEOUT;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SOCKET_KEEP_ALIVE;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SOCKET_TIMEOUT;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SSL_ENABLED;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.THREADS_ALLOWED_TO_BLOCK;
+import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.WRITE_CONCERN;
 
 
 /**
@@ -63,7 +91,7 @@ public class MongoTableUtils {
      * Utility method which can be used to check if the given primary key is valid i.e. non empty
      * and is made up of attributes and return an index model when PrimaryKey is valid.
      *
-     * @param primaryKey the PrimaryKey annotation which contains the primary key attributes.
+     * @param primaryKey     the PrimaryKey annotation which contains the primary key attributes.
      * @param attributeNames List containing names of the attributes.
      * @return List of String with primary key attributes.
      */
@@ -89,7 +117,7 @@ public class MongoTableUtils {
      * Utility method which can be used to check if the given Indices are valid  and return List of
      * MongoDB Index Models when valid.
      *
-     * @param indices    the IndexBy annotation which contains the indices definitions.
+     * @param indices        the IndexBy annotation which contains the indices definitions.
      * @param attributeNames List containing names of the attributes.
      * @return List of IndexModel.
      */
@@ -373,6 +401,70 @@ public class MongoTableUtils {
             log.warn("Existing indices differs from the expected indices defined by the Annotations 'PrimaryKey' " +
                     "and 'IndexBy'.\nExisting Indices '" + existingIndexDocuments.toString() + "'.\n" +
                     "Expected Indices '" + expectedIndexDocuments.toString() + "'");
+        }
+    }
+
+    /**
+     * Utility method which can be used to create MongoClientOptionsBuilder from values defined in the
+     * deployment yaml file.
+     *
+     * @param configReader {@link ConfigReader} Configuration Reader
+     */
+    public static MongoClientOptions.Builder extractMongoClientOptionsBuilder(ConfigReader configReader) {
+        MongoClientOptions.Builder mongoClientOptionsBuilder = MongoClientOptions.builder();
+        try {
+            mongoClientOptionsBuilder.connectionsPerHost(
+                    Integer.parseInt(configReader.readConfig(CONNECTIONS_PER_HOST, "100")));
+            mongoClientOptionsBuilder.connectTimeout(
+                    Integer.parseInt(configReader.readConfig(CONNECT_TIMEOUT, "10000")));
+            mongoClientOptionsBuilder.heartbeatConnectTimeout(
+                    Integer.parseInt(configReader.readConfig(HEARTBEAT_CONNECT_TIMEOUT, "20000")));
+            mongoClientOptionsBuilder.heartbeatSocketTimeout(
+                    Integer.parseInt(configReader.readConfig(HEARTBEAT_SOCKET_TIMEOUT, "20000")));
+            mongoClientOptionsBuilder.heartbeatFrequency(
+                    Integer.parseInt(configReader.readConfig(HEARTBEAT_FREQUENCY, "10000")));
+            mongoClientOptionsBuilder.localThreshold(
+                    Integer.parseInt(configReader.readConfig(LOCAL_THRESHOLD, "15")));
+            mongoClientOptionsBuilder.maxWaitTime(
+                    Integer.parseInt(configReader.readConfig(MAX_WAIT_TIME, "120000")));
+            mongoClientOptionsBuilder.maxConnectionIdleTime(
+                    Integer.parseInt(configReader.readConfig(MAX_CONNECTION_IDLE_TIME, "0")));
+            mongoClientOptionsBuilder.maxConnectionLifeTime(
+                    Integer.parseInt(configReader.readConfig(MAX_CONNECTION_LIFE_TIME, "0")));
+            mongoClientOptionsBuilder.minConnectionsPerHost(
+                    Integer.parseInt(configReader.readConfig(MIN_CONNECTIONS_PER_HOST, "0")));
+            mongoClientOptionsBuilder.minHeartbeatFrequency(
+                    Integer.parseInt(configReader.readConfig(MIN_HEARTBEAT_FREQUENCY, "500")));
+            mongoClientOptionsBuilder.serverSelectionTimeout(
+                    Integer.parseInt(configReader.readConfig(SERVER_SELECTION_TIMEOUT, "30000")));
+            mongoClientOptionsBuilder.socketTimeout(
+                    Integer.parseInt(configReader.readConfig(SOCKET_TIMEOUT, "0")));
+            mongoClientOptionsBuilder.threadsAllowedToBlockForConnectionMultiplier(Integer.parseInt(
+                    configReader.readConfig(THREADS_ALLOWED_TO_BLOCK, "5")));
+            mongoClientOptionsBuilder.socketKeepAlive(
+                    Boolean.parseBoolean(configReader.readConfig(SOCKET_KEEP_ALIVE, "false")));
+            mongoClientOptionsBuilder.sslEnabled(
+                    Boolean.parseBoolean(configReader.readConfig(SSL_ENABLED, "false")));
+            mongoClientOptionsBuilder.cursorFinalizerEnabled(
+                    Boolean.parseBoolean(configReader.readConfig(CURSOR_FINALIZER_ENABLED, "true")));
+            mongoClientOptionsBuilder.requiredReplicaSetName(
+                    configReader.readConfig(REQUIRED_REPLICA_SET_NAME, null));
+            mongoClientOptionsBuilder.applicationName(
+                    configReader.readConfig(APPLICATION_NAME, null));
+            mongoClientOptionsBuilder.readPreference(
+                    ReadPreference.valueOf(configReader.readConfig(READ_PREFERENCE, "primary")));
+            mongoClientOptionsBuilder.writeConcern(
+                    WriteConcern.valueOf(configReader.readConfig(WRITE_CONCERN, "acknowledged")));
+
+            String readConcern = configReader.readConfig(READ_CONCERN, "DEFAULT");
+            if (!readConcern.matches("DEFAULT")) {
+                mongoClientOptionsBuilder.readConcern(new ReadConcern(
+                        ReadConcernLevel.fromString(readConcern)));
+            }
+
+            return mongoClientOptionsBuilder;
+        } catch (IllegalArgumentException e) {
+            throw new MongoTableException("Values Read from config readers have illegal values : ", e);
         }
     }
 }

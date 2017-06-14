@@ -19,6 +19,7 @@ package org.wso2.siddhi.extension.store.mongodb;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -124,7 +125,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
         Annotation indices = AnnotationHelper
                 .getAnnotation(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
 
-        this.initializeConnectionParameters(storeAnnotation);
+        this.initializeConnectionParameters(storeAnnotation, configReader);
 
         List<IndexModel> expectedIndexModels = new ArrayList<>();
         IndexModel primaryKey = MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames);
@@ -157,14 +158,17 @@ public class MongoDBEventTable extends AbstractRecordTable {
      * Method for initializing mongoClientURI and database name.
      *
      * @param storeAnnotation the source annotation which contains the needed parameters.
+     * @param configReader {@link ConfigReader} ConfigurationReader.
      * @throws MongoTableException when store annotation does not contain mongodb.uri or contains an illegal
      *                             argument for mongodb.uri
      */
-    private void initializeConnectionParameters(Annotation storeAnnotation) {
+    private void initializeConnectionParameters(Annotation storeAnnotation, ConfigReader configReader) {
         String mongoClientURI = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_URI);
         if (mongoClientURI != null) {
+            MongoClientOptions.Builder mongoClientOptionsBuilder =
+                    MongoTableUtils.extractMongoClientOptionsBuilder(configReader);
             try {
-                this.mongoClientURI = new MongoClientURI(mongoClientURI);
+                this.mongoClientURI = new MongoClientURI(mongoClientURI, mongoClientOptionsBuilder);
                 this.databaseName = this.mongoClientURI.getDatabase();
             } catch (IllegalArgumentException e) {
                 throw new MongoTableException("Annotation '" + storeAnnotation.getName() + "' contains illegal " +
