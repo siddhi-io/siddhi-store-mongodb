@@ -37,6 +37,7 @@ import org.bson.Document;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ConditionBuilder;
@@ -72,13 +73,134 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                 "in a MongoDB of user's choice.",
         parameters = {
                 @Parameter(name = "mongodb.uri",
-                        description = "The MongoDB URI for the MongoDB data store.",
+                        description = "The MongoDB URI for the MongoDB data store. The uri must be of the format " +
+                                "mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]" +
+                                "The options specified in the uri will override any connection options specified in " +
+                                "the deployment yaml.",
                         type = {DataType.STRING}),
                 @Parameter(name = "collection.name",
                         description = "The name of the collection in the store this Event Table should" +
                                 " be persisted as. If not specified, the collection name will be the same as the" +
                                 " Siddhi table.",
                         type = {DataType.STRING}, optional = true)
+        },
+        systemParameter = {
+                @SystemParameter(name = "applicationName",
+                        description = "Sets the logical name of the application using this MongoClient. The " +
+                                "application name may be used by the client to identify the application to " +
+                                "the server, for use in server logs, slow query logs, and profile collection.",
+                        defaultValue = "null",
+                        possibleParameters = "the logical name of the application using this MongoClient. The " +
+                                "UTF-8 encoding may not exceed 128 bytes."),
+                @SystemParameter(name = "cursorFinalizerEnabled",
+                        description = "Sets whether cursor finalizers are enabled.",
+                        defaultValue = "true",
+                        possibleParameters = {"true", "false"}),
+                @SystemParameter(name = "requiredReplicaSetName",
+                        description = "The name of the replica set",
+                        defaultValue = "null",
+                        possibleParameters = "the logical name of the replica set"),
+                @SystemParameter(name = "sslEnabled",
+                        description = "Sets whether to initiate connection with TSL/SSL enabled. true: Initiate " +
+                                "the connection with TLS/SSL. false: Initiate the connection without TLS/SSL.",
+                        defaultValue = "false",
+                        possibleParameters = {"true", "false"}),
+                @SystemParameter(name = "connectTimeout",
+                        description = "The time in milliseconds to attempt a connection before timing out.",
+                        defaultValue = "10000",
+                        possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "connectionsPerHost",
+                        description = "The maximum number of connections in the connection pool.",
+                        defaultValue = "100",
+                        possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "minConnectionsPerHost",
+                        description = "The minimum number of connections in the connection pool.",
+                        defaultValue = "0",
+                        possibleParameters = "Any natural number"),
+                @SystemParameter(name = "maxConnectionIdleTime",
+                        description = "The maximum number of milliseconds that a connection can remain idle in " +
+                                "the pool before being removed and closed. A zero value indicates no limit to " +
+                                "the idle time.  A pooled connection that has exceeded its idle time will be " +
+                                "closed and replaced when necessary by a new connection.",
+                        defaultValue = "0",
+                        possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "maxWaitTime",
+                        description = "The maximum wait time in milliseconds that a thread may wait for a connection " +
+                                "to become available. A value of 0 means that it will not wait.  A negative value " +
+                                "means to wait indefinitely",
+                        defaultValue = "120000",
+                        possibleParameters = "Any integer"),
+                @SystemParameter(name = "threadsAllowedToBlockForConnectionMultiplier",
+                        description = "The maximum number of connections allowed per host for this MongoClient " +
+                                "instance. Those connections will be kept in a pool when idle. Once the pool " +
+                                "is exhausted, any operation requiring a connection will block waiting for an " +
+                                "available connection.",
+                        defaultValue = "100",
+                        possibleParameters = "Any natural number"),
+                @SystemParameter(name = "maxConnectionLifeTime",
+                        description = "The maximum life time of a pooled connection.  A zero value indicates " +
+                                "no limit to the life time.  A pooled connection that has exceeded its life time " +
+                                "will be closed and replaced when necessary by a new connection.",
+                        defaultValue = "0",
+                        possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "socketKeepAlive",
+                        description = "Sets whether to keep a connection alive through firewalls",
+                        defaultValue = "false",
+                        possibleParameters = {"true", "false"}),
+                @SystemParameter(name = "socketTimeout",
+                        description = "The time in milliseconds to attempt a send or receive on a socket " +
+                                "before the attempt times out. Default 0 means never to timeout.",
+                        defaultValue = "0",
+                        possibleParameters = "Any natural integer"),
+                @SystemParameter(name = "writeConcern",
+                        description = "The write concern to use.",
+                        defaultValue = "acknowledged",
+                        possibleParameters = {"acknowledged", "w1", "w2", "w3", "unacknowledged", "fsynced",
+                                "journaled", "replica_acknowledged", "normal", "safe", "majority", "fsync_safe",
+                                "journal_safe", "replicas_safe"}),
+                @SystemParameter(name = "readConcern",
+                        description = "The level of isolation for the reads from replica sets.",
+                        defaultValue = "default",
+                        possibleParameters = {"local", "majority", "linearizable"}),
+                @SystemParameter(name = "readPreference",
+                        description = "Specifies the replica set read preference for the connection.",
+                        defaultValue = "primary",
+                        possibleParameters = {"primary", "secondary", "secondarypreferred", "primarypreferred",
+                                "nearest" }),
+                @SystemParameter(name = "localThreshold",
+                        description = "The size (in milliseconds) of the latency window for selecting among " +
+                                "multiple suitable MongoDB instances.",
+                        defaultValue = "15",
+                        possibleParameters = "Any natural number"),
+                @SystemParameter(name = "serverSelectionTimeout",
+                        description = "Specifies how long (in milliseconds) to block for server selection " +
+                                "before throwing an exception. A value of 0 means that it will timeout immediately " +
+                                "if no server is available.  A negative value means to wait indefinitely.",
+                        defaultValue = "30000",
+                        possibleParameters = "Any integer"),
+                @SystemParameter(name = "heartbeatSocketTimeout",
+                        description = "The socket timeout for connections used for the cluster heartbeat. A value of " +
+                                "0 means that it will timeout immediately if no cluster member is available.  " +
+                                "A negative value means to wait indefinitely.",
+                        defaultValue = "20000",
+                        possibleParameters = "Any integer"),
+                @SystemParameter(name = "heartbeatConnectTimeout",
+                        description = "The connect timeout for connections used for the cluster heartbeat. A value " +
+                                "of 0 means that it will timeout immediately if no cluster member is available.  " +
+                                "A negative value means to wait indefinitely.",
+                        defaultValue = "20000",
+                        possibleParameters = "Any integer"),
+                @SystemParameter(name = "heartbeatFrequency",
+                        description = "Specify the interval (in milliseconds) between checks, counted from " +
+                                "the end of the previous check until the beginning of the next one.",
+                        defaultValue = "10000",
+                        possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "minHeartbeatFrequency",
+                        description = "Sets the minimum heartbeat frequency.  In the event that the driver " +
+                                "has to frequently re-check a server's availability, it will wait at least this " +
+                                "long since the previous check to avoid wasted effort.",
+                        defaultValue = "500",
+                        possibleParameters = "Any positive integer")
         },
         examples = {
                 @Example(
@@ -158,7 +280,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
      * Method for initializing mongoClientURI and database name.
      *
      * @param storeAnnotation the source annotation which contains the needed parameters.
-     * @param configReader {@link ConfigReader} ConfigurationReader.
+     * @param configReader    {@link ConfigReader} ConfigurationReader.
      * @throws MongoTableException when store annotation does not contain mongodb.uri or contains an illegal
      *                             argument for mongodb.uri
      */
