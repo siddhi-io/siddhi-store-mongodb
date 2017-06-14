@@ -427,10 +427,6 @@ public class MongoTableUtils {
                     Integer.parseInt(configReader.readConfig(LOCAL_THRESHOLD, "15")));
             mongoClientOptionsBuilder.maxWaitTime(
                     Integer.parseInt(configReader.readConfig(MAX_WAIT_TIME, "120000")));
-            mongoClientOptionsBuilder.maxConnectionIdleTime(
-                    Integer.parseInt(configReader.readConfig(MAX_CONNECTION_IDLE_TIME, "0")));
-            mongoClientOptionsBuilder.maxConnectionLifeTime(
-                    Integer.parseInt(configReader.readConfig(MAX_CONNECTION_LIFE_TIME, "0")));
             mongoClientOptionsBuilder.minConnectionsPerHost(
                     Integer.parseInt(configReader.readConfig(MIN_CONNECTIONS_PER_HOST, "0")));
             mongoClientOptionsBuilder.minHeartbeatFrequency(
@@ -447,10 +443,6 @@ public class MongoTableUtils {
                     Boolean.parseBoolean(configReader.readConfig(SSL_ENABLED, "false")));
             mongoClientOptionsBuilder.cursorFinalizerEnabled(
                     Boolean.parseBoolean(configReader.readConfig(CURSOR_FINALIZER_ENABLED, "true")));
-            mongoClientOptionsBuilder.requiredReplicaSetName(
-                    configReader.readConfig(REQUIRED_REPLICA_SET_NAME, null));
-            mongoClientOptionsBuilder.applicationName(
-                    configReader.readConfig(APPLICATION_NAME, null));
             mongoClientOptionsBuilder.readPreference(
                     ReadPreference.valueOf(configReader.readConfig(READ_PREFERENCE, "primary")));
             mongoClientOptionsBuilder.writeConcern(
@@ -460,6 +452,26 @@ public class MongoTableUtils {
             if (!readConcern.matches("DEFAULT")) {
                 mongoClientOptionsBuilder.readConcern(new ReadConcern(
                         ReadConcernLevel.fromString(readConcern)));
+            }
+
+            int maxConnectionIdleTime = Integer.parseInt(configReader.readConfig(MAX_CONNECTION_IDLE_TIME, "0"));
+            if (maxConnectionIdleTime != 0) {
+                mongoClientOptionsBuilder.maxConnectionIdleTime(maxConnectionIdleTime);
+            }
+
+            int maxConnectionLifeTime = Integer.parseInt(configReader.readConfig(MAX_CONNECTION_LIFE_TIME, "0"));
+            if (maxConnectionIdleTime != 0) {
+                mongoClientOptionsBuilder.maxConnectionLifeTime(maxConnectionLifeTime);
+            }
+
+            String requiredReplicaSetName = configReader.readConfig(REQUIRED_REPLICA_SET_NAME, "");
+            if (requiredReplicaSetName.equals("")) {
+                mongoClientOptionsBuilder.requiredReplicaSetName(requiredReplicaSetName);
+            }
+
+            String applicationName = configReader.readConfig(APPLICATION_NAME, "");
+            if (applicationName.equals("")) {
+                mongoClientOptionsBuilder.applicationName(applicationName);
             }
 
             return mongoClientOptionsBuilder;
