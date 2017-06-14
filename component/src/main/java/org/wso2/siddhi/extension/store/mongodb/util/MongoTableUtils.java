@@ -64,18 +64,17 @@ public class MongoTableUtils {
      * and is made up of attributes.
      *
      * @param primaryKey the PrimaryKey annotation which contains the primary key attributes.
-     * @param attributes list of attributes form the table definition.
+     * @param attributeNames List containing names of the attributes.
      * @return List of String with primary key attributes.
      */
-    public static IndexModel extractPrimaryKey(Annotation primaryKey, List<Attribute> attributes) {
+    public static IndexModel extractPrimaryKey(Annotation primaryKey, List<String> attributeNames) {
         if (primaryKey == null) {
             return null;
         }
-        List<String> attributesNames = attributes.stream().map(Attribute::getName).collect(Collectors.toList());
         Document primaryKeyIndex = new Document();
         primaryKey.getElements().forEach(
                 element -> {
-                    if (!isEmpty(element.getValue()) && attributesNames.contains(element.getValue())) {
+                    if (!isEmpty(element.getValue()) && attributeNames.contains(element.getValue())) {
                         primaryKeyIndex.append(element.getValue(), 1);
                     } else {
                         throw new MongoTableException("Annotation '" + primaryKey.getName() + "' contains value '" +
@@ -91,26 +90,25 @@ public class MongoTableUtils {
      * MongoDB Index Models when valid.
      *
      * @param indices    the IndexBy annotation which contains the indices definitions.
-     * @param attributes list of attributes form the table definition.
+     * @param attributeNames List containing names of the attributes.
      * @return List of IndexModel.
      */
-    public static List<IndexModel> extractIndexModels(Annotation indices, List<Attribute> attributes) {
+    public static List<IndexModel> extractIndexModels(Annotation indices, List<String> attributeNames) {
         if (indices == null) {
             return new ArrayList<>();
         }
         Pattern pattern = Pattern.compile(REG_INDEX_BY);
-        List<String> attributesNames = attributes.stream().map(Attribute::getName).collect(Collectors.toList());
         return indices.getElements().stream().map(index -> {
             Matcher matcher = pattern.matcher(index.getValue());
             if (matcher.matches()) {
-                if (attributesNames.contains(matcher.group(1))) {
+                if (attributeNames.contains(matcher.group(1))) {
                     return createIndexModel(matcher.group(1), Integer.parseInt(matcher.group(2)), matcher.group(3));
                 } else {
                     throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal " +
                             "value(s). Please check your query and try again.");
                 }
             } else {
-                if (attributesNames.contains(index.getValue())) {
+                if (attributeNames.contains(index.getValue())) {
                     return createIndexModel(index.getValue(), 1, null);
                 }
                 throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal value(s). " +

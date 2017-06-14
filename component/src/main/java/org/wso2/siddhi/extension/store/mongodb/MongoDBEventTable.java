@@ -103,16 +103,18 @@ public class MongoDBEventTable extends AbstractRecordTable {
     private MongoClient mongoClient;
     private String databaseName;
     private String collectionName;
-    private List<Attribute> attributes;
-    private Map<Integer, String> attributesPositions;
+    private List<String> attributeNames;
+    private Map<Integer, String> attributePositions;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
-        this.attributes = tableDefinition.getAttributeList();
-        this.attributesPositions = new HashMap<>();
+        List<Attribute> attributes = tableDefinition.getAttributeList();
+        this.attributeNames = new ArrayList<>();
+        this.attributePositions = new HashMap<>();
         int count = 0;
-        for (Attribute attribute : this.attributes) {
-            this.attributesPositions.put(count, attribute.getName());
+        for (Attribute attribute : attributes) {
+            this.attributePositions.put(count, attribute.getName());
+            this.attributeNames.add(attribute.getName());
             count++;
         }
 
@@ -125,8 +127,8 @@ public class MongoDBEventTable extends AbstractRecordTable {
 
         this.initializeConnectionParameters(storeAnnotation);
         List<IndexModel> expectedIndexModels = new ArrayList<>();
-        expectedIndexModels.add(MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributes));
-        expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributes));
+        expectedIndexModels.add(MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames));
+        expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames));
 
         String customCollectionName = storeAnnotation.getElement(
                 MongoTableConstants.ANNOTATION_ELEMENT_COLLECTION_NAME);
@@ -277,7 +279,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) {
         List<InsertOneModel<Document>> parsedRecords = records.stream().map(record -> {
-            Map<String, Object> insertMap = MongoTableUtils.mapValuestoAttributes(record, this.attributesPositions);
+            Map<String, Object> insertMap = MongoTableUtils.mapValuestoAttributes(record, this.attributePositions);
             Document insertDocument = new Document(insertMap);
             if (log.isDebugEnabled()) {
                 log.debug("Event formatted as the document '" + insertDocument.toJson() + "' is used for building " +
@@ -294,7 +296,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
         Document findFilter = MongoTableUtils
                 .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
         MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
-        return new MongoIterator(mongoCollection.find(findFilter), this.attributes);
+        return new MongoIterator(mongoCollection.find(findFilter), this.attributeNames);
     }
 
     @Override

@@ -33,14 +33,14 @@ import java.util.List;
  */
 public class MongoIterator implements RecordIterator<Object[]> {
     private MongoCursor documents;
-    private List<Attribute> attributes;
+    private List<String> attributeNames;
 
     private boolean preFetched;
     private Object[] nextDocument;
 
-    public MongoIterator(FindIterable documents, List<Attribute> attributes) {
+    public MongoIterator(FindIterable documents, List<String> attributeNames) {
         this.documents = documents.iterator();
-        this.attributes = attributes;
+        this.attributeNames = attributeNames;
     }
 
     @Override
@@ -76,8 +76,8 @@ public class MongoIterator implements RecordIterator<Object[]> {
      */
     private Object[] extractRecord(Document document) {
         List<Object> result = new ArrayList<>();
-        for (Attribute attribute : this.attributes) {
-            result.add(document.get(attribute.getName()));
+        for (String attributeName : this.attributeNames) {
+            result.add(document.get(attributeName));
         }
         return result.toArray();
     }
