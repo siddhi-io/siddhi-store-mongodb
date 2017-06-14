@@ -18,6 +18,7 @@
 package org.wso2.siddhi.extension.store.mongodb.util;
 
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationAlternate;
 import com.mongodb.client.model.CollationCaseFirst;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -236,7 +238,6 @@ public class MongoTableUtils {
             throw new MongoTableException("Annotation 'IndexBy' for the field '" + fieldName + "' contains illegal " +
                     "value(s) for index option. Please check your query and try again.", e);
         }
-
         return new IndexModel(indexDocument, indexOptions);
     }
 
@@ -297,6 +298,74 @@ public class MongoTableUtils {
             attributesValuesMap.put(attributesPositions.get(i), record[i]);
         }
         return attributesValuesMap;
+    }
+
+    /**
+     * Utility method which can be used to check if the existing indices contains the expected indices
+     * defined by the annotation 'PrimaryKey' and 'IndexBy'
+     *
+     * @param existingIndices List of indices that the collection contains.
+     * @param expectedIndices List of indices that are defined by the annotations.
+     */
+    public static void checkExistingIndices(List<IndexModel> expectedIndices, MongoCursor<Document> existingIndices) {
+        Map<String, Object> indexOptionsMap = new HashMap<>();
+        List<Document> expectedIndexDocuments = expectedIndices.stream().map(expectedIndex -> {
+            IndexOptions expectedIndexOptions = expectedIndex.getOptions();
+            indexOptionsMap.put("key", expectedIndex.getKeys());
+            // Default value for name of the index
+            if (expectedIndexOptions.getName() == null) {
+                StringBuilder indexName = new StringBuilder();
+                ((Document) expectedIndex.getKeys()).forEach((key, value) ->
+                        indexName.append("_").append(key).append("_").append(value));
+                indexName.deleteCharAt(0);
+                indexOptionsMap.put("name", indexName.toString());
+            } else {
+                indexOptionsMap.put("name", expectedIndexOptions.getName());
+            }
+            // Default value for the version
+            if (expectedIndexOptions.getVersion() == null) {
+                indexOptionsMap.put("v", 2);
+            } else {
+                indexOptionsMap.put("v", expectedIndexOptions.getVersion());
+            }
+            indexOptionsMap.put("unique", expectedIndexOptions.isUnique());
+            indexOptionsMap.put("background", expectedIndexOptions.isBackground());
+            indexOptionsMap.put("sparse", expectedIndexOptions.isSparse());
+            indexOptionsMap.put("expireAfterSeconds", expectedIndexOptions.getExpireAfter(TimeUnit.SECONDS));
+            indexOptionsMap.put("weights", expectedIndexOptions.getWeights());
+            indexOptionsMap.put("languageOverride", expectedIndexOptions.getLanguageOverride());
+            indexOptionsMap.put("defaultLanguage", expectedIndexOptions.getDefaultLanguage());
+            indexOptionsMap.put("textVersion", expectedIndexOptions.getTextVersion());
+            indexOptionsMap.put("sphereVersion", expectedIndexOptions.getSphereVersion());
+            indexOptionsMap.put("textVersion", expectedIndexOptions.getTextVersion());
+            indexOptionsMap.put("bits", expectedIndexOptions.getBits());
+            indexOptionsMap.put("min", expectedIndexOptions.getMin());
+            indexOptionsMap.put("max", expectedIndexOptions.getMax());
+            indexOptionsMap.put("bucketSize", expectedIndexOptions.getBucketSize());
+            indexOptionsMap.put("partialFilterExpression", expectedIndexOptions.getPartialFilterExpression());
+            indexOptionsMap.put("collation", expectedIndexOptions.getCollation());
+            indexOptionsMap.put("storageEngine", expectedIndexOptions.getStorageEngine());
+
+            //Remove if Default Values - these would not be in the existingIndexDocument.
+            indexOptionsMap.values().removeIf(Objects::isNull);
+            indexOptionsMap.remove("unique", false);
+            indexOptionsMap.remove("background", false);
+            indexOptionsMap.remove("sparse", false);
+
+            return new Document(indexOptionsMap);
+        }).collect(Collectors.toList());
+
+        List<Document> existingIndexDocuments = new ArrayList<>();
+        existingIndices.forEachRemaining(existingIndex -> {
+            existingIndex.remove("ns");
+            existingIndexDocuments.add(existingIndex);
+        });
+
+        if (!existingIndexDocuments.containsAll(expectedIndexDocuments)) {
+            log.warn("Existing indices differs from the expected indices defined by the Annotations 'PrimaryKey' " +
+                    "and 'IndexBy'.\nExisting Indices '" + existingIndexDocuments.toString() + "'.\n" +
+                    "Expected Indices '" + expectedIndexDocuments.toString() + "'");
+        }
     }
 }
 

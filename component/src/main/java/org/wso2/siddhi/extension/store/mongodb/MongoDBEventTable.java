@@ -23,6 +23,7 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.DeleteManyModel;
 import com.mongodb.client.model.IndexModel;
@@ -51,7 +52,6 @@ import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,8 +124,9 @@ public class MongoDBEventTable extends AbstractRecordTable {
                 .getAnnotation(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
 
         this.initializeConnectionParameters(storeAnnotation);
-        IndexModel primaryKeyIndex = MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributes);
-        List<IndexModel> indexModels = MongoTableUtils.extractIndexModels(indices, this.attributes);
+        List<IndexModel> expectedIndexModels = new ArrayList<>();
+        expectedIndexModels.add(MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributes));
+        expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributes));
 
         String customCollectionName = storeAnnotation.getElement(
                 MongoTableConstants.ANNOTATION_ELEMENT_COLLECTION_NAME);
@@ -135,34 +136,15 @@ public class MongoDBEventTable extends AbstractRecordTable {
         if (!this.collectionExists()) {
             try {
                 this.getDatabaseObject().createCollection(this.collectionName);
-                if (primaryKeyIndex != null) {
-                    this.createIndices(Collections.singletonList(primaryKeyIndex));
-                }
-                this.createIndices(indexModels);
+                this.createIndices(expectedIndexModels);
             } catch (MongoCommandException e) {
                 this.mongoClient.close();
                 throw new MongoTableException("Creating mongo collection is not successful " +
                         "due to " + e.getLocalizedMessage(), e);
             }
         } else {
-            List<Document> existingIndicesKeys = new ArrayList<>();
-            for (Document document : this.getCollectionObject().listIndexes()) {
-                if (!document.get("name").equals("_id_")) {
-                    existingIndicesKeys.add((Document) document.get("name"));
-                }
-            }
-            List<Document> indexesNeeded = new ArrayList<>();
-            if (primaryKeyIndex != null) {
-                indexesNeeded.add((Document) primaryKeyIndex.getKeys());
-            }
-            indexModels.forEach(indexModel ->
-                    indexesNeeded.add((Document) indexModel.getKeys())
-            );
-            if (!existingIndicesKeys.containsAll(indexesNeeded)) {
-                log.warn("The existing indexes defined in the MongoDB differs from the one described by the " +
-                        "'PrimaryKey' and 'IndexBy' annotations. Existing Indices '" + existingIndicesKeys.toString() +
-                        "'. Indices described by the annotations '" + indexesNeeded.toString() + "'.");
-            }
+            MongoCursor<Document> existingIndicesIterator = this.getCollectionObject().listIndexes().iterator();
+            MongoTableUtils.checkExistingIndices(expectedIndexModels, existingIndicesIterator);
         }
     }
 
