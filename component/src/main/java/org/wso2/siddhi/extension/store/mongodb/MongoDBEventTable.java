@@ -126,8 +126,12 @@ public class MongoDBEventTable extends AbstractRecordTable {
                 .getAnnotation(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
 
         this.initializeConnectionParameters(storeAnnotation);
+
         List<IndexModel> expectedIndexModels = new ArrayList<>();
-        expectedIndexModels.add(MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames));
+        IndexModel primaryKey = MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames);
+        if (primaryKey != null) {
+            expectedIndexModels.add(primaryKey);
+        }
         expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames));
 
         String customCollectionName = storeAnnotation.getElement(
