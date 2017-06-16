@@ -409,6 +409,7 @@ public class MongoTableUtils {
      * deployment yaml file.
      *
      * @param configReader {@link ConfigReader} Configuration Reader
+     * @return MongoClientOptions.Builder
      */
     public static MongoClientOptions.Builder extractMongoClientOptionsBuilder(ConfigReader configReader) {
         MongoClientOptions.Builder mongoClientOptionsBuilder = MongoClientOptions.builder();
