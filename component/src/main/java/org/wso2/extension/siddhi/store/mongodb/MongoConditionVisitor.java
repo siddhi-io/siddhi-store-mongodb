@@ -15,11 +15,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
+import org.wso2.extension.siddhi.store.mongodb.util.Constant;
+import org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants;
 import org.wso2.siddhi.core.table.record.BaseConditionVisitor;
-import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
-import org.wso2.siddhi.extension.store.mongodb.util.Constant;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
@@ -28,27 +29,6 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_AND_FILTER;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_EQUAL;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_FILTER;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_GREATER_THAN;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_LESS_THAN;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_COMPARE_NOT_EQUAL;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_IS_NULL_FILTER;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_NOT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_NOT_FILTER;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MONGO_OR_FILTER;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.PLACEHOLDER_FIELD_NAME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.PLACEHOLDER_LEFT_OPERAND;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.PLACEHOLDER_OPERAND;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_EXPRESSION;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_SIMPLE_EXPRESSION;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_STREAMVAR_OR_CONST;
 
 /**
  * Class which is used by the Siddhi runtime for instructions on converting the SiddhiQL condition to the condition
@@ -98,11 +78,11 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
     public void endVisitAnd() {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        if (rightOperand.matches(REG_EXPRESSION) &&
-                leftOperand.matches(REG_EXPRESSION)) {
-            String andFilter = MONGO_AND_FILTER
-                    .replace(PLACEHOLDER_LEFT_OPERAND, leftOperand)
-                    .replace(PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        if (rightOperand.matches(MongoTableConstants.REG_EXPRESSION) &&
+                leftOperand.matches(MongoTableConstants.REG_EXPRESSION)) {
+            String andFilter = MongoTableConstants.MONGO_AND_FILTER
+                    .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                    .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
             this.conditionOperands.push(andFilter);
         } else {
             throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
@@ -135,11 +115,11 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
     public void endVisitOr() {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        if (rightOperand.matches(REG_EXPRESSION) &&
-                leftOperand.matches(REG_EXPRESSION)) {
-            String orFilter = MONGO_OR_FILTER
-                    .replace(PLACEHOLDER_LEFT_OPERAND, leftOperand)
-                    .replace(PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        if (rightOperand.matches(MongoTableConstants.REG_EXPRESSION) &&
+                leftOperand.matches(MongoTableConstants.REG_EXPRESSION)) {
+            String orFilter = MongoTableConstants.MONGO_OR_FILTER
+                    .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                    .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
             this.conditionOperands.push(orFilter);
         } else {
             throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
@@ -171,14 +151,14 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
     @Override
     public void endVisitNot() {
         String operand = this.conditionOperands.pop();
-        Pattern pattern = Pattern.compile(REG_SIMPLE_EXPRESSION);
+        Pattern pattern = Pattern.compile(MongoTableConstants.REG_SIMPLE_EXPRESSION);
         Matcher matcher = pattern.matcher(operand);
         if (matcher.find()) {
             String fieldName = matcher.group(1);
-            operand = operand.replace(fieldName, MONGO_NOT);
-            String notFilter = MONGO_NOT_FILTER
-                    .replace(PLACEHOLDER_FIELD_NAME, fieldName)
-                    .replace(PLACEHOLDER_OPERAND, operand);
+            operand = operand.replace(fieldName, MongoTableConstants.MONGO_NOT);
+            String notFilter = MongoTableConstants.MONGO_NOT_FILTER
+                    .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, fieldName)
+                    .replace(MongoTableConstants.PLACEHOLDER_OPERAND, operand);
             this.conditionOperands.push(notFilter);
         } else {
             throw new MongoTableException("MongoDB Event Table found operand '" + operand + "' for NOT operation. " +
@@ -193,31 +173,37 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
 
     @Override
     public void endVisitCompare(Compare.Operator operator) {
-        String compareFilter = MONGO_COMPARE_FILTER;
+        String compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER;
         switch (operator) {
             case EQUAL:
-                compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_EQUAL);
+                compareFilter = compareFilter.replace(
+                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                        MongoTableConstants.MONGO_COMPARE_EQUAL);
                 break;
             case GREATER_THAN:
-                compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_GREATER_THAN);
+                compareFilter = compareFilter.replace(
+                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                        MongoTableConstants.MONGO_COMPARE_GREATER_THAN);
                 break;
             case GREATER_THAN_EQUAL:
-                compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_GREATER_THAN_EQUAL);
+                compareFilter = compareFilter.replace(
+                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                        MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL);
                 break;
             case LESS_THAN:
-                compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_LESS_THAN);
+                compareFilter = compareFilter.replace(
+                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                        MongoTableConstants.MONGO_COMPARE_LESS_THAN);
                 break;
             case LESS_THAN_EQUAL:
                 compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_LESS_THAN_EQUAL);
+                        .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                                MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL);
                 break;
             case NOT_EQUAL:
                 compareFilter = compareFilter
-                        .replace(PLACEHOLDER_COMPARE_OPERATOR, MONGO_COMPARE_NOT_EQUAL);
+                        .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
+                                MongoTableConstants.MONGO_COMPARE_NOT_EQUAL);
                 break;
             default:
                 throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
@@ -226,18 +212,18 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
 
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        if (!rightOperand.matches(REG_EXPRESSION) &&
-                !leftOperand.matches(REG_EXPRESSION)) {
-            if (leftOperand.matches(REG_STREAMVAR_OR_CONST) !=
-                    rightOperand.matches(REG_STREAMVAR_OR_CONST)) {
-                if (!rightOperand.matches(REG_STREAMVAR_OR_CONST)) {
+        if (!rightOperand.matches(MongoTableConstants.REG_EXPRESSION) &&
+                !leftOperand.matches(MongoTableConstants.REG_EXPRESSION)) {
+            if (leftOperand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST) !=
+                    rightOperand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST)) {
+                if (!rightOperand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST)) {
                     compareFilter = compareFilter
-                            .replace(PLACEHOLDER_LEFT_OPERAND, rightOperand)
-                            .replace(PLACEHOLDER_RIGHT_OPERAND, leftOperand);
+                            .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, rightOperand)
+                            .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, leftOperand);
                 } else {
                     compareFilter = compareFilter
-                            .replace(PLACEHOLDER_LEFT_OPERAND, leftOperand)
-                            .replace(PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+                            .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                            .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
                 }
                 this.conditionOperands.push(compareFilter);
             } else {
@@ -279,10 +265,10 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
     @Override
     public void endVisitIsNull(String streamId) {
         String operand = this.conditionOperands.pop();
-        if (!operand.matches(REG_EXPRESSION) &&
-                !operand.matches(REG_STREAMVAR_OR_CONST)) {
-            String isNullFilter = MONGO_IS_NULL_FILTER
-                    .replace(PLACEHOLDER_OPERAND, operand);
+        if (!operand.matches(MongoTableConstants.REG_EXPRESSION) &&
+                !operand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST)) {
+            String isNullFilter = MongoTableConstants.MONGO_IS_NULL_FILTER
+                    .replace(MongoTableConstants.PLACEHOLDER_OPERAND, operand);
             this.conditionOperands.push(isNullFilter);
         } else {
             throw new MongoTableException("MongoDB Event Table found operand '" + operand + "' for is NULL operation." +

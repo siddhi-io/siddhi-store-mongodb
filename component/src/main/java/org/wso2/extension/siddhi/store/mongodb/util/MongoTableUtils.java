@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb.util;
+package org.wso2.extension.siddhi.store.mongodb.util;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoClientOptions;
@@ -36,9 +36,9 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonParseException;
+import org.wso2.extension.siddhi.store.mongodb.MongoCompiledCondition;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.extension.store.mongodb.MongoCompiledCondition;
-import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
@@ -51,30 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.APPLICATION_NAME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CONNECTIONS_PER_HOST;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CONNECT_TIMEOUT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.CURSOR_FINALIZER_ENABLED;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_CONNECT_TIMEOUT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_FREQUENCY;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.HEARTBEAT_SOCKET_TIMEOUT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.LOCAL_THRESHOLD;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_CONNECTION_IDLE_TIME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_CONNECTION_LIFE_TIME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MAX_WAIT_TIME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MIN_CONNECTIONS_PER_HOST;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.MIN_HEARTBEAT_FREQUENCY;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.READ_CONCERN;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.READ_PREFERENCE;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REG_INDEX_BY;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.REQUIRED_REPLICA_SET_NAME;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SERVER_SELECTION_TIMEOUT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SOCKET_KEEP_ALIVE;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SOCKET_TIMEOUT;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.SSL_ENABLED;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.THREADS_ALLOWED_TO_BLOCK;
-import static org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants.WRITE_CONCERN;
 
 
 /**
@@ -125,7 +101,7 @@ public class MongoTableUtils {
         if (indices == null) {
             return new ArrayList<>();
         }
-        Pattern pattern = Pattern.compile(REG_INDEX_BY);
+        Pattern pattern = Pattern.compile(MongoTableConstants.REG_INDEX_BY);
         return indices.getElements().stream().map(index -> {
             Matcher matcher = pattern.matcher(index.getValue());
             if (matcher.matches()) {
@@ -415,62 +391,64 @@ public class MongoTableUtils {
         MongoClientOptions.Builder mongoClientOptionsBuilder = MongoClientOptions.builder();
         try {
             mongoClientOptionsBuilder.connectionsPerHost(
-                    Integer.parseInt(configReader.readConfig(CONNECTIONS_PER_HOST, "100")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECTIONS_PER_HOST, "100")));
             mongoClientOptionsBuilder.connectTimeout(
-                    Integer.parseInt(configReader.readConfig(CONNECT_TIMEOUT, "10000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")));
             mongoClientOptionsBuilder.heartbeatConnectTimeout(
-                    Integer.parseInt(configReader.readConfig(HEARTBEAT_CONNECT_TIMEOUT, "20000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_CONNECT_TIMEOUT, "20000")));
             mongoClientOptionsBuilder.heartbeatSocketTimeout(
-                    Integer.parseInt(configReader.readConfig(HEARTBEAT_SOCKET_TIMEOUT, "20000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_SOCKET_TIMEOUT, "20000")));
             mongoClientOptionsBuilder.heartbeatFrequency(
-                    Integer.parseInt(configReader.readConfig(HEARTBEAT_FREQUENCY, "10000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_FREQUENCY, "10000")));
             mongoClientOptionsBuilder.localThreshold(
-                    Integer.parseInt(configReader.readConfig(LOCAL_THRESHOLD, "15")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.LOCAL_THRESHOLD, "15")));
             mongoClientOptionsBuilder.maxWaitTime(
-                    Integer.parseInt(configReader.readConfig(MAX_WAIT_TIME, "120000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MAX_WAIT_TIME, "120000")));
             mongoClientOptionsBuilder.minConnectionsPerHost(
-                    Integer.parseInt(configReader.readConfig(MIN_CONNECTIONS_PER_HOST, "0")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_CONNECTIONS_PER_HOST, "0")));
             mongoClientOptionsBuilder.minHeartbeatFrequency(
-                    Integer.parseInt(configReader.readConfig(MIN_HEARTBEAT_FREQUENCY, "500")));
-            mongoClientOptionsBuilder.serverSelectionTimeout(
-                    Integer.parseInt(configReader.readConfig(SERVER_SELECTION_TIMEOUT, "30000")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_HEARTBEAT_FREQUENCY, "500")));
+            mongoClientOptionsBuilder.serverSelectionTimeout(Integer.parseInt(
+                    configReader.readConfig(MongoTableConstants.SERVER_SELECTION_TIMEOUT, "30000")));
             mongoClientOptionsBuilder.socketTimeout(
-                    Integer.parseInt(configReader.readConfig(SOCKET_TIMEOUT, "0")));
+                    Integer.parseInt(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")));
             mongoClientOptionsBuilder.threadsAllowedToBlockForConnectionMultiplier(Integer.parseInt(
-                    configReader.readConfig(THREADS_ALLOWED_TO_BLOCK, "5")));
+                    configReader.readConfig(MongoTableConstants.THREADS_ALLOWED_TO_BLOCK, "5")));
             mongoClientOptionsBuilder.socketKeepAlive(
-                    Boolean.parseBoolean(configReader.readConfig(SOCKET_KEEP_ALIVE, "false")));
+                    Boolean.parseBoolean(configReader.readConfig(MongoTableConstants.SOCKET_KEEP_ALIVE, "false")));
             mongoClientOptionsBuilder.sslEnabled(
-                    Boolean.parseBoolean(configReader.readConfig(SSL_ENABLED, "false")));
-            mongoClientOptionsBuilder.cursorFinalizerEnabled(
-                    Boolean.parseBoolean(configReader.readConfig(CURSOR_FINALIZER_ENABLED, "true")));
+                    Boolean.parseBoolean(configReader.readConfig(MongoTableConstants.SSL_ENABLED, "false")));
+            mongoClientOptionsBuilder.cursorFinalizerEnabled(Boolean.parseBoolean(
+                    configReader.readConfig(MongoTableConstants.CURSOR_FINALIZER_ENABLED, "true")));
             mongoClientOptionsBuilder.readPreference(
-                    ReadPreference.valueOf(configReader.readConfig(READ_PREFERENCE, "primary")));
+                    ReadPreference.valueOf(configReader.readConfig(MongoTableConstants.READ_PREFERENCE, "primary")));
             mongoClientOptionsBuilder.writeConcern(
-                    WriteConcern.valueOf(configReader.readConfig(WRITE_CONCERN, "acknowledged")));
+                    WriteConcern.valueOf(configReader.readConfig(MongoTableConstants.WRITE_CONCERN, "acknowledged")));
 
-            String readConcern = configReader.readConfig(READ_CONCERN, "DEFAULT");
+            String readConcern = configReader.readConfig(MongoTableConstants.READ_CONCERN, "DEFAULT");
             if (!readConcern.matches("DEFAULT")) {
                 mongoClientOptionsBuilder.readConcern(new ReadConcern(
                         ReadConcernLevel.fromString(readConcern)));
             }
 
-            int maxConnectionIdleTime = Integer.parseInt(configReader.readConfig(MAX_CONNECTION_IDLE_TIME, "0"));
+            int maxConnectionIdleTime = Integer.parseInt(
+                    configReader.readConfig(MongoTableConstants.MAX_CONNECTION_IDLE_TIME, "0"));
             if (maxConnectionIdleTime != 0) {
                 mongoClientOptionsBuilder.maxConnectionIdleTime(maxConnectionIdleTime);
             }
 
-            int maxConnectionLifeTime = Integer.parseInt(configReader.readConfig(MAX_CONNECTION_LIFE_TIME, "0"));
+            int maxConnectionLifeTime = Integer.parseInt(
+                    configReader.readConfig(MongoTableConstants.MAX_CONNECTION_LIFE_TIME, "0"));
             if (maxConnectionIdleTime != 0) {
                 mongoClientOptionsBuilder.maxConnectionLifeTime(maxConnectionLifeTime);
             }
 
-            String requiredReplicaSetName = configReader.readConfig(REQUIRED_REPLICA_SET_NAME, "");
+            String requiredReplicaSetName = configReader.readConfig(MongoTableConstants.REQUIRED_REPLICA_SET_NAME, "");
             if (requiredReplicaSetName.equals("")) {
                 mongoClientOptionsBuilder.requiredReplicaSetName(requiredReplicaSetName);
             }
 
-            String applicationName = configReader.readConfig(APPLICATION_NAME, "");
+            String applicationName = configReader.readConfig(MongoTableConstants.APPLICATION_NAME, "");
             if (applicationName.equals("")) {
                 mongoClientOptionsBuilder.applicationName(applicationName);
             }

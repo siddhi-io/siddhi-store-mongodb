@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
@@ -59,15 +59,15 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 4, "Insertion failed");
@@ -95,16 +95,16 @@ public class InsertIntoMongoTableTest {
                     "select symbol, price " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6f});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{75.6f, 100L});
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Insertion Failed");
@@ -130,15 +130,15 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L, 12});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L, true});
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'insertIntoMongoTableTest3' ignored due to " + e.getMessage());
             throw e;
@@ -162,14 +162,14 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable1234 ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
             stockStream.send(new Object[]{"IBM", 75.6f, 100L});
             stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -200,9 +200,9 @@ public class InsertIntoMongoTableTest {
                     "from StockStream1212   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'insertIntoMongoTableTest5' ignored due to " + e.getMessage());
@@ -225,9 +225,9 @@ public class InsertIntoMongoTableTest {
                     "from StockStream" +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'insertIntoMongoTableTest6' ignored due to " + e.getMessage());
@@ -249,9 +249,9 @@ public class InsertIntoMongoTableTest {
                     "from StockStream " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
 
         } catch (MongoException e) {
@@ -279,16 +279,16 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"MSFT", 57.6F, 100L});
             Thread.sleep(1000);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -317,16 +317,16 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"WSO2", 57.1F, 100L});
             Thread.sleep(1000);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Primary Key Duplication failed");

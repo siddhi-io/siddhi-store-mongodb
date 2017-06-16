@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
@@ -73,8 +73,8 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.addCallback("query2", new QueryCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.addCallback("query2", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                     if (inEvents != null) {
@@ -101,15 +101,15 @@ public class JoinMongoTableTest {
 
             });
 
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = executionPlanRuntime.getInputHandler("CheckStockStream");
-            executionPlanRuntime.start();
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
             stockStream.send(new Object[]{"IBM", 7.6f, 10L});
             checkStockStream.send(new Object[]{"WSO2_check"});
             Thread.sleep(1000);
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             Assert.assertEquals(inEventCount, 2, "Number of success events");
             Assert.assertEquals(removeEventCount, 0, "Number of remove events");
@@ -142,9 +142,9 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'testMongoTableJoinQuery2' ignored due to " + e.getMessage());
@@ -175,9 +175,9 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'testMongoTableJoinQuery3' ignored due to " + e.getMessage());
@@ -208,9 +208,9 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'testMongoTableJoinQuery5' ignored due to " + e.getMessage());

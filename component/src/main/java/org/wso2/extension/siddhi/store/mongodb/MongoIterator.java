@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;

@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.commons.logging.Log;
@@ -53,10 +53,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on 'IBM' == symbol  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -64,7 +64,7 @@ public class ConditionVisitorTest {
             deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
             Thread.sleep(1000);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest1' ignored due to " + e.getMessage());
             throw e;
@@ -94,10 +94,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on symbol == 'IBM'  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -105,7 +105,7 @@ public class ConditionVisitorTest {
             deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
             Thread.sleep(1000);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest2' ignored due to " + e.getMessage());
             throw e;
@@ -133,10 +133,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol==symbol;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -146,7 +146,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest7' ignored due to " + e.getMessage());
             throw e;
@@ -174,10 +174,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on symbol == FooTable.symbol;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -187,7 +187,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest8' ignored due to " + e.getMessage());
             throw e;
@@ -215,10 +215,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on 'IBM' == FooTable.symbol  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -228,7 +228,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest1' ignored due to " + e.getMessage());
             throw e;
@@ -258,10 +258,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == 'IBM'  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -271,7 +271,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest2' ignored due to " + e.getMessage());
             throw e;
@@ -300,10 +300,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol != symbol  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -313,7 +313,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest7' ignored due to " + e.getMessage());
             throw e;
@@ -343,10 +343,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price > price  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -356,7 +356,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest8 ignored due to " + e.getMessage());
             throw e;
@@ -385,10 +385,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price >= 57.6F  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 75.6, 100L});
@@ -398,7 +398,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest9 ignored due to " + e.getMessage());
             throw e;
@@ -427,10 +427,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price < price  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 75.6, 100L});
@@ -440,7 +440,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest10 ignored due to " + e.getMessage());
             throw e;
@@ -469,10 +469,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price <= price  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 75.6, 100L});
@@ -482,7 +482,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest9 ignored due to " + e.getMessage());
             throw e;
@@ -512,10 +512,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == symbol AND FooTable.price <= price  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 55.6, 100L});
@@ -525,7 +525,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest12 ignored due to " + e.getMessage());
             throw e;
@@ -554,10 +554,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == symbol OR FooTable.price <= price  ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 55.6, 100L});
@@ -567,7 +567,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest13 ignored due to " + e.getMessage());
             throw e;
@@ -596,10 +596,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on NOT (FooTable.symbol == symbol);";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 55.6, 100L});
@@ -609,7 +609,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest14 ignored due to " + e.getMessage());
             throw e;
@@ -639,10 +639,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on (FooTable.symbol) in symbol;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 55.6, 100L});
@@ -652,7 +652,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest15 ignored due to " + e.getMessage());
             throw e;
@@ -681,10 +681,10 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on NOT (FooTable.symbol is NULL);";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6, 100L});
             stockStream.send(new Object[]{"IBM", 55.6, 100L});
@@ -694,7 +694,7 @@ public class ConditionVisitorTest {
 
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest16 ignored due to " + e.getMessage());
             throw e;
@@ -723,9 +723,9 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price + price < 67;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest17 ignored due to " + e.getMessage());
             throw e;
@@ -755,9 +755,9 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on DateOf(FooTable.price) < 67;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'conditionBuilderTest18 ignored due to " + e.getMessage());
             throw e;

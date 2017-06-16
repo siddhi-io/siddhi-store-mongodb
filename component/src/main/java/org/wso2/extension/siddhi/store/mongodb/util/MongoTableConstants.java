@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb.util;
+package org.wso2.extension.siddhi.store.mongodb.util;
 
 /**
  * Class which holds the constants required by the MongoDB Event Table implementation.

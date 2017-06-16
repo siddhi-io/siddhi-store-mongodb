@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.commons.logging.Log;
@@ -71,10 +71,10 @@ public class ContainsMongoTableTest {
                     "insert into OutputStream ;";
 
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-            executionPlanRuntime.addCallback("OutputStream", new StreamCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+            siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
                 @Override
                 public void receive(Event[] events) {
                     if (events != null) {
@@ -95,7 +95,7 @@ public class ContainsMongoTableTest {
                     }
                 }
             });
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -106,7 +106,7 @@ public class ContainsMongoTableTest {
             fooStream.send(new Object[]{"IBM", 7.56, 200});
             fooStream.send(new Object[]{"IBM_2", 70.56, 200});
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             Assert.assertEquals(inEventCount, 2, "Number of success events");
             Assert.assertEquals(eventArrived, true, "Event arrived");
@@ -144,10 +144,10 @@ public class ContainsMongoTableTest {
                     "insert into OutputStream ;";
 
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler fooStream = executionPlanRuntime.getInputHandler("FooStream");
-            executionPlanRuntime.addCallback("OutputStream", new StreamCallback() {
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+            siddhiAppRuntime.addCallback("OutputStream", new StreamCallback() {
                 @Override
                 public void receive(Event[] events) {
                     if (events != null) {
@@ -169,7 +169,7 @@ public class ContainsMongoTableTest {
                     eventArrived = true;
                 }
             });
-            executionPlanRuntime.start();
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -180,7 +180,7 @@ public class ContainsMongoTableTest {
             fooStream.send(new Object[]{"IBM", 70.56, 200});
             fooStream.send(new Object[]{"IBM_2", 70.56, 200});
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
             Assert.assertEquals(inEventCount, 2, "Number of success events");
             Assert.assertEquals(eventArrived, true, "Event arrived");

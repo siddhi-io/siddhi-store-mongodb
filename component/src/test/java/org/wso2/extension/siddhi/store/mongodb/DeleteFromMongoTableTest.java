@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.commons.logging.Log;
@@ -67,10 +67,10 @@ public class DeleteFromMongoTableTest {
                     "   on (FooTable.symbol == symbol) ";
 
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -82,7 +82,7 @@ public class DeleteFromMongoTableTest {
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'deleteFromMongoTableTest1' ignored due to " + e.getMessage());
             throw e;
@@ -112,9 +112,9 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable1234 " +
                     "on FooTable.symbol == symbol;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'deleteFromMongoTableTest2' ignored due to " + e.getMessage());
@@ -145,9 +145,9 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable " +
                     "on FooTable.symbol == symbol;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'deleteFromMongoTableTest3' ignored due to " + e.getMessage());
             throw e;
@@ -176,9 +176,9 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable " +
                     "   on (FooTable.length == length) ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'deleteFromMongoTableTest4' ignored due to " + e.getMessage());
             throw e;
@@ -208,10 +208,10 @@ public class DeleteFromMongoTableTest {
                     "   on (FooTable.symbol == symbol) ";
 
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
@@ -223,7 +223,7 @@ public class DeleteFromMongoTableTest {
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 3, "Deletion failed");
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'deleteFromMongoTableTest5' ignored due to " + e.getMessage());
             throw e;

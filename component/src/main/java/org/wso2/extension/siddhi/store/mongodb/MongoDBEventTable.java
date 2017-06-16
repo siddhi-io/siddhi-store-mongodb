@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoClient;
@@ -34,6 +34,9 @@ import com.mongodb.client.model.WriteModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
+import org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants;
+import org.wso2.extension.siddhi.store.mongodb.util.MongoTableUtils;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -44,9 +47,6 @@ import org.wso2.siddhi.core.table.record.ConditionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
-import org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants;
-import org.wso2.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
@@ -166,7 +166,7 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         description = "Specifies the replica set read preference for the connection.",
                         defaultValue = "primary",
                         possibleParameters = {"primary", "secondary", "secondarypreferred", "primarypreferred",
-                                "nearest" }),
+                                "nearest"}),
                 @SystemParameter(name = "localThreshold",
                         description = "The size (in milliseconds) of the latency window for selecting among " +
                                 "multiple suitable MongoDB instances.",

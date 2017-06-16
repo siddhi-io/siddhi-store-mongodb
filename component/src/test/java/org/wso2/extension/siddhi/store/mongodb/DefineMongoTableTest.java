@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
@@ -24,10 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
 
 
 public class DefineMongoTableTest {
@@ -53,9 +53,9 @@ public class DefineMongoTableTest {
                     "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -83,16 +83,16 @@ public class DefineMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"IBM", 75.6F, 100L});
             stockStream.send(new Object[]{"MSFT", 57.6F, 100L});
             Thread.sleep(1000);
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
 
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
@@ -117,9 +117,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest3' ignored due to " + e.getMessage());
@@ -140,9 +140,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol234')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest4' ignored due to " + e.getMessage());
@@ -163,9 +163,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest5' ignored due to " + e.getMessage());
@@ -186,9 +186,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest6' ignored due to " + e.getMessage());
             throw e;
@@ -209,9 +209,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest7' ignored due to " + e.getMessage());
             throw e;
@@ -232,9 +232,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -260,9 +260,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -287,9 +287,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -314,9 +314,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest11' ignored due to " + e.getMessage());
             throw e;
@@ -338,9 +338,9 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest12' ignored due to " + e.getMessage());
@@ -361,9 +361,9 @@ public class DefineMongoTableTest {
                     "mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo?maxPoolSize=5&maxPoolSize=100') " +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -388,9 +388,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"price 1 {background:true}\", \"symbol -1 {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -428,9 +428,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"1 {background:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest15' ignored due to " + e.getMessage());
@@ -451,9 +451,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol1234 1 {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest16' ignored due to " + e.getMessage());
@@ -474,9 +474,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest17' ignored due to " + e.getMessage());
@@ -497,9 +497,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -526,9 +526,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {unique:222true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");
@@ -552,9 +552,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {max:'has'}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
         } catch (MongoException e) {
             log.info("Test case 'mongoTableDefinitionTest20' ignored due to " + e.getMessage());
@@ -576,9 +576,9 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {unique:false, unique: true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
 
             boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
@@ -611,9 +611,9 @@ public class DefineMongoTableTest {
                     "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
                     "define table FooTable (symbol string, price float, volume long);";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            executionPlanRuntime.start();
-            executionPlanRuntime.shutdown();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+            siddhiAppRuntime.start();
+            siddhiAppRuntime.shutdown();
 
             doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
             Assert.assertEquals(doesCollectionExists, true, "Definition failed");

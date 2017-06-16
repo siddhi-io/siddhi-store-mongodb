@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
@@ -64,10 +64,10 @@ public class UpdateOrInsertMongoTableTest {
                     "" +
                     "   on FooTable.symbol== symbol ;";
 
-            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
-            InputHandler updateStockStream = executionPlanRuntime.getInputHandler("UpdateStockStream");
-            executionPlanRuntime.start();
+            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+            InputHandler updateStockStream = siddhiAppRuntime.getInputHandler("UpdateStockStream");
+            siddhiAppRuntime.start();
 
             stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
             stockStream.send(new Object[]{"GOOG", 75.6F, 100L});
@@ -78,7 +78,7 @@ public class UpdateOrInsertMongoTableTest {
             long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
             Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
 
-            executionPlanRuntime.shutdown();
+            siddhiAppRuntime.shutdown();
         } catch (MongoException e) {
             log.info("Test case 'updateOrInsertMongoTableTest1' ignored due to " + e.getMessage());
             throw e;

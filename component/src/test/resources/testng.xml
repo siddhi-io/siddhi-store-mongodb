@@ -4,14 +4,14 @@
     <test name="MonogStoreTest">
         <classes>
             <!-- Skipping tests-->
-            <!-- <class name="org.wso2.siddhi.extension.store.mongodb.ConditionVisitorTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.ContainsMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.DefineMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.DeleteFromMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.InsertIntoMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.JoinMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.UpdateMongoTableTest" />
-             <class name="org.wso2.siddhi.extension.store.mongodb.UpdateOrInsertMongoTableTest" />-->
+            <!-- <class naConditionVisitorTestTest" />
+             <class naContainsMongoTableTestTest" />
+             <class naDefineMongoTableTestTest" />
+             <class naDeleteFromMongoTableTestTest" />
+             <class naInsertIntoMongoTableTestTest" />
+             <class naJoinMongoTableTestTest" />
+             <class naUpdateMongoTableTestTest" />
+             <class naUpdateOrInsertMongoTableTestTest" />-->
         </classes>
     </test>
 </suite>
