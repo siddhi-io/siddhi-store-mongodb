@@ -22,17 +22,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.table.record.ConditionVisitor;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class ConditionVisitorTest {
 
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest1() throws InterruptedException, MongoException {
         log.info("conditionBuilderTest1");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -53,7 +53,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on 'IBM' == symbol  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -72,7 +72,7 @@ public class ConditionVisitorTest {
 
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest2() throws InterruptedException, MongoException {
         log.info("conditionBuilderTest2");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -94,7 +94,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on symbol == 'IBM'  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -133,7 +133,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol==symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -174,7 +174,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on symbol == FooTable.symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -215,7 +215,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on 'IBM' == FooTable.symbol  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -258,7 +258,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == 'IBM'  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -300,7 +300,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol != symbol  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -343,7 +343,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price > price  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -385,7 +385,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price >= 57.6F  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -427,7 +427,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price < price  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -469,7 +469,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price <= price  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -512,7 +512,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == symbol AND FooTable.price <= price  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -554,7 +554,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.symbol == symbol OR FooTable.price <= price  ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -596,7 +596,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on NOT (FooTable.symbol == symbol);";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -639,7 +639,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on (FooTable.symbol) in symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -681,7 +681,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on NOT (FooTable.symbol is NULL);";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -701,7 +701,7 @@ public class ConditionVisitorTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest17() throws InterruptedException, MongoException {
         log.info("conditionBuilderTest17");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -723,7 +723,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on FooTable.price + price < 67;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -733,7 +733,7 @@ public class ConditionVisitorTest {
     }
 
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest18() throws InterruptedException, MongoException {
         log.info("conditionBuilderTest18");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -755,7 +755,7 @@ public class ConditionVisitorTest {
                     "delete FooTable " +
                     "   on DateOf(FooTable.price) < 67;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {

@@ -24,7 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
@@ -53,7 +53,7 @@ public class DefineMongoTableTest {
                     "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -83,7 +83,7 @@ public class DefineMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -117,7 +117,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -140,7 +140,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol234')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -163,7 +163,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -186,7 +186,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -209,7 +209,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -232,7 +232,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -260,7 +260,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -287,7 +287,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -314,7 +314,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -338,7 +338,7 @@ public class DefineMongoTableTest {
                     "@PrimaryKey('symbol')" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -361,7 +361,7 @@ public class DefineMongoTableTest {
                     "mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo?maxPoolSize=5&maxPoolSize=100') " +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -388,7 +388,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"price 1 {background:true}\", \"symbol -1 {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -428,7 +428,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"1 {background:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -451,7 +451,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol1234 1 {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -474,7 +474,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol {unique:true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -497,7 +497,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -526,7 +526,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {unique:222true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -552,7 +552,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {max:'has'}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -576,7 +576,7 @@ public class DefineMongoTableTest {
                     "@IndexBy(\"symbol 1 {unique:false, unique: true}\")" +
                     "define table FooTable (symbol string, price float, volume long); ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -611,7 +611,7 @@ public class DefineMongoTableTest {
                     "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
                     "define table FooTable (symbol string, price float, volume long);";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 

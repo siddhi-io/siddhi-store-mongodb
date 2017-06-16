@@ -17,13 +17,13 @@
  */
 package org.wso2.siddhi.extension.store.mongodb.exception;
 
-import org.wso2.siddhi.core.exception.ExecutionPlanCreationException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * Represents an unchecked exception which may be thrown during runtime, from which we may not expect the Siddhi runtime
  * to recover.
  */
-public class MongoTableException extends ExecutionPlanCreationException {
+public class MongoTableException extends SiddhiAppCreationException {
 
     public MongoTableException(String message) {
         super(message);
