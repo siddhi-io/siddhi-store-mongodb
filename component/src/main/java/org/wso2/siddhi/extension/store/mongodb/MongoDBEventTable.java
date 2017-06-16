@@ -80,8 +80,8 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         type = {DataType.STRING}),
                 @Parameter(name = "collection.name",
                         description = "The name of the collection in the store this Event Table should" +
-                                " be persisted as. If not specified, the collection name will be the same as the" +
-                                " Siddhi table.",
+                                " be persisted as.",
+                        defaultValue = "Name of the event table.",
                         type = {DataType.STRING}, optional = true)
         },
         systemParameter = {

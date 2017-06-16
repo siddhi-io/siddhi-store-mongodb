@@ -23,11 +23,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
 
 
@@ -59,7 +59,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -95,7 +95,7 @@ public class InsertIntoMongoTableTest {
                     "select symbol, price " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -130,7 +130,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -162,7 +162,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable1234 ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -183,7 +183,7 @@ public class InsertIntoMongoTableTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void insertIntoMongoTableTest5() throws InterruptedException {
         log.info("insertIntoMongoTableTest5 - " +
                 "DASC5-883:[N] Insert events to a MongoDB table by selecting from non existing stream");
@@ -200,7 +200,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream1212   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -225,7 +225,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream" +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -249,7 +249,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -279,7 +279,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 
@@ -317,7 +317,7 @@ public class InsertIntoMongoTableTest {
                     "from StockStream   " +
                     "insert into FooTable ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             executionPlanRuntime.start();
 

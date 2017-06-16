@@ -24,12 +24,12 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class JoinMongoTableTest {
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
@@ -73,7 +73,7 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.addCallback("query2", new QueryCallback() {
                 @Override
                 public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
@@ -120,7 +120,7 @@ public class JoinMongoTableTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testMongoTableJoinQuery2() throws InterruptedException, MongoException {
         log.info("testMongoTableJoinQuery2DASC5-916:Read events from a non existing MongoDB collection");
         SiddhiManager siddhiManager = new SiddhiManager();
@@ -142,7 +142,7 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -152,7 +152,7 @@ public class JoinMongoTableTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testMongoTableJoinQuery3() throws InterruptedException, MongoException {
         log.info("testMongoTableJoinQuery - " +
                 "DASC5-917:Read events from a MongoDB collection by sending through non existing stream");
@@ -175,7 +175,7 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -185,7 +185,7 @@ public class JoinMongoTableTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void testMongoTableJoinQuery5() throws InterruptedException, MongoException {
         log.info("testMongoTableJoinQuery5 - " +
                 "DASC5-919:Read events from a MongoDB collection for non existing attributes");
@@ -208,7 +208,7 @@ public class JoinMongoTableTest {
                     "FooTable.volume as volume  " +
                     "insert into OutputStream ;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 

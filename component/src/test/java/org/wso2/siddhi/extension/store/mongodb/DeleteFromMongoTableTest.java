@@ -24,10 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.siddhi.core.ExecutionPlanRuntime;
+import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.ExecutionPlanValidationException;
+import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class DeleteFromMongoTableTest {
@@ -67,7 +67,7 @@ public class DeleteFromMongoTableTest {
                     "   on (FooTable.symbol == symbol) ";
 
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
@@ -90,7 +90,7 @@ public class DeleteFromMongoTableTest {
     }
 
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void deleteFromMongoTableTest2() throws InterruptedException, MongoException {
         log.info("deleteFromMongoTableTest2 - " +
                 "DASC5-904:Delete an event from a non existing MongoDB table");
@@ -112,7 +112,7 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable1234 " +
                     "on FooTable.symbol == symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
 
@@ -123,7 +123,7 @@ public class DeleteFromMongoTableTest {
     }
 
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void deleteFromMongoTableTest3() throws InterruptedException, MongoException {
         log.info("deleteFromMongoTableTest3 - " +
                 "DASC5-905:Delete an event from a MongoDB table by selecting from non existing stream");
@@ -145,7 +145,7 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable " +
                     "on FooTable.symbol == symbol;";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -154,7 +154,7 @@ public class DeleteFromMongoTableTest {
         }
     }
 
-    @Test(expectedExceptions = ExecutionPlanValidationException.class)
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void deleteFromMongoTableTest4() throws InterruptedException, MongoException {
         log.info("deleteFromMongoTableTest4 - " +
                 "DASC5-906:Delete an event from a MongoDB table based on a non-existing attribute");
@@ -176,7 +176,7 @@ public class DeleteFromMongoTableTest {
                     "delete FooTable " +
                     "   on (FooTable.length == length) ";
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             executionPlanRuntime.start();
             executionPlanRuntime.shutdown();
         } catch (MongoException e) {
@@ -208,7 +208,7 @@ public class DeleteFromMongoTableTest {
                     "   on (FooTable.symbol == symbol) ";
 
 
-            ExecutionPlanRuntime executionPlanRuntime = siddhiManager.createExecutionPlanRuntime(streams + query);
+            SiddhiAppRuntime executionPlanRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
             InputHandler stockStream = executionPlanRuntime.getInputHandler("StockStream");
             InputHandler deleteStockStream = executionPlanRuntime.getInputHandler("DeleteStockStream");
             executionPlanRuntime.start();
