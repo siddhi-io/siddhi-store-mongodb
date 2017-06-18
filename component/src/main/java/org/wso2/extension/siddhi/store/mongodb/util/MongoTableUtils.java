@@ -450,12 +450,12 @@ public class MongoTableUtils {
             }
 
             String requiredReplicaSetName = configReader.readConfig(MongoTableConstants.REQUIRED_REPLICA_SET_NAME, "");
-            if (requiredReplicaSetName.equals("")) {
+            if (!requiredReplicaSetName.equals("")) {
                 mongoClientOptionsBuilder.requiredReplicaSetName(requiredReplicaSetName);
             }
 
             String applicationName = configReader.readConfig(MongoTableConstants.APPLICATION_NAME, "");
-            if (applicationName.equals("")) {
+            if (!applicationName.equals("")) {
                 mongoClientOptionsBuilder.applicationName(applicationName);
             }
 
