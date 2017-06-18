@@ -101,22 +101,28 @@ public class MongoTableUtils {
         if (indices == null) {
             return new ArrayList<>();
         }
-        Pattern pattern = Pattern.compile(MongoTableConstants.REG_INDEX_BY);
+        Pattern indexBy = Pattern.compile(MongoTableConstants.REG_INDEX_BY);
         return indices.getElements().stream().map(index -> {
-            Matcher matcher = pattern.matcher(index.getValue());
-            if (matcher.matches()) {
-                if (attributeNames.contains(matcher.group(1))) {
-                    return createIndexModel(matcher.group(1), Integer.parseInt(matcher.group(2)), matcher.group(3));
+            Matcher matcher = indexBy.matcher(index.getValue());
+            if (matcher.matches() && attributeNames.contains(matcher.group(1))) {
+                if (matcher.groupCount() == 4) {
+                    return createIndexModel(
+                            matcher.group(1), Integer.parseInt(matcher.group(2)), matcher.group(3).trim());
                 } else {
-                    throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal " +
-                            "value(s). Please check your query and try again.");
+                    if (matcher.groupCount() == 3) {
+                        if (matcher.group(3) == null) {
+                            return createIndexModel(
+                                    matcher.group(1), Integer.parseInt(matcher.group(2).trim()), null);
+                        } else {
+                            return createIndexModel(matcher.group(1), 1, matcher.group(3).trim());
+                        }
+                    } else {
+                        return createIndexModel(matcher.group(1), 1, null);
+                    }
                 }
             } else {
-                if (attributeNames.contains(index.getValue())) {
-                    return createIndexModel(index.getValue(), 1, null);
-                }
-                throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal value(s). " +
-                        "Please check your query and try again.");
+                throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal " +
+                        "value : '" + index.getValue() + "'. Please check your query and try again.");
             }
         }).collect(Collectors.toList());
     }
