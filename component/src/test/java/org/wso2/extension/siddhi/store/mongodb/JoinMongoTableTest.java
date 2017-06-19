@@ -18,11 +18,11 @@
 
 package org.wso2.extension.siddhi.store.mongodb;
 
-import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -34,14 +34,9 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 public class JoinMongoTableTest {
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
     private int inEventCount;
-    private int removeEventCount;
-    private boolean eventArrived;
 
     @BeforeClass
     public void init() {
-        inEventCount = 0;
-        removeEventCount = 0;
-        eventArrived = false;
         log.info("== Mongo Table JOIN tests started ==");
     }
 
@@ -50,172 +45,209 @@ public class JoinMongoTableTest {
         log.info("== Mongo Table JOIN tests completed ==");
     }
 
+    @BeforeMethod
+    public void testInit() {
+        inEventCount = 0;
+    }
+
     @Test
-    public void testMongoTableJoinQuery1() throws InterruptedException, MongoException {
+    public void testMongoTableJoinQuery1() throws InterruptedException {
         log.info("testMongoTableJoinQuery1 -" +
                 "DASC5-915:Read events from a MongoDB collection successfully");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream CheckStockStream (symbol string); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from CheckStockStream#window.length(1) join FooTable " +
-                    "select CheckStockStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
-                    "FooTable.volume as volume  " +
-                    "insert into OutputStream ;";
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.addCallback("query2", new QueryCallback() {
-                @Override
-                public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
-                    if (inEvents != null) {
-                        for (Event event : inEvents) {
-                            inEventCount++;
-                            switch (inEventCount) {
-                                case 1:
-                                    Assert.assertEquals(new Object[]{"WSO2_check", "WSO2", 100L}, event.getData());
-                                    break;
-                                case 2:
-                                    Assert.assertEquals(new Object[]{"WSO2_check", "IBM", 10L}, event.getData());
-                                    break;
-                                default:
-                                    break;
-                            }
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream#window.length(1) join FooTable " +
+                "select FooStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
+                "FooTable.volume as volume  " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2_check", "WSO2", 100L}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"WSO2_check", "IBM", 10L}, event.getData());
+                                break;
+                            default:
+                                break;
                         }
-                        eventArrived = true;
                     }
-                    if (removeEvents != null) {
-                        removeEventCount = removeEventCount + removeEvents.length;
-                    }
-                    eventArrived = true;
                 }
+            }
 
-            });
+        });
 
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler checkStockStream = siddhiAppRuntime.getInputHandler("CheckStockStream");
-            siddhiAppRuntime.start();
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
 
-            stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
-            stockStream.send(new Object[]{"IBM", 7.6f, 10L});
-            checkStockStream.send(new Object[]{"WSO2_check"});
-            Thread.sleep(1000);
-            siddhiAppRuntime.shutdown();
+        stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 7.6f, 10L});
+        fooStream.send(new Object[]{"WSO2_check"});
+        Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
 
-            Assert.assertEquals(inEventCount, 2, "Number of success events");
-            Assert.assertEquals(removeEventCount, 0, "Number of remove events");
-            Assert.assertEquals(eventArrived, true, "Event arrived");
-        } catch (MongoException e) {
-            log.info("Test case 'testMongoTableJoinQuery1' ignored due to " + e.getMessage());
-            throw e;
-        }
+        Assert.assertEquals(inEventCount, 2, "Read events failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void testMongoTableJoinQuery2() throws InterruptedException, MongoException {
+    public void testMongoTableJoinQuery2() {
         log.info("testMongoTableJoinQuery2DASC5-916:Read events from a non existing MongoDB collection");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream CheckStockStream (symbol string); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from CheckStockStream#window.length(1) join FooTable123 " +
-                    "select CheckStockStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
-                    "FooTable.volume as volume  " +
-                    "insert into OutputStream ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'testMongoTableJoinQuery2' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream#window.length(1) join FooTable123 " +
+                "select FooStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
+                "FooTable.volume as volume  " +
+                "insert into OutputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void testMongoTableJoinQuery3() throws InterruptedException, MongoException {
-        log.info("testMongoTableJoinQuery - " +
+    public void testMongoTableJoinQuery3() {
+        log.info("testMongoTableJoinQuery3 - " +
                 "DASC5-917:Read events from a MongoDB collection by sending through non existing stream");
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream CheckStockStream (symbol string); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from CheckStockStream123#window.length(1) join FooTable " +
-                    "select CheckStockStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
-                    "FooTable.volume as volume  " +
-                    "insert into OutputStream ;";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream123#window.length(1) join FooTable " +
+                "select FooStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
+                "FooTable.volume as volume  " +
+                "insert into OutputStream ;";
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
 
-        } catch (MongoException e) {
-            log.info("Test case 'testMongoTableJoinQuery3' ignored due to " + e.getMessage());
-            throw e;
-        }
+    @Test
+    public void testMongoTableJoinQuery4() throws InterruptedException {
+        log.info("testMongoTableJoinQuery4 - " +
+                "DASC5-918:Read events from a MongoDB collection for less attributes than total attribute list");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream#window.length(1) join FooTable " +
+                "select FooStream.symbol as checkSymbol, FooTable.symbol as symbol " +
+                "insert into OutputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2_check", "WSO2"}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"WSO2_check", "IBM"}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
+        stockStream.send(new Object[]{"IBM", 7.6f, 10L});
+        fooStream.send(new Object[]{"WSO2_check"});
+        Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(inEventCount, 2, "Read events failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void testMongoTableJoinQuery5() throws InterruptedException, MongoException {
+    public void testMongoTableJoinQuery5() {
         log.info("testMongoTableJoinQuery5 - " +
                 "DASC5-919:Read events from a MongoDB collection for non existing attributes");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream CheckStockStream (symbol string); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from CheckStockStream123#window.length(1) join FooTable " +
-                    "select CheckStockStream.hello as checkHello, FooTable.symbol as symbol, " +
-                    "FooTable.volume as volume  " +
-                    "insert into OutputStream ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'testMongoTableJoinQuery5' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream123#window.length(1) join FooTable " +
+                "select FooStream.hello as checkHello, FooTable.symbol as symbol, " +
+                "FooTable.volume as volume  " +
+                "insert into OutputStream ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
-
 }

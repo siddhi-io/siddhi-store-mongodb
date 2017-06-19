@@ -17,7 +17,6 @@
  */
 package org.wso2.extension.siddhi.store.mongodb;
 
-import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.bson.Document;
 import org.testng.Assert;
@@ -27,8 +26,6 @@ import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.stream.input.InputHandler;
-
 
 public class DefineMongoTableTest {
     private static final Logger log = Logger.getLogger(DefineMongoTableTest.class);
@@ -44,584 +41,615 @@ public class DefineMongoTableTest {
     }
 
     @Test
-    public void mongoTableDefinitionTest1() throws InterruptedException {
-        log.info("mongoTableDefinitionTest1 - DASC5-854:Defining a MongoDB event table successfully");
+    public void mongoTableDefinitionTest1() {
+        log.info("mongoTableDefinitionTest1 - " +
+                "DASC5-958:Defining a MongoDB event table with a non existing collection.");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); ";
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest1' ignored due to " + e.getMessage());
-            throw e;
-        }
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
     }
 
     @Test
-    public void mongoTableDefinitionTest2() throws InterruptedException {
-        log.info("mongoTableDefinitionTest2 - DASC5-856:Defining a MongoDB event table with a Primary Key field");
+    public void mongoTableDefinitionTest2() {
+        log.info("mongoTableDefinitionTest2 - " +
+                "DASC5-854:Defining a MongoDB event table with an existing collection");
+
+        MongoTableTestUtils.createCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            //  MongoTableTestUtils.clearCollection();
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable ;";
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
+    }
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"MSFT", 57.6F, 100L});
-            Thread.sleep(1000);
+    @Test
+    public void mongoTableDefinitionTest3() {
+        log.info("mongoTableDefinitionTest3 - DASC5-856:Defining a MongoDB event table with a Primary Key field");
 
-            siddhiAppRuntime.shutdown();
+        MongoTableTestUtils.dropCollection("FooTable");
 
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long);";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
 
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest2' ignored due to " + e.getMessage());
-            throw e;
-        }
+        Document indexExcepted = new org.bson.Document()
+                .append("key", new org.bson.Document("symbol", 1))
+                .append("name", "symbol_1")
+                .append("v", 2)
+                .append("unique", true);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Primary Key Definition Failed");
     }
 
     @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest3() throws InterruptedException {
-        log.info("mongoTableDefinitionTest3 - " +
-                "DASC5-857:Defining a MongoDB table without defining a value for Primary Key field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "@PrimaryKey('')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest3' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest4() throws InterruptedException {
+    public void mongoTableDefinitionTest4() {
         log.info("mongoTableDefinitionTest4 - " +
-                "DASC5-858:Defining a MongoDB table with an invalid value for Primary Key field");
+                "DASC5-857:Defining a MongoDB table without defining a value for Primary Key field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "@PrimaryKey('symbol234')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest4' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@PrimaryKey('')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest5() throws InterruptedException {
+    public void mongoTableDefinitionTest5() {
         log.info("mongoTableDefinitionTest5 - " +
-                "DASC5-859:Defining a MongoDB table without having a mongodb uri field");
+                "DASC5-858:Defining a MongoDB table with an invalid value for Primary Key field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb') " +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest5' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@PrimaryKey('symbol234')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest6() throws InterruptedException {
+    public void mongoTableDefinitionTest6() {
         log.info("mongoTableDefinitionTest6 - " +
-                "DASC5-860:Defining a MongoDB table without defining a value for mongodb uri field");
+                "DASC5-859:Defining a MongoDB table without having a mongodb uri field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='') " +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest6' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@store(type = 'mongodb') " +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
-
     @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest7() throws InterruptedException {
+    public void mongoTableDefinitionTest7() {
         log.info("mongoTableDefinitionTest7 - " +
-                "DASC5-861:Defining a MongoDBS table with an invalid value for mongodb uri field");
+                "DASC5-860:Defining a MongoDB table without defining a value for mongodb uri field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='1234444mongodb://admin:admin@localhost:27017/Foo') " +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest7' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='') " +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test
-    public void mongoTableDefinitionTest8() throws InterruptedException {
+    @Test(expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest8() {
         log.info("mongoTableDefinitionTest8 - " +
-                "DASC5-862:Defining a MongoDB table with a single option defined in mongodburl");
+                "DASC5-861:Defining a MongoDBS table with an invalid value for mongodb uri field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?maxPoolSize=100')" +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest8' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-
-    @Test
-    public void mongoTableDefinitionTest9() throws InterruptedException {
-        log.info("mongoTableDefinitionTest9 - " +
-                "DASC5-863:Defining a MongoDB table with multiple options defined in mongodburl");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost/Foo?maxPoolSize=100&connectTimeoutMS=10000')" +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest9' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void mongoTableDefinitionTest10() throws InterruptedException {
-        log.info("mongoTableDefinitionTest10 - " +
-                "DASC5-864:Defining a MongoDB table with an invalid option defined in mongodburl");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?wso2ssl=true')" +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest10' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest11() throws InterruptedException {
-        log.info("mongoTableDefinitionTest11 - " +
-                "DASC5-865:Defining a MongoDB table with an invalid value for an option defined in mongodburl");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?w=majority5')" +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest11' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest12() throws InterruptedException {
-        log.info("mongoTableDefinitionTest12 - " +
-                "DASC5-866:Defining a MongoDB table without a value for an option defined in mongodburl");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?maxPoolSize=')" +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest12' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void mongoTableDefinitionTest13() throws InterruptedException {
-        log.info("mongoTableDefinitionTest13 - " +
-                "DASC5-867:Defining a MongoDB table with contradictory values for the same option defined in " +
-                "mongodburl");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , " +
-                    "mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo?maxPoolSize=5&maxPoolSize=100') " +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest1' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void mongoTableDefinitionTest14() throws InterruptedException {
-        log.info("mongoTableDefinitionTest14 - " +
-                "DASC5-868:Defining a MongoDB event table with IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost/Foo?maxPoolSize=100&connectTimeoutMS=10000')" +
-                    "@IndexBy(\"price 1 {background:true}\", \"symbol -1 {unique:true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-            Document symbolIndex = MongoTableTestUtils.getIndexList().get(2);
-            Document priceIndex = MongoTableTestUtils.getIndexList().get(1);
-
-            //Assert Index Order and properties - price
-            Assert.assertEquals(priceIndex.get("key"), new Document("price", 1), "Index Creation Failed");
-            Assert.assertEquals(priceIndex.get("background"), true, "Index Creation Failed");
-
-            //Assert Index Order and properties - symbol
-            Assert.assertEquals(symbolIndex.get("key"), new Document("symbol", -1), "Index Creation Failed");
-            Assert.assertEquals(symbolIndex.get("unique"), true, "Index Creation Failed");
-
-            Thread.sleep(1000);
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest14' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest15() throws InterruptedException {
-        log.info("mongoTableDefinitionTest15 - " +
-                "DASC5-869:Defining a MongoDB table without defining a value for indexing column within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', " +
-                    "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?maxPoolSize=')" +
-                    "@IndexBy(\"1 {background:true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest15' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest16() throws InterruptedException {
-        log.info("mongoTableDefinitionTest16 - " +
-                "DASC5-870:Defining a MongoDB table with an invalid value for indexing column within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol1234 1 {unique:true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest16' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest17() throws InterruptedException {
-        log.info("mongoTableDefinitionTest17 - " +
-                "DASC5-872:Defining a MongoDB table without defining a value for sorting within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol {unique:true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest17' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void mongoTableDefinitionTest18() throws InterruptedException {
-        log.info("mongoTableDefinitionTest18 - " +
-                "DASC5-873:Defining a MongoDB table without defining options within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            //   MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol 1 {}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-            //Assert Index Order and properties - price
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest18' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest19() throws InterruptedException {
-        log.info("mongoTableDefinitionTest19 - " +
-                "DASC5-874:Defining a MongoDB table by defining non existing options within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol 1 {unique:222true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest19' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test(expectedExceptions = MongoTableException.class)
-    public void mongoTableDefinitionTest20() throws InterruptedException {
-        log.info("mongoTableDefinitionTest20 - " +
-                "DASC5-875:Defining a MongoDB table by defining an option with an invalid value within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol 1 {max:'has'}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest20' ignored due to " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Test
-    public void mongoTableDefinitionTest21() throws InterruptedException {
-        log.info("mongoTableDefinitionTest21 - " +
-                "DASC5-876:Defining a MongoDB table by having contradictory values for an option " +
-                "defined within IndexBy field");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-
-            String streams = "" +
-                    "@Store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
-                    "@IndexBy(\"symbol 1 {unique:false, unique: true}\")" +
-                    "define table FooTable (symbol string, price float, volume long); ";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-            Document symbolIndex = MongoTableTestUtils.getIndexList().get(1);
-
-            //Assert Index Order and properties - price
-            Assert.assertEquals(symbolIndex.get("key"), new Document("symbol", 1), "Index Creation Failed");
-            Assert.assertEquals(symbolIndex.get("unique"), true, "Index Creation Failed");
-
-
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest21' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='1234444mongodb://admin:admin@localhost:27017/Foo') " +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test(enabled = false)
-    public void mongoTableDefinitionTest22() throws InterruptedException {
-        log.info("mongoTableDefinitionTest22 - " +
-                "DASC5-959:Defining a MongoDB event table with an existing collection with different attributes");
-        boolean doesCollectionExists;
-        doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-        Assert.assertEquals(doesCollectionExists, true, "Foo collection not present before test");
+    public void mongoTableDefinitionTest9() {
+        log.info("mongoTableDefinitionTest9 - " +
+                "   Actions DASC5-862:Defining a MongoDB table with by defining ssl in mongodburl");
+
+        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            String streams = "" +
-                    "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?ssl=true')" +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
 
-            doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    @Test(enabled = false)
+    public void mongoTableDefinitionTest10() {
+        log.info("mongoTableDefinitionTest10 - " +
+                "DASC5-863:Defining a MongoDB table with multiple options defined in mongodburl");
 
-        } catch (MongoException e) {
-            log.info("Test case 'mongoTableDefinitionTest22' ignored due to " + e.getMessage());
-            throw e;
-        }
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost/Foo?ssl=true&maxPoolSize=100')" +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test(enabled = false)
+    public void mongoTableDefinitionTest11() {
+        log.info("mongoTableDefinitionTest11 - " +
+                "DASC5-864:Defining a MongoDB table with an invalid option defined in mongodburl");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?wso2ssl=true')" +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test(enabled = false, expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest12() {
+        log.info("mongoTableDefinitionTest12 - " +
+                "DASC5-865:Defining a MongoDB table with an invalid value for an option defined in mongodburl");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?ssl=wso2true')" +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(enabled = false, expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest13() {
+        log.info("mongoTableDefinitionTest13 - " +
+                    "DASC5-866:Defining a MongoDB table without a value for an option defined in mongodburl");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?maxPoolSize=')" +
+                "@PrimaryKey('symbol')" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(enabled = false)
+    public void mongoTableDefinitionTest14() {
+        log.info("mongoTableDefinitionTest14 - " +
+                "DASC5-867:Defining a MongoDB table with contradictory values for the same option defined in " +
+                "mongodburl");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , " +
+                "mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo?ssl=true&ssl=false') " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest15() {
+        log.info("mongoTableDefinitionTest15 - " +
+                "DASC5-868:Defining a MongoDB event table with IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost/Foo?maxPoolSize=100&connectTimeoutMS=10000')" +
+                "@IndexBy(\"price 1 {background:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document priceIndexExpected = new Document()
+                .append("name", "price_1")
+                .append("v", 2)
+                .append("key", new Document("price", 1))
+                .append("background", true);
+        Document priceIndexActual = MongoTableTestUtils.getIndex("FooTable", "price_1");
+        Assert.assertEquals(priceIndexActual, priceIndexExpected, "Index Creation Failed");
+    }
+
+    @Test(expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest16() {
+        log.info("mongoTableDefinitionTest16 - " +
+                "DASC5-869:Defining a MongoDB table without defining a value for indexing column within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost:27017/Foo?maxPoolSize=')" +
+                "@IndexBy(\"1 {background:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test(expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest17() {
+        log.info("mongoTableDefinitionTest17 - " +
+                "DASC5-870:Defining a MongoDB table with an invalid value for indexing column within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol1234 1 {unique:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void mongoTableDefinitionTest18() {
+        log.info("mongoTableDefinitionTest18 - " +
+                "DASC5-872:Defining a MongoDB table without defining a value for sorting within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol {unique:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document indexExcepted = new org.bson.Document()
+                .append("key", new org.bson.Document("symbol", 1))
+                .append("name", "symbol_1")
+                .append("v", 2)
+                .append("unique", true);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest19() {
+        log.info("mongoTableDefinitionTest19 - " +
+                "DASC5-872:Defining a MongoDB table without defining a value for sorting within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol 1 {}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document indexExcepted = new org.bson.Document()
+                .append("key", new org.bson.Document("symbol", 1))
+                .append("name", "symbol_1")
+                .append("v", 2);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
+    }
+
+    @Test(expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest20() {
+        log.info("mongoTableDefinitionTest20 - " +
+                "DASC5-874:Defining a MongoDB table by defining non existing options within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol 1 {2222unique:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document indexExcepted = new org.bson.Document()
+                .append("key", new org.bson.Document("symbol", 1))
+                .append("name", "symbol_1")
+                .append("v", 2);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
+    }
+
+    @Test(expectedExceptions = MongoTableException.class)
+    public void mongoTableDefinitionTest21() {
+        log.info("mongoTableDefinitionTest21 - " +
+                "DASC5-875:Defining a MongoDB table by defining an option with an invalid value within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol 1 {background:tr22ue}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void mongoTableDefinitionTest22() {
+        log.info("mongoTableDefinitionTest22 - " +
+                "DASC5-876:Defining a MongoDB table by having contradictory values for an option " +
+                "defined within IndexBy field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', mongodb.uri='mongodb://admin:admin@localhost:27017/Foo')" +
+                "@IndexBy(\"symbol 1 {unique:true, unique: false}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document indexExcepted = new org.bson.Document()
+                .append("key", new org.bson.Document("symbol", 1))
+                .append("name", "symbol_1")
+                .append("v", 2);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest23() {
+        log.info("mongoTableDefinitionTest23 - " +
+                "DASC5-948:Defining a MongoDB event table with a new collection name");
+
+        MongoTableTestUtils.dropCollection("newcollection");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , " +
+                "mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo', collection.name=\"newcollection\") " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("newcollection");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest24() {
+        log.info("mongoTableDefinitionTest24 - " +
+                "DASC5-949:Defining a MongoDB event table with a existing collection name");
+
+        MongoTableTestUtils.createCollection("newcollection");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo', " +
+                "collection.name=\"newcollection\") " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("newcollection");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test(enabled = false)
+    public void mongoTableDefinitionTest25() {
+        log.info("mongoTableDefinitionTest25 - " +
+                "DASC5-962:Defining a MongoDB event table with multiple hosts and default ports");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , " +
+                "mongodb.uri=\"mongodb://admin:admin@localhost:27017,192.168.11.17:27017/Foo\") " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test(enabled = false)
+    public void mongoTableDefinitionTest26() {
+        log.info("mongoTableDefinitionTest26 - " +
+                "DASC5-963:Defining a MongoDB event table with multiple hosts and non-default ports");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , " +
+                "mongodb.uri=\"mongodb://admin:admin@localhost:27018,192.168.11.17:27018/Foo\") " +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest27() {
+        log.info("mongoTableDefinitionTest27 - " +
+                "DASC5-965:Defining a MongoDB event table by having multiple indexing columns");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb', " +
+                "mongodb.uri='mongodb://admin:admin@localhost/Foo?maxPoolSize=100&connectTimeoutMS=10000')" +
+                "@IndexBy(\"price 1 {background:true}\",\"volume 1 {background:true}\")" +
+                "define table FooTable (symbol string, price float, volume long); ";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document priceIndexExpected = new Document()
+                .append("name", "price_1")
+                .append("v", 2)
+                .append("key", new Document("price", 1))
+                .append("background", true);
+        Document priceIndexActual = MongoTableTestUtils.getIndex("FooTable", "price_1");
+        Assert.assertEquals(priceIndexActual, priceIndexExpected, "Index Creation Failed");
+
+        Document volumeIndexExpected = new Document()
+                .append("name", "volume_1")
+                .append("v", 2)
+                .append("key", new Document("volume", 1))
+                .append("background", true);
+        Document volumeIndexActual = MongoTableTestUtils.getIndex("FooTable", "volume_1");
+        Assert.assertEquals(volumeIndexActual, volumeIndexExpected, "Index Creation Failed");
+    }
+
+    @Test
+    public void mongoTableDefinitionTest28() {
+        log.info("mongoTableDefinitionTest28 - DASC5-856:Defining a MongoDB event table with a Primary Key field");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@PrimaryKey('symbol','price')" +
+                "define table FooTable (symbol string, price float, volume long); " +
+                "define stream StockStream (symbol string, price float, volume long);";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, true, "Definition failed");
+
+        Document key = new Document()
+                .append("symbol", 1)
+                .append("price", 1);
+        Document indexExcepted = new org.bson.Document()
+                .append("key", key)
+                .append("name", "symbol_1_price_1")
+                .append("v", 2)
+                .append("unique", true);
+        Document indexActual = MongoTableTestUtils.getIndex("FooTable", "symbol_1_price_1");
+        Assert.assertEquals(indexActual, indexExcepted, "Primary Key Definition Failed");
     }
 
 }

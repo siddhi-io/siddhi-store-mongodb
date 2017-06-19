@@ -21,70 +21,131 @@ package org.wso2.extension.siddhi.store.mongodb;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
-import org.apache.log4j.Logger;
+import com.mongodb.client.ListIndexesIterable;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class MongoTableTestUtils {
 
-    private static final Logger log = Logger.getLogger(MongoTableTestUtils.class);
-
-    private static final String CONNECTIONURI = "mongodb://admin:admin@127.0.0.1/Foo";
-    private static final String DATABASENAME = "Foo";
-    private static final String COLLECTIONNAME = "FooTable";
+    private static final Log log = LogFactory.getLog(MongoTableTestUtils.class);
+    private static final String MONGO_CLIENT_URI = "mongodb://admin:admin@127.0.0.1/Foo";
+    private static final String DATABASE_NAME = "Foo";
+    private static MongoClient mongoClient;
 
     private MongoTableTestUtils() {
-
     }
 
-    public static void clearCollection() throws MongoException {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(CONNECTIONURI))) {
-            mongoClient.getDatabase(DATABASENAME).getCollection(COLLECTIONNAME).drop();
+    private static MongoClient getMongoClient() {
+        if (mongoClient != null) {
+            return mongoClient;
+        } else {
+            try {
+                return mongoClient = new MongoClient(new MongoClientURI(MONGO_CLIENT_URI));
+            } catch (Exception e) {
+                log.debug("Creating Mongo client failed due to " + e.getMessage(), e);
+                throw e;
+            }
+
+        }
+    }
+
+    public static void dropCollection(String collectionName) {
+        try {
+            getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
         }
     }
 
-    public static long getDocumentsCount() throws MongoException {
-        long totalDocumentsInCollection = 0;
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(CONNECTIONURI))) {
-            totalDocumentsInCollection = mongoClient.getDatabase(DATABASENAME).getCollection(COLLECTIONNAME).count();
+    public static long getDocumentsCount(String collectionName) {
+        try {
+            return getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).count();
         } catch (MongoException e) {
             log.debug("Getting rows in DB table failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
         }
-        return totalDocumentsInCollection;
     }
 
-
-    public static boolean doesCollectionExists() throws MongoException {
-        boolean doesCollectionExists = false;
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(CONNECTIONURI))) {
-            for (String collectionName : mongoClient.getDatabase(DATABASENAME).listCollectionNames()) {
-                if (COLLECTIONNAME.equals(collectionName)) {
-                    doesCollectionExists = true;
-                    break;
+    public static boolean doesCollectionExists(String customCollectionName) {
+        try {
+            for (String collectionName : getMongoClient().getDatabase(DATABASE_NAME).listCollectionNames()) {
+                if (customCollectionName.equals(collectionName)) {
+                    return true;
                 }
             }
+            return false;
         } catch (MongoException e) {
             log.debug("Checking whether collection was created failed due to" + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
         }
-        return doesCollectionExists;
     }
 
-
-    public static List<Document> getIndexList() throws MongoException {
-        List<Document> indexesList = new ArrayList<>();
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(CONNECTIONURI))) {
-            for (Document document :
-                    mongoClient.getDatabase(DATABASENAME).getCollection(COLLECTIONNAME).listIndexes()) {
-                indexesList.add(document);
-            }
+    public static List<Document> getIndexList(String collectionName) {
+        try {
+            ListIndexesIterable<Document> existingIndexesIterable =
+                    getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).listIndexes();
+            List<Document> existingIndexDocuments = new ArrayList<>();
+            existingIndexesIterable.forEach((Consumer<? super Document>) existingIndex -> {
+                existingIndex.remove("ns");
+                existingIndexDocuments.add(existingIndex);
+            });
+            return existingIndexDocuments;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
         }
-        return indexesList;
     }
 
+    public static Document getIndex(String collectionName, String indexName) {
+        try {
+            List<Document> existingIndexList = getIndexList(collectionName);
+            for (Document existingIndex : existingIndexList) {
+                if (existingIndex.get("name").equals(indexName)) {
+                    return existingIndex;
+                }
+            }
+            return null;
+        } catch (MongoException e) {
+            log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
+        }
+    }
+
+    public static Document getDocument(String collectionName, String findFilter) {
+        try {
+            Document findFilterDocument = Document.parse(findFilter);
+            Document firstFind = getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName)
+                    .find(findFilterDocument).first();
+            firstFind.remove("_id");
+            return firstFind;
+        } catch (MongoException e) {
+            log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
+        }
+    }
+
+    public static void createCollection(String collectionName) {
+        dropCollection(collectionName);
+        try {
+            getMongoClient().getDatabase(DATABASE_NAME).createCollection(collectionName);
+        } catch (MongoException e) {
+            log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
+            mongoClient.close();
+            throw e;
+        }
+    }
 }
+
+

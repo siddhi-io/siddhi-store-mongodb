@@ -17,7 +17,6 @@
  */
 package org.wso2.extension.siddhi.store.mongodb;
 
-import com.mongodb.MongoException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
@@ -33,734 +32,642 @@ public class ConditionVisitorTest {
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void conditionBuilderTest1() throws InterruptedException, MongoException {
+    public void conditionBuilderTest1() {
         log.info("conditionBuilderTest1");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on 'IBM' == symbol  ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
-
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest1' ignored due to " + e.getMessage());
-            throw e;
-        }
-
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on 'IBM' == symbol  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void conditionBuilderTest2() throws InterruptedException, MongoException {
+    public void conditionBuilderTest2() {
         log.info("conditionBuilderTest2");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on symbol == 'IBM'  ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
-
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest2' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on symbol == 'IBM'  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
-    public void conditionBuilderTest3() throws InterruptedException, MongoException {
+    public void conditionBuilderTest3() throws InterruptedException {
         log.info("conditionBuilderTest3");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.symbol==symbol;";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.symbol==symbol;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
 
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest7' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest4() throws InterruptedException, MongoException {
+    public void conditionBuilderTest4() throws InterruptedException {
         log.info("conditionBuilderTest4");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on symbol == FooTable.symbol;";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on symbol == FooTable.symbol;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
 
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest8' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest5() throws InterruptedException, MongoException {
+    public void conditionBuilderTest5() throws InterruptedException {
         log.info("conditionBuilderTest5");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on 'IBM' == FooTable.symbol  ;";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on 'IBM' == FooTable.symbol  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
 
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest1' ignored due to " + e.getMessage());
-            throw e;
-        }
-
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest6() throws InterruptedException, MongoException {
+    public void conditionBuilderTest6() throws InterruptedException {
         log.info("conditionBuilderTest6");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.symbol == 'IBM'  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.symbol == 'IBM'  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest2' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest7() throws InterruptedException, MongoException {
+    public void conditionBuilderTest7() throws InterruptedException {
         log.info("conditionBuilderTest7");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.symbol != symbol  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.symbol != symbol  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest7' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
 
     @Test
-    public void conditionBuilderTest8() throws InterruptedException, MongoException {
+    public void conditionBuilderTest8() throws InterruptedException {
         log.info("conditionBuilderTest8");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.price > price  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.price > price  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6F, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest8 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest9() throws InterruptedException, MongoException {
+    public void conditionBuilderTest9() throws InterruptedException {
         log.info("conditionBuilderTest9");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.price >= 57.6F  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.price >= 57.6F  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest9 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest10() throws InterruptedException, MongoException {
+    public void conditionBuilderTest10() throws InterruptedException {
         log.info("conditionBuilderTest10");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.price < price  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.price < price  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest10 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest11() throws InterruptedException, MongoException {
+    public void conditionBuilderTest11() throws InterruptedException {
         log.info("conditionBuilderTest11");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.price <= price  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.price <= price  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 75.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest9 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
 
     @Test
-    public void conditionBuilderTest12() throws InterruptedException, MongoException {
+    public void conditionBuilderTest12() throws InterruptedException {
         log.info("conditionBuilderTest12");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.symbol == symbol AND FooTable.price <= price  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.symbol == symbol AND FooTable.price <= price  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 55.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 55.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest12 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest13() throws InterruptedException, MongoException {
+    public void conditionBuilderTest13() throws InterruptedException {
         log.info("conditionBuilderTest13");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.symbol == symbol OR FooTable.price <= price  ;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.symbol == symbol OR FooTable.price <= price  ;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 55.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 55.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest13 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest14() throws InterruptedException, MongoException {
+    public void conditionBuilderTest14() throws InterruptedException {
         log.info("conditionBuilderTest14");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on NOT (FooTable.symbol == symbol);";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on NOT (FooTable.symbol == symbol);";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 55.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 55.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest14 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
 
-    @Test(enabled = false)
-    public void conditionBuilderTest15() throws InterruptedException, MongoException {
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void conditionBuilderTest15() throws InterruptedException {
         log.info("conditionBuilderTest15");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on (FooTable.symbol) in symbol;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on (FooTable.symbol) in symbol;";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 55.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 55.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest15 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
     @Test
-    public void conditionBuilderTest16() throws InterruptedException, MongoException {
+    public void conditionBuilderTest16() throws InterruptedException {
         log.info("conditionBuilderTest16");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on NOT (FooTable.symbol is NULL);";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
+        siddhiAppRuntime.start();
 
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on NOT (FooTable.symbol is NULL);";
+        stockStream.send(new Object[]{"WSO2", 55.6, 100L});
+        stockStream.send(new Object[]{"IBM", 55.6, 100L});
+        stockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
+        Thread.sleep(1000);
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            InputHandler deleteStockStream = siddhiAppRuntime.getInputHandler("DeleteStockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6, 100L});
-            stockStream.send(new Object[]{"IBM", 55.6, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-            Thread.sleep(1000);
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest16 ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void conditionBuilderTest17() throws InterruptedException, MongoException {
+    public void conditionBuilderTest17() {
         log.info("conditionBuilderTest17");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on FooTable.price + price < 67;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest17 ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on FooTable.price + price < 67;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void conditionBuilderTest18() throws InterruptedException, MongoException {
+    public void conditionBuilderTest18() {
         log.info("conditionBuilderTest18");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long); " +
-                    "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
-                    "define table FooTable (symbol string, price float, volume long);";
-
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;" +
-                    "" +
-                    "@info(name = 'query2') " +
-                    "from DeleteStockStream " +
-                    "delete FooTable " +
-                    "   on DateOf(FooTable.price) < 67;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'conditionBuilderTest18 ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, volume long); " +
+                "define stream DeleteStockStream (symbol string, price float, volume long); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from DeleteStockStream " +
+                "delete FooTable " +
+                "   on DateOf(FooTable.price) < 67;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 }

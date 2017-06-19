@@ -17,19 +17,17 @@
  */
 package org.wso2.extension.siddhi.store.mongodb;
 
-import com.mongodb.MongoException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
-
 
 public class InsertIntoMongoTableTest {
     private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
@@ -47,102 +45,80 @@ public class InsertIntoMongoTableTest {
     @Test
     public void insertIntoMongoTableTest1() throws InterruptedException {
         log.info("insertIntoMongoTableTest1 - DASC5-877:Insert events to a MongoDB table successfully");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable ;";
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
 
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-            siddhiAppRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 4, "Insertion failed");
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest1' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
+
     }
 
     @Test(expectedExceptions = DuplicateDefinitionException.class)
-    public void insertIntoMongoTableTest2() throws InterruptedException {
+    public void insertIntoMongoTableTest2() {
         log.info("insertIntoMongoTableTest2 - " +
                 "DASC5-878:Insert events to a MongoDB table when query has less attributes to select from");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "@source(type='inMemory')" +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream  " +
-                    "select symbol, price " +
-                    "insert into FooTable ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
-
-            stockStream.send(new Object[]{"WSO2", 55.6f});
-            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            stockStream.send(new Object[]{75.6f, 100L});
-
-            siddhiAppRuntime.shutdown();
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Insertion Failed");
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest2' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = ArrayIndexOutOfBoundsException.class)
-    public void insertIntoMongoTableTest3() throws InterruptedException {
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void insertIntoMongoTableTest3() {
         log.info("insertIntoMongoTableTest3 - " +
                 "DASC5-879:[N] Insert events to a MongoDB table when query has more attributes to select from");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
-
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L, 12});
-            stockStream.send(new Object[]{"IBM", 75.6f, 100L, true});
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-
-            siddhiAppRuntime.shutdown();
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest3' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, length, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
 
@@ -150,114 +126,104 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest4() throws InterruptedException {
         log.info("insertIntoMongoTableTest4 - " +
                 "DASC5-880:[N] Insert events to a non existing MongoDB table");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable1234 ;";
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable144;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
 
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6f, 100L});
-            stockStream.send(new Object[]{"WSO2", 55.6f, 100L});
-            siddhiAppRuntime.shutdown();
+        siddhiAppRuntime.shutdown();
 
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 0, "Insertion failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest4' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 0, "Insertion failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
-    public void insertIntoMongoTableTest5() throws InterruptedException {
+    public void insertIntoMongoTableTest5() {
         log.info("insertIntoMongoTableTest5 - " +
                 "DASC5-883:[N] Insert events to a MongoDB table by selecting from non existing stream");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "" +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream1212   " +
-                    "insert into FooTable ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest5' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream123 " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiParserException.class)
-    public void insertIntoMongoTableTest6() throws InterruptedException {
+    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    public void insertIntoMongoTableTest6() {
         log.info("insertIntoMongoTableTest6 - " +
                 "DASC5-888:[N] Insert events to a MongoDB table when the stream has not defined");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1:27017/Foo') " +
-                    "define table FooTable (symbol string, price float, volume long); ";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream" +
-                    "insert into FooTable ;";
-
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest6' ignored due to " + e.getMessage());
-            throw e;
-        }
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
     }
 
     @Test
-    public void insertIntoMongoTableTest7() throws InterruptedException {
+    public void insertIntoMongoTableTest7() {
         log.info("insertIntoMongoTableTest7 - " +
                 "DASC5-889:[N] Insert events data to MongoDB table when the table has not defined");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream " +
-                    "insert into FooTable ;";
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            siddhiAppRuntime.start();
-            siddhiAppRuntime.shutdown();
-
-
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest7' ignored due to " + e.getMessage());
-            throw e;
-        }
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        Assert.assertEquals(doesCollectionExists, false, "Definition was created");
     }
 
 
@@ -265,38 +231,31 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest8() throws InterruptedException {
         log.info("insertIntoMongoTableTest8 - " +
                 "DASC5-890:Insert events to a MongoDB table when there are multiple primary keys defined");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\",\"price\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
 
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "@PrimaryKey('symbol','price')" +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable ;";
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"MSFT", 57.6F, 100L});
-            Thread.sleep(1000);
-
-            siddhiAppRuntime.shutdown();
-
-            boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists();
-            Assert.assertEquals(doesCollectionExists, true, "Definition failed");
-
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest8' ignored due to " + e.getMessage());
-            throw e;
-        }
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
     }
 
     @Test
@@ -304,35 +263,89 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest9 - " +
                 "DASC5-892:Insert an event to a MongoDB table when the same value was " +
                 "inserted for a defined primary key");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
         SiddhiManager siddhiManager = new SiddhiManager();
-        try {
-            MongoTableTestUtils.clearCollection();
-            String streams = "" +
-                    "@Store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
-                    "@PrimaryKey('symbol')" +
-                    "define table FooTable (symbol string, price float, volume long); " +
-                    "define stream StockStream (symbol string, price float, volume long);";
-            String query = "" +
-                    "@info(name = 'query1') " +
-                    "from StockStream   " +
-                    "insert into FooTable ;";
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
 
-            SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
-            InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
-            siddhiAppRuntime.start();
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        fooStream.send(new Object[]{"IBM", 55.6f, 100L});
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
 
-            stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-            stockStream.send(new Object[]{"IBM", 75.6F, 100L});
-            stockStream.send(new Object[]{"WSO2", 57.1F, 100L});
-            Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
 
-            siddhiAppRuntime.shutdown();
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 2, "Insertion failed");
+    }
 
-            long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount();
-            Assert.assertEquals(totalDocumentsInCollection, 2, "Primary Key Duplication failed");
-        } catch (MongoException e) {
-            log.info("Test case 'insertIntoMongoTableTest9' ignored due to " + e.getMessage());
-            throw e;
-        }
+    @Test(expectedExceptions = MongoTableException.class)
+    public void insertIntoMongoTableTest10() {
+        log.info("insertIntoMongoTableTest10 - " +
+                "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin2:admin2@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.start();
+        siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void insertIntoMongoTableTest11() throws InterruptedException {
+        log.info("insertIntoMongoTableTest11 - " +
+                "DASC5-969:User attempts to insert events with duplicate values for the Indexing fields " +
+                "which are unique");
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, volume long); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@IndexBy(\"price 1 {unique:true}\")" +
+                "define table FooTable (symbol string, price float, volume long);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, volume " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        fooStream.send(new Object[]{"WSO2", 55.6f, 100L});
+        fooStream.send(new Object[]{"IBM", 55.6f, 100L});
+
+        siddhiAppRuntime.shutdown();
+
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
     }
 }
