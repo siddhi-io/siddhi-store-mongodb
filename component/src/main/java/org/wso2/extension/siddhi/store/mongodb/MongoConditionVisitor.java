@@ -279,7 +279,8 @@ public class MongoConditionVisitor extends BaseConditionVisitor {
 
     @Override
     public void beginVisitIn(String storeId) {
-        //Not Applicable
+        throw new MongoTableException("MongoDB Event Table does not support IN operations. Please check your" +
+                " query and try again.");
     }
 
     @Override
