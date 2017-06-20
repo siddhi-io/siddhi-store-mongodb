@@ -31,6 +31,8 @@ import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.util.HashMap;
+
 public class JoinMongoTableTest {
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
     private int inEventCount;
@@ -249,5 +251,65 @@ public class JoinMongoTableTest {
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         siddhiAppRuntime.start();
         siddhiAppRuntime.shutdown();
+    }
+
+    @Test
+    public void testMongoTableJoinQuery6() throws InterruptedException {
+        log.info("testMongoTableJoinQuery6");
+        //Object reads
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, input Object); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "define table FooTable (symbol string, price float, input Object);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream#window.length(1) join FooTable " +
+                "select FooStream.symbol as checkSymbol, FooTable.symbol as symbol, " +
+                "FooTable.input as input  " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        inEventCount++;
+                        switch (inEventCount) {
+                            case 1:
+                                HashMap<String, String> input = new HashMap<>();
+                                input.put("symbol", "IBM");
+                                Assert.assertEquals(new Object[]{"WSO2_check", "WSO2", input}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        HashMap<String, String> input = new HashMap<>();
+        input.put("symbol", "IBM");
+        stockStream.send(new Object[]{"WSO2", 5.6f, input});
+        fooStream.send(new Object[]{"WSO2_check"});
+        Thread.sleep(1000);
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(inEventCount, 1, "Read events failed");
     }
 }

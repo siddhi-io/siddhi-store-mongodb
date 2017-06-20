@@ -29,6 +29,8 @@ import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
+import java.util.HashMap;
+
 public class InsertIntoMongoTableTest {
     private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
 
@@ -347,5 +349,39 @@ public class InsertIntoMongoTableTest {
 
         long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
+    }
+
+    @Test
+    public void insertIntoMongoTableTest12() throws InterruptedException {
+        log.info("insertIntoMongoTableTest12");
+        //Object inserts
+
+        MongoTableTestUtils.dropCollection("FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "@source(type='inMemory', topic='stock') " +
+                "define stream FooStream (symbol string, price float, input Object); " +
+                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@PrimaryKey(\"symbol\")" +
+                "define table FooTable (symbol string, price float, input Object);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from FooStream " +
+                "select symbol, price, input " +
+                "insert into FooTable;";
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        HashMap<String, String> input = new HashMap<>();
+        input.put("symbol", "IBM");
+        fooStream.send(new Object[]{"WSO2", 55.6f, input});
+
+        siddhiAppRuntime.shutdown();
+
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
+
     }
 }
