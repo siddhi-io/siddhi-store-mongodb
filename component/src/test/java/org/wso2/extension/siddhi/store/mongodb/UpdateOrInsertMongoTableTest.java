@@ -73,7 +73,6 @@ public class UpdateOrInsertMongoTableTest {
         stockStream.send(new Object[]{"GOOG", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         fooStream.send(new Object[]{"GOOG", 10.6, 100});
-        Thread.sleep(500);
 
         siddhiAppRuntime.shutdown();
 
@@ -119,7 +118,6 @@ public class UpdateOrInsertMongoTableTest {
         stockStream.send(new Object[]{"GOOG", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         fooStream.send(new Object[]{"GOOG_2", 10.6, 100});
-        Thread.sleep(500);
 
         siddhiAppRuntime.shutdown();
 
@@ -165,7 +163,6 @@ public class UpdateOrInsertMongoTableTest {
         stockStream.send(new Object[]{"GOOG", 75.6F, 100L});
         fooStream.send(new Object[]{"WSO2", 57.6, 100});
         fooStream.send(new Object[]{"GOOG_2", 10.6, 100});
-        Thread.sleep(500);
 
         siddhiAppRuntime.shutdown();
 

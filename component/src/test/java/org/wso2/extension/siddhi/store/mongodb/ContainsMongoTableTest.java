@@ -29,12 +29,18 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class ContainsMongoTableTest {
 
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
-    private int inEventCount;
+
+    private AtomicInteger eventCount = new AtomicInteger(0);
+    private int waitTime = 50;
+    private int timeout = 30000;
 
     @BeforeClass
     public void init() {
@@ -48,7 +54,7 @@ public class ContainsMongoTableTest {
 
     @BeforeMethod
     public void testInit() {
-        this.inEventCount = 0;
+        eventCount.set(0);
     }
 
     @Test
@@ -82,8 +88,8 @@ public class ContainsMongoTableTest {
             public void receive(Event[] events) {
                 if (events != null) {
                     for (Event event : events) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
                             case 1:
                                 Assert.assertEquals(new Object[]{"WSO2", 5.56, 200}, event.getData());
                                 break;
@@ -91,7 +97,6 @@ public class ContainsMongoTableTest {
                                 Assert.assertEquals(new Object[]{"IBM", 7.56, 200}, event.getData());
                                 break;
                             default:
-                                Assert.assertEquals(inEventCount, 2);
                                 break;
                         }
                     }
@@ -103,15 +108,14 @@ public class ContainsMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2_2", 57.6F, 100L});
-        Thread.sleep(1000);
-
         fooStream.send(new Object[]{"WSO2", 5.56, 200});
         fooStream.send(new Object[]{"IBM", 7.56, 200});
         fooStream.send(new Object[]{"IBM_2", 70.56, 200});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(inEventCount, 2, "Number of success events");
+        Assert.assertEquals(eventCount.intValue(), 2, "Number of success events");
     }
 
     @Test
@@ -147,8 +151,8 @@ public class ContainsMongoTableTest {
             public void receive(Event[] events) {
                 if (events != null) {
                     for (Event event : events) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
                             case 1:
                                 Assert.assertEquals(new Object[]{"WSO2", 50.56, 200}, event.getData());
                                 break;
@@ -168,14 +172,13 @@ public class ContainsMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 55.6F, 100L});
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2_2", 57.6F, 100L});
-        Thread.sleep(1000);
-
         fooStream.send(new Object[]{"WSO2", 50.56, 200});
         fooStream.send(new Object[]{"IBM", 70.56, 200});
         fooStream.send(new Object[]{"IBM_2", 70.56, 200});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(inEventCount, 2, "Number of success events");
+        Assert.assertEquals(eventCount.intValue(), 2, "Number of success events");
     }
 }

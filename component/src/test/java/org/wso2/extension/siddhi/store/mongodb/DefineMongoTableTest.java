@@ -277,7 +277,7 @@ public class DefineMongoTableTest {
     @Test(enabled = false, expectedExceptions = MongoTableException.class)
     public void mongoTableDefinitionTest13() {
         log.info("mongoTableDefinitionTest13 - " +
-                    "DASC5-866:Defining a MongoDB table without a value for an option defined in mongodburl");
+                "DASC5-866:Defining a MongoDB table without a value for an option defined in mongodburl");
 
         MongoTableTestUtils.dropCollection("FooTable");
 

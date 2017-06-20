@@ -75,7 +75,6 @@ public class DeleteFromMongoTableTest {
         stockStream.send(new Object[]{"WSO52", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 75.6F, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 55.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -200,7 +199,6 @@ public class DeleteFromMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM_v2", 75.6F, 100L});
         deleteStockStream.send(new Object[]{"WSO2_v2", 55.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 

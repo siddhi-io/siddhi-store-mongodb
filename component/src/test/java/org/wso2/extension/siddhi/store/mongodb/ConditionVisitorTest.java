@@ -113,7 +113,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"IBM", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -151,7 +150,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"IBM", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -189,7 +187,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -227,7 +224,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -265,7 +261,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -304,7 +299,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6F, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6F, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6F, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -342,7 +336,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -380,7 +373,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -418,7 +410,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 75.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"IBM", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -457,7 +448,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 55.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -495,7 +485,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 55.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -533,7 +522,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 55.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -572,7 +560,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 55.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -610,7 +597,6 @@ public class ConditionVisitorTest {
         stockStream.send(new Object[]{"IBM", 55.6, 100L});
         stockStream.send(new Object[]{"WSO2", 57.6, 100L});
         deleteStockStream.send(new Object[]{"WSO2", 57.6, 100L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 

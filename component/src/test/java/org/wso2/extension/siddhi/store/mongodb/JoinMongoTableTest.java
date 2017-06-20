@@ -29,13 +29,18 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
+import org.wso2.siddhi.core.util.SiddhiTestHelper;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class JoinMongoTableTest {
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
-    private int inEventCount;
+
+    private AtomicInteger eventCount = new AtomicInteger(0);
+    private int waitTime = 50;
+    private int timeout = 30000;
 
     @BeforeClass
     public void init() {
@@ -49,7 +54,7 @@ public class JoinMongoTableTest {
 
     @BeforeMethod
     public void testInit() {
-        inEventCount = 0;
+        eventCount.set(0);
     }
 
     @Test
@@ -82,8 +87,8 @@ public class JoinMongoTableTest {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
                     for (Event event : inEvents) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
                             case 1:
                                 Assert.assertEquals(new Object[]{"WSO2_check", "WSO2", 100L}, event.getData());
                                 break;
@@ -106,10 +111,11 @@ public class JoinMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
         stockStream.send(new Object[]{"IBM", 7.6f, 10L});
         fooStream.send(new Object[]{"WSO2_check"});
-        Thread.sleep(1000);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(inEventCount, 2, "Read events failed");
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
@@ -195,8 +201,8 @@ public class JoinMongoTableTest {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
                     for (Event event : inEvents) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
                             case 1:
                                 Assert.assertEquals(new Object[]{"WSO2_check", "WSO2"}, event.getData());
                                 break;
@@ -219,10 +225,11 @@ public class JoinMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 5.6f, 100L});
         stockStream.send(new Object[]{"IBM", 7.6f, 10L});
         fooStream.send(new Object[]{"WSO2_check"});
-        Thread.sleep(1000);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(inEventCount, 2, "Read events failed");
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
     }
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
@@ -283,8 +290,8 @@ public class JoinMongoTableTest {
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
                     for (Event event : inEvents) {
-                        inEventCount++;
-                        switch (inEventCount) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
                             case 1:
                                 HashMap<String, String> input = new HashMap<>();
                                 input.put("symbol", "IBM");
@@ -307,9 +314,10 @@ public class JoinMongoTableTest {
         input.put("symbol", "IBM");
         stockStream.send(new Object[]{"WSO2", 5.6f, input});
         fooStream.send(new Object[]{"WSO2_check"});
-        Thread.sleep(1000);
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(inEventCount, 1, "Read events failed");
+        Assert.assertEquals(eventCount.intValue(), 1, "Read events failed");
     }
 }

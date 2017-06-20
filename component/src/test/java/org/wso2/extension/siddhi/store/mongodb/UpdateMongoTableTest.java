@@ -75,7 +75,6 @@ public class UpdateMongoTableTest {
         stockStream.send(new Object[]{"IBM", 74.6f, 100L});
         stockStream.send(new Object[]{"WSO2_2", 57.6f, 100L});
         fooStream.send(new Object[]{"IBM", 575.6, 500});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -124,7 +123,6 @@ public class UpdateMongoTableTest {
         stockStream.send(new Object[]{"IBM", 74.6f, 100L});
         stockStream.send(new Object[]{"WSO2_2", 57.6f, 100L});
         fooStream.send(new Object[]{"IBM_2", 575.6f, 500L});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
@@ -314,7 +312,6 @@ public class UpdateMongoTableTest {
         stockStream.send(new Object[]{"IBM", 74.6f, 100L});
         stockStream.send(new Object[]{"WSO2_2", 57.6f, 100L});
         fooStream.send(new Object[]{"IBM_2", 575.6, 500});
-        Thread.sleep(1000);
 
         siddhiAppRuntime.shutdown();
 
