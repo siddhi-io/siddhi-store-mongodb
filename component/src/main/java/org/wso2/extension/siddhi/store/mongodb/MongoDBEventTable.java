@@ -53,7 +53,6 @@ import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -226,19 +225,11 @@ public class MongoDBEventTable extends AbstractRecordTable {
     private String databaseName;
     private String collectionName;
     private List<String> attributeNames;
-    private Map<Integer, String> attributePositions;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
-        List<Attribute> attributes = tableDefinition.getAttributeList();
-        this.attributeNames = new ArrayList<>();
-        this.attributePositions = new HashMap<>();
-        int count = 0;
-        for (Attribute attribute : attributes) {
-            this.attributePositions.put(count, attribute.getName());
-            this.attributeNames.add(attribute.getName());
-            count++;
-        }
+        this.attributeNames =
+                tableDefinition.getAttributeList().stream().map(Attribute::getName).collect(Collectors.toList());
 
         Annotation storeAnnotation = AnnotationHelper
                 .getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations());
@@ -418,7 +409,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) {
         List<InsertOneModel<Document>> parsedRecords = records.stream().map(record -> {
-            Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributePositions);
+            Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributeNames);
             Document insertDocument = new Document(insertMap);
             if (log.isDebugEnabled()) {
                 log.debug("Event formatted as document '" + insertDocument.toJson() + "' is used for building " +

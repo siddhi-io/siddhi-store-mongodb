@@ -306,14 +306,14 @@ public class MongoTableUtils {
     /**
      * Utility method tp map the values to the respective attributes before database writes.
      *
-     * @param record              Object array of the runtime values.
-     * @param attributesPositions Map containing the attribute position and name.
+     * @param record         Object array of the runtime values.
+     * @param attributeNames List containing names of the attributes.
      * @return Document
      */
-    public static Map<String, Object> mapValuesToAttributes(Object[] record, Map<Integer, String> attributesPositions) {
+    public static Map<String, Object> mapValuesToAttributes(Object[] record, List<String> attributeNames) {
         Map<String, Object> attributesValuesMap = new HashMap<>();
         for (int i = 0; i < record.length; i++) {
-            attributesValuesMap.put(attributesPositions.get(i), record[i]);
+            attributesValuesMap.put(attributeNames.get(i), record[i]);
         }
         return attributesValuesMap;
     }
