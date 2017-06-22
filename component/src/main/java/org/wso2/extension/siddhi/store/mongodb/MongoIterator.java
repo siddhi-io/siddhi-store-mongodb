@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
@@ -24,6 +24,7 @@ import org.wso2.siddhi.core.table.record.RecordIterator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -76,7 +77,14 @@ public class MongoIterator implements RecordIterator<Object[]> {
     private Object[] extractRecord(Document document) {
         List<Object> result = new ArrayList<>();
         for (String attributeName : this.attributeNames) {
-            result.add(document.get(attributeName));
+            Object attributeValue = document.get(attributeName);
+            if (attributeValue instanceof Document) {
+                HashMap<Object, Object> attributAsAMap = new HashMap<>();
+                ((Document) attributeValue).forEach(attributAsAMap::put);
+                result.add(attributAsAMap);
+            } else {
+                result.add(attributeValue);
+            }
         }
         return result.toArray();
     }

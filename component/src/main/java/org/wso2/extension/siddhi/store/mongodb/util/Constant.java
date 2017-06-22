@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb.util;
+package org.wso2.extension.siddhi.store.mongodb.util;
 
 import org.wso2.siddhi.query.api.definition.Attribute;
 

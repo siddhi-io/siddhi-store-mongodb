@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb;
+package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.MongoBulkWriteException;
 import com.mongodb.MongoClient;
@@ -34,6 +34,9 @@ import com.mongodb.client.model.WriteModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
+import org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants;
+import org.wso2.extension.siddhi.store.mongodb.util.MongoTableUtils;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -44,16 +47,12 @@ import org.wso2.siddhi.core.table.record.ConditionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.config.ConfigReader;
-import org.wso2.siddhi.extension.store.mongodb.exception.MongoTableException;
-import org.wso2.siddhi.extension.store.mongodb.util.MongoTableConstants;
-import org.wso2.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.definition.TableDefinition;
 import org.wso2.siddhi.query.api.util.AnnotationHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -166,7 +165,7 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         description = "Specifies the replica set read preference for the connection.",
                         defaultValue = "primary",
                         possibleParameters = {"primary", "secondary", "secondarypreferred", "primarypreferred",
-                                "nearest" }),
+                                "nearest"}),
                 @SystemParameter(name = "localThreshold",
                         description = "The size (in milliseconds) of the latency window for selecting among " +
                                 "multiple suitable MongoDB instances.",
@@ -226,19 +225,11 @@ public class MongoDBEventTable extends AbstractRecordTable {
     private String databaseName;
     private String collectionName;
     private List<String> attributeNames;
-    private Map<Integer, String> attributePositions;
 
     @Override
     protected void init(TableDefinition tableDefinition, ConfigReader configReader) {
-        List<Attribute> attributes = tableDefinition.getAttributeList();
-        this.attributeNames = new ArrayList<>();
-        this.attributePositions = new HashMap<>();
-        int count = 0;
-        for (Attribute attribute : attributes) {
-            this.attributePositions.put(count, attribute.getName());
-            this.attributeNames.add(attribute.getName());
-            count++;
-        }
+        this.attributeNames =
+                tableDefinition.getAttributeList().stream().map(Attribute::getName).collect(Collectors.toList());
 
         Annotation storeAnnotation = AnnotationHelper
                 .getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations());
@@ -418,7 +409,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void add(List<Object[]> records) {
         List<InsertOneModel<Document>> parsedRecords = records.stream().map(record -> {
-            Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributePositions);
+            Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributeNames);
             Document insertDocument = new Document(insertMap);
             if (log.isDebugEnabled()) {
                 log.debug("Event formatted as document '" + insertDocument.toJson() + "' is used for building " +

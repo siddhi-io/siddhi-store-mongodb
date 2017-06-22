@@ -66,7 +66,7 @@ Features Supported
 * https://docs.wso2.com/display/DAS400/Configuring+Event+Tables+to+Store+Data
 
 ## How to Contribute
-* Please report issues at [Siddhi Github Issue Tacker] https://github.com/wso2/siddhi/issues
+* Please report issues at [Siddhi Github Issue Tacker] https://github.com/wso2-extensions/siddhi-store-mongodb/issues
 * Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-store-mongodb/tree/master) 
 
 ## Contact us 

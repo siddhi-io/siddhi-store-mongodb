@@ -15,7 +15,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.wso2.siddhi.extension.store.mongodb.exception;
+package org.wso2.extension.siddhi.store.mongodb.exception;
 
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
