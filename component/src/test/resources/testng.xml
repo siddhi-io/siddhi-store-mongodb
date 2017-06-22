@@ -4,8 +4,8 @@
     <test name="MonogStoreTest">
         <classes>
             <!-- Skipping tests-->
-            <class name="org.wso2.extension.siddhi.store.mongodb.ConditionVisitorTest"/>
-            <!--            <class name="org.wso2.extension.siddhi.store.mongodb.DefineMongoTableTest" />
+            <!--        <class name="org.wso2.extension.siddhi.store.mongodb.ConditionVisitorTest"/>
+                        <class name="org.wso2.extension.siddhi.store.mongodb.DefineMongoTableTest" />
                         <class name="org.wso2.extension.siddhi.store.mongodb.InsertIntoMongoTableTest" />
                         <class name="org.wso2.extension.siddhi.store.mongodb.JoinMongoTableTest" />
                         <class name="org.wso2.extension.siddhi.store.mongodb.UpdateMongoTableTest" />
