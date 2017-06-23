@@ -33,8 +33,9 @@ import java.util.function.Consumer;
 public class MongoTableTestUtils {
 
     private static final Log log = LogFactory.getLog(MongoTableTestUtils.class);
-    private static final String MONGO_CLIENT_URI = "mongodb://admin:admin@127.0.0.1/Foo";
-    private static final String DATABASE_NAME = "Foo";
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.username}}:{{mongo.password}}@{{docker.ip}}:{{docker.port}}/{{mongo.database}}";
+    private static String databaseName = "Foo";
     private static MongoClient mongoClient;
 
     private MongoTableTestUtils() {
@@ -45,7 +46,8 @@ public class MongoTableTestUtils {
             return mongoClient;
         } else {
             try {
-                return mongoClient = new MongoClient(new MongoClientURI(MONGO_CLIENT_URI));
+                String uri = resolveUri();
+                return mongoClient = new MongoClient(new MongoClientURI(uri));
             } catch (Exception e) {
                 log.debug("Creating Mongo client failed due to " + e.getMessage(), e);
                 throw e;
@@ -54,9 +56,70 @@ public class MongoTableTestUtils {
         }
     }
 
+    public static String resolveUri(String uri) {
+        return uri
+                .replace("{{docker.ip}}", getIpAddressOfContainer())
+                .replace("{{docker.port}}", getPortOfContainer())
+                .replace("{{mongo.username}}", getMongoUserName())
+                .replace("{{mongo.password}}", getMongoPassword())
+                .replace("{{mongo.database}}", getMongoDatabase());
+    }
+
+    public static String resolveUri() {
+        return resolveUri(MONGO_CLIENT_URI);
+    }
+
+    private static String getIpAddressOfContainer() {
+        String dockerHostIp = System.getProperty("docker.host.ip");
+        if (!isEmpty(dockerHostIp)) {
+            return dockerHostIp;
+        } else {
+            return "172.17.0.2";
+        }
+    }
+
+    private static String getPortOfContainer() {
+        String dockerHostPort = System.getProperty("docker.host.port");
+        if (!isEmpty(dockerHostPort)) {
+            return dockerHostPort;
+        } else {
+            return "27017";
+        }
+    }
+
+    private static String getMongoUserName() {
+        String mongoUsername = System.getProperty("mongo.username");
+        if (!isEmpty(mongoUsername)) {
+            return mongoUsername;
+        } else {
+            return "admin";
+        }
+    }
+
+    private static String getMongoPassword() {
+        String mongoPassword = System.getProperty("mongo.password");
+        if (!isEmpty(mongoPassword)) {
+            return mongoPassword;
+        } else {
+            return "admin";
+        }
+    }
+
+    private static String getMongoDatabase() {
+        String mongoDatabase = System.getProperty("mongo.database");
+        if (!isEmpty(mongoDatabase)) {
+            databaseName = mongoDatabase;
+        }
+        return databaseName;
+    }
+
+    private static boolean isEmpty(String field) {
+        return (field == null || field.trim().length() == 0);
+    }
+
     public static void dropCollection(String collectionName) {
         try {
-            getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).drop();
+            getMongoClient().getDatabase(databaseName).getCollection(collectionName).drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
             mongoClient.close();
@@ -66,7 +129,7 @@ public class MongoTableTestUtils {
 
     public static long getDocumentsCount(String collectionName) {
         try {
-            return getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).count();
+            return getMongoClient().getDatabase(databaseName).getCollection(collectionName).count();
         } catch (MongoException e) {
             log.debug("Getting rows in DB table failed due to " + e.getMessage(), e);
             mongoClient.close();
@@ -76,7 +139,7 @@ public class MongoTableTestUtils {
 
     public static boolean doesCollectionExists(String customCollectionName) {
         try {
-            for (String collectionName : getMongoClient().getDatabase(DATABASE_NAME).listCollectionNames()) {
+            for (String collectionName : getMongoClient().getDatabase(databaseName).listCollectionNames()) {
                 if (customCollectionName.equals(collectionName)) {
                     return true;
                 }
@@ -89,10 +152,10 @@ public class MongoTableTestUtils {
         }
     }
 
-    public static List<Document> getIndexList(String collectionName) {
+    private static List<Document> getIndexList(String collectionName) {
         try {
             ListIndexesIterable<Document> existingIndexesIterable =
-                    getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).listIndexes();
+                    getMongoClient().getDatabase(databaseName).getCollection(collectionName).listIndexes();
             List<Document> existingIndexDocuments = new ArrayList<>();
             existingIndexesIterable.forEach((Consumer<? super Document>) existingIndex -> {
                 existingIndex.remove("ns");
@@ -125,7 +188,7 @@ public class MongoTableTestUtils {
     public static Document getDocument(String collectionName, String findFilter) {
         try {
             Document findFilterDocument = Document.parse(findFilter);
-            Document firstFind = getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName)
+            Document firstFind = getMongoClient().getDatabase(databaseName).getCollection(collectionName)
                     .find(findFilterDocument).first();
             firstFind.remove("_id");
             return firstFind;
@@ -139,7 +202,7 @@ public class MongoTableTestUtils {
     public static void createCollection(String collectionName) {
         dropCollection(collectionName);
         try {
-            getMongoClient().getDatabase(DATABASE_NAME).createCollection(collectionName);
+            getMongoClient().getDatabase(databaseName).createCollection(collectionName);
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
             mongoClient.close();

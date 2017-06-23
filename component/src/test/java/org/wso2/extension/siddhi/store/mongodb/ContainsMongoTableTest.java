@@ -36,15 +36,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ContainsMongoTableTest {
 
-    private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
+    private static final Log log = LogFactory.getLog(ContainsMongoTableTest.class);
 
     private AtomicInteger eventCount = new AtomicInteger(0);
+    private String uri;
     private int waitTime = 50;
     private int timeout = 30000;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection IN tests started ==");
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
@@ -67,9 +69,9 @@ public class ContainsMongoTableTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@source(type='inMemory') " +
+                "    " +
                 "define stream FooStream (symbol string, price float, volume long);" +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -130,7 +132,7 @@ public class ContainsMongoTableTest {
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@source(type='inMemory') " +
                 "define stream FooStream (symbol string, price float, volume long);" +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);" +
                 "@source(type='inMemory')" +
                 "define stream OutputStream (symbol string, price float, volume long);";

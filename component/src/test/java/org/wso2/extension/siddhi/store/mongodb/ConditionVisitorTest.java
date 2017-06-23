@@ -20,6 +20,8 @@ package org.wso2.extension.siddhi.store.mongodb;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
@@ -31,6 +33,19 @@ public class ConditionVisitorTest {
 
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
 
+    private String url;
+
+    @BeforeClass
+    public void init() {
+        log.info("== MongoDB Collection Condition Visitor tests started ==");
+        url = MongoTableTestUtils.resolveUri();
+    }
+
+    @AfterClass
+    public void shutdown() {
+        log.info("== MongoDB Collection IN tests completed ==");
+    }
+
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest1() {
         log.info("conditionBuilderTest1");
@@ -41,7 +56,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -67,7 +82,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -93,7 +108,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -130,7 +145,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -167,7 +182,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -204,7 +219,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -241,7 +256,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -279,7 +294,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -316,7 +331,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -353,7 +368,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -390,7 +405,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -428,7 +443,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -465,7 +480,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -502,7 +517,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -540,7 +555,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -577,7 +592,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -614,7 +629,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -641,7 +656,7 @@ public class ConditionVisitorTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +

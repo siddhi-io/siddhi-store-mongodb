@@ -34,9 +34,12 @@ import java.util.HashMap;
 public class InsertIntoMongoTableTest {
     private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
 
+    private static String uri;
+
     @BeforeClass
     public void init() {
         log.info("== Mongo Table INSERT tests started ==");
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
@@ -54,7 +57,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -86,7 +89,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -110,7 +113,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -135,7 +138,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -166,7 +169,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -189,7 +192,7 @@ public class InsertIntoMongoTableTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -213,7 +216,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -240,7 +243,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\",\"price\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -272,7 +275,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -301,11 +304,14 @@ public class InsertIntoMongoTableTest {
 
         MongoTableTestUtils.dropCollection("FooTable");
 
+        String uri = MongoTableTestUtils
+                .resolveUri("mongodb://admin121:admin123@{{docker.ip}}:{{docker.port}}/{{mongo.database}}");
+
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin2:admin2@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -330,7 +336,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@IndexBy(\"price 1 {unique:true}\")" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -362,7 +368,7 @@ public class InsertIntoMongoTableTest {
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
                 "define stream FooStream (symbol string, price float, input Object); " +
-                "@Store(type=\"mongodb\", mongodb.uri=\"mongodb://admin:admin@localhost:27017/Foo\")" +
+                "@Store(type=\"mongodb\", mongodb.uri='" + uri + "')" +
                 "@PrimaryKey(\"symbol\")" +
                 "define table FooTable (symbol string, price float, input Object);";
         String query = "" +

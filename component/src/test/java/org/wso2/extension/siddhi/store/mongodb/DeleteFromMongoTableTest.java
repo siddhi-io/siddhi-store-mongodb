@@ -32,9 +32,12 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 public class DeleteFromMongoTableTest {
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
 
+    private String uri;
+
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection DELETE tests started ==");
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
@@ -53,7 +56,7 @@ public class DeleteFromMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "@PrimaryKey('symbol')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -94,7 +97,7 @@ public class DeleteFromMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -122,7 +125,7 @@ public class DeleteFromMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -150,7 +153,7 @@ public class DeleteFromMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -177,7 +180,7 @@ public class DeleteFromMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +

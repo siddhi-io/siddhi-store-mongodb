@@ -32,9 +32,12 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 public class UpdateMongoTableTest {
     private static final Logger log = Logger.getLogger(UpdateMongoTableTest.class);
 
+    private static String uri;
+
     @BeforeClass
     public void init() {
         log.info("== Mongo Table UPDATE tests started ==");
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
@@ -52,7 +55,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -100,7 +103,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -141,7 +144,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -170,7 +173,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -200,7 +203,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -230,7 +233,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -259,7 +262,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -289,7 +292,7 @@ public class UpdateMongoTableTest {
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
