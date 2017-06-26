@@ -38,6 +38,8 @@ public class ContainsMongoTableTest {
 
     private static final Log log = LogFactory.getLog(ContainsMongoTableTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private AtomicInteger eventCount = new AtomicInteger(0);
     private String uri;
     private int waitTime = 50;
@@ -46,7 +48,7 @@ public class ContainsMongoTableTest {
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection IN tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -64,7 +66,7 @@ public class ContainsMongoTableTest {
         log.info("containsMongoTableTest1 - " +
                 "DASC5-911:Configure siddhi to check whether particular records exist in a MongoDB Collection");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -125,7 +127,7 @@ public class ContainsMongoTableTest {
         log.info("containsMongoTableTest2 - " +
                 "DASC5-912:Configure siddhi to check whether record exist when OutputStream is already exists");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +

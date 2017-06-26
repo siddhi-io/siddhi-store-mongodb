@@ -34,12 +34,14 @@ import java.util.HashMap;
 public class InsertIntoMongoTableTest {
     private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table INSERT tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -51,7 +53,7 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest1() throws InterruptedException {
         log.info("insertIntoMongoTableTest1 - DASC5-877:Insert events to a MongoDB table successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -73,7 +75,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
 
     }
@@ -82,8 +84,6 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest2() {
         log.info("insertIntoMongoTableTest2 - " +
                 "DASC5-878:Insert events to a MongoDB table when query has less attributes to select from");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -106,8 +106,6 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest3() {
         log.info("insertIntoMongoTableTest3 - " +
                 "DASC5-879:[N] Insert events to a MongoDB table when query has more attributes to select from");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -132,7 +130,7 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest4 - " +
                 "DASC5-880:[N] Insert events to a non existing MongoDB table");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -154,7 +152,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 0, "Insertion failed");
     }
 
@@ -162,8 +160,6 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest5() {
         log.info("insertIntoMongoTableTest5 - " +
                 "DASC5-883:[N] Insert events to a MongoDB table by selecting from non existing stream");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -187,8 +183,6 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest6 - " +
                 "DASC5-888:[N] Insert events to a MongoDB table when the stream has not defined");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@source(type='inMemory', topic='stock') " +
@@ -210,7 +204,7 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest7 - " +
                 "DASC5-889:[N] Insert events data to MongoDB table when the table has not defined");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -227,7 +221,7 @@ public class InsertIntoMongoTableTest {
         siddhiAppRuntime.start();
         siddhiAppRuntime.shutdown();
 
-        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists(uri, "FooTable");
         Assert.assertEquals(doesCollectionExists, false, "Definition was created");
     }
 
@@ -237,7 +231,7 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest8 - " +
                 "DASC5-890:Insert events to a MongoDB table when there are multiple primary keys defined");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -259,7 +253,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
     }
 
@@ -269,7 +263,7 @@ public class InsertIntoMongoTableTest {
                 "DASC5-892:Insert an event to a MongoDB table when the same value was " +
                 "inserted for a defined primary key");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -293,7 +287,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Insertion failed");
     }
 
@@ -301,8 +295,6 @@ public class InsertIntoMongoTableTest {
     public void insertIntoMongoTableTest10() {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         String uri = MongoTableTestUtils
                 .resolveUri("mongodb://admin121:admin123@{{docker.ip}}:{{docker.port}}/{{mongo.database}}");
@@ -330,7 +322,7 @@ public class InsertIntoMongoTableTest {
                 "DASC5-969:User attempts to insert events with duplicate values for the Indexing fields " +
                 "which are unique");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -353,7 +345,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
     }
 
@@ -362,7 +354,7 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest12");
         //Object inserts
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -386,7 +378,7 @@ public class InsertIntoMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Insertion failed");
 
     }

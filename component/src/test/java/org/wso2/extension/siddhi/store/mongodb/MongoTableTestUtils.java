@@ -33,82 +33,41 @@ import java.util.function.Consumer;
 public class MongoTableTestUtils {
 
     private static final Log log = LogFactory.getLog(MongoTableTestUtils.class);
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.username}}:{{mongo.password}}@{{docker.ip}}:{{docker.port}}/{{mongo.database}}";
-    private static String databaseName = "Foo";
-    private static MongoClient mongoClient;
+    private static String databaseName = "admin";
 
     private MongoTableTestUtils() {
     }
 
-    private static MongoClient getMongoClient() {
-        if (mongoClient != null) {
-            return mongoClient;
-        } else {
-            try {
-                String uri = resolveUri();
-                return mongoClient = new MongoClient(new MongoClientURI(uri));
-            } catch (Exception e) {
-                log.debug("Creating Mongo client failed due to " + e.getMessage(), e);
-                throw e;
-            }
-
-        }
-    }
-
     public static String resolveUri(String uri) {
         return uri
-                .replace("{{docker.ip}}", getIpAddressOfContainer())
-                .replace("{{docker.port}}", getPortOfContainer())
-                .replace("{{mongo.username}}", getMongoUserName())
-                .replace("{{mongo.password}}", getMongoPassword())
-                .replace("{{mongo.database}}", getMongoDatabase());
+                .replace("{{mongo.credentials}}", getMongoCredentials())
+                .replace("{{mongo.servers}}", getAddressOfContainers())
+                .replace("{{mongo.database}}", getMongoDatabaseName());
     }
 
-    public static String resolveUri() {
-        return resolveUri(MONGO_CLIENT_URI);
-    }
-
-    private static String getIpAddressOfContainer() {
-        String dockerHostIp = System.getProperty("docker.host.ip");
-        if (!isEmpty(dockerHostIp)) {
-            return dockerHostIp;
+    private static String getAddressOfContainers() {
+        String mongoServers = System.getProperty("mongo.servers");
+        if (!isEmpty(mongoServers)) {
+            return mongoServers;
         } else {
-            return "172.17.0.2";
+            return "172.17.0.2:27017";
         }
     }
 
-    private static String getPortOfContainer() {
-        String dockerHostPort = System.getProperty("docker.host.port");
-        if (!isEmpty(dockerHostPort)) {
-            return dockerHostPort;
-        } else {
-            return "27017";
-        }
-    }
-
-    private static String getMongoUserName() {
+    private static String getMongoCredentials() {
         String mongoUsername = System.getProperty("mongo.username");
-        if (!isEmpty(mongoUsername)) {
-            return mongoUsername;
-        } else {
-            return "admin";
-        }
-    }
-
-    private static String getMongoPassword() {
         String mongoPassword = System.getProperty("mongo.password");
-        if (!isEmpty(mongoPassword)) {
-            return mongoPassword;
+        if (!isEmpty(mongoUsername) && !isEmpty(mongoPassword)) {
+            return mongoUsername + ":" + mongoPassword + "@";
         } else {
-            return "admin";
+            return "";
         }
     }
 
-    private static String getMongoDatabase() {
-        String mongoDatabase = System.getProperty("mongo.database");
-        if (!isEmpty(mongoDatabase)) {
-            databaseName = mongoDatabase;
+    private static String getMongoDatabaseName() {
+        String mongoDatabaseName = System.getProperty("mongo.database.name");
+        if (!isEmpty(mongoDatabaseName)) {
+            databaseName = mongoDatabaseName;
         }
         return databaseName;
     }
@@ -117,29 +76,27 @@ public class MongoTableTestUtils {
         return (field == null || field.trim().length() == 0);
     }
 
-    public static void dropCollection(String collectionName) {
-        try {
-            getMongoClient().getDatabase(databaseName).getCollection(collectionName).drop();
+    public static void dropCollection(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            mongoClient.getDatabase(databaseName).getCollection(collectionName).drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static long getDocumentsCount(String collectionName) {
-        try {
-            return getMongoClient().getDatabase(databaseName).getCollection(collectionName).count();
+    public static long getDocumentsCount(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            return mongoClient.getDatabase(databaseName).getCollection(collectionName).count();
         } catch (MongoException e) {
             log.debug("Getting rows in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static boolean doesCollectionExists(String customCollectionName) {
-        try {
-            for (String collectionName : getMongoClient().getDatabase(databaseName).listCollectionNames()) {
+    public static boolean doesCollectionExists(String uri, String customCollectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            for (String collectionName : mongoClient.getDatabase(databaseName).listCollectionNames()) {
                 if (customCollectionName.equals(collectionName)) {
                     return true;
                 }
@@ -147,15 +104,14 @@ public class MongoTableTestUtils {
             return false;
         } catch (MongoException e) {
             log.debug("Checking whether collection was created failed due to" + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    private static List<Document> getIndexList(String collectionName) {
-        try {
+    private static List<Document> getIndexList(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
             ListIndexesIterable<Document> existingIndexesIterable =
-                    getMongoClient().getDatabase(databaseName).getCollection(collectionName).listIndexes();
+                    mongoClient.getDatabase(databaseName).getCollection(collectionName).listIndexes();
             List<Document> existingIndexDocuments = new ArrayList<>();
             existingIndexesIterable.forEach((Consumer<? super Document>) existingIndex -> {
                 existingIndex.remove("ns");
@@ -164,14 +120,13 @@ public class MongoTableTestUtils {
             return existingIndexDocuments;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static Document getIndex(String collectionName, String indexName) {
+    public static Document getIndex(String uri, String collectionName, String indexName) {
         try {
-            List<Document> existingIndexList = getIndexList(collectionName);
+            List<Document> existingIndexList = getIndexList(uri, collectionName);
             for (Document existingIndex : existingIndexList) {
                 if (existingIndex.get("name").equals(indexName)) {
                     return existingIndex;
@@ -180,32 +135,29 @@ public class MongoTableTestUtils {
             return null;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static Document getDocument(String collectionName, String findFilter) {
-        try {
+    public static Document getDocument(String uri, String collectionName, String findFilter) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
             Document findFilterDocument = Document.parse(findFilter);
-            Document firstFind = getMongoClient().getDatabase(databaseName).getCollection(collectionName)
+            Document firstFind = mongoClient.getDatabase(databaseName).getCollection(collectionName)
                     .find(findFilterDocument).first();
             firstFind.remove("_id");
             return firstFind;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static void createCollection(String collectionName) {
-        dropCollection(collectionName);
-        try {
-            getMongoClient().getDatabase(databaseName).createCollection(collectionName);
+    public static void createCollection(String uri, String collectionName) {
+        dropCollection(uri, collectionName);
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            mongoClient.getDatabase(databaseName).createCollection(collectionName);
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }

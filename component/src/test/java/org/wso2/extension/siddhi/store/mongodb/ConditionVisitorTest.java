@@ -31,14 +31,15 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class ConditionVisitorTest {
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
-
-    private String url;
+    private String uri;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection Condition Visitor tests started ==");
-        url = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -50,13 +51,11 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest1() {
         log.info("conditionBuilderTest1");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -76,13 +75,11 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest2() {
         log.info("conditionBuilderTest2");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -102,13 +99,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest3() throws InterruptedException {
         log.info("conditionBuilderTest3");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -131,7 +128,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -139,13 +136,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest4() throws InterruptedException {
         log.info("conditionBuilderTest4");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -168,7 +165,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -176,13 +173,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest5() throws InterruptedException {
         log.info("conditionBuilderTest5");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -205,7 +202,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
@@ -213,13 +210,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest6() throws InterruptedException {
         log.info("conditionBuilderTest6");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -242,7 +239,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
@@ -250,13 +247,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest7() throws InterruptedException {
         log.info("conditionBuilderTest7");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -279,22 +276,21 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
-
 
     @Test
     public void conditionBuilderTest8() throws InterruptedException {
         log.info("conditionBuilderTest8");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -317,7 +313,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
@@ -325,13 +321,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest9() throws InterruptedException {
         log.info("conditionBuilderTest9");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -354,7 +350,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -362,13 +358,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest10() throws InterruptedException {
         log.info("conditionBuilderTest10");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -391,7 +387,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
@@ -399,13 +395,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest11() throws InterruptedException {
         log.info("conditionBuilderTest11");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -428,22 +424,21 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
-
 
     @Test
     public void conditionBuilderTest12() throws InterruptedException {
         log.info("conditionBuilderTest12");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -466,7 +461,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -474,13 +469,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest13() throws InterruptedException {
         log.info("conditionBuilderTest13");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -503,7 +498,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
     }
 
@@ -511,13 +506,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest14() throws InterruptedException {
         log.info("conditionBuilderTest14");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -540,22 +535,19 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
-
 
     @Test(expectedExceptions = SiddhiAppValidationException.class)
     public void conditionBuilderTest15() throws InterruptedException {
         log.info("conditionBuilderTest15");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -578,7 +570,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
@@ -586,13 +578,13 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest16() throws InterruptedException {
         log.info("conditionBuilderTest16");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -615,7 +607,7 @@ public class ConditionVisitorTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
     }
 
@@ -623,13 +615,11 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest17() {
         log.info("conditionBuilderTest17");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -650,13 +640,11 @@ public class ConditionVisitorTest {
     public void conditionBuilderTest18() {
         log.info("conditionBuilderTest18");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='" + url + "')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +

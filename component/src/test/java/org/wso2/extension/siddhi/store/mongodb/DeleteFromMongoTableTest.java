@@ -32,12 +32,14 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 public class DeleteFromMongoTableTest {
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private String uri;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection DELETE tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -50,7 +52,7 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest1 - " +
                 "DASC5-903:Delete an event of a MongoDB table successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -81,7 +83,7 @@ public class DeleteFromMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -90,8 +92,6 @@ public class DeleteFromMongoTableTest {
     public void deleteFromMongoTableTest2() {
         log.info("deleteFromMongoTableTest2 - " +
                 "DASC5-904:Delete an event from a non existing MongoDB table");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -119,8 +119,6 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest3 - " +
                 "DASC5-905:Delete an event from a MongoDB table by selecting from non existing stream");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -147,8 +145,6 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest4 - " +
                 "DASC5-906:Delete an event from a MongoDB table based on a non-existing attribute");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -174,7 +170,7 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest5 - " +
                 "DASC5-909:Delete an event from a MongoDB table based on a non-existing attribute value");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -205,7 +201,7 @@ public class DeleteFromMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Deletion failed");
     }
 }

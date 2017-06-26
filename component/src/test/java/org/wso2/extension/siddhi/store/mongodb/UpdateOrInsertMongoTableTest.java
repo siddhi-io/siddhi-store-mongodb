@@ -32,12 +32,14 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 public class UpdateOrInsertMongoTableTest {
     private static final Logger log = Logger.getLogger(UpdateOrInsertMongoTableTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table UPDATE/INSERT tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -50,7 +52,7 @@ public class UpdateOrInsertMongoTableTest {
         log.info("updateOrInsertMongoTableTest1 - DASC5-929:Configure siddhi to perform insert/update on " +
                 "MongoDB document");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -79,14 +81,14 @@ public class UpdateOrInsertMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
 
         Document expectedUpdatedDocument = new Document()
                 .append("symbol", "GOOG")
                 .append("price", 10.6)
                 .append("volume", 100);
-        Document updatedDocument = MongoTableTestUtils.getDocument("FooTable", "{symbol:'GOOG'}");
+        Document updatedDocument = MongoTableTestUtils.getDocument(uri, "FooTable", "{symbol:'GOOG'}");
         Assert.assertEquals(updatedDocument, expectedUpdatedDocument, "Update Failed");
     }
 
@@ -95,7 +97,7 @@ public class UpdateOrInsertMongoTableTest {
         log.info("updateOrInsertMongoTableTest2 - DASC5-930:Configure siddhi to perform insert/update on MongoDB " +
                 "Document when no any matching record exist");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -124,14 +126,14 @@ public class UpdateOrInsertMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 4, "Update failed");
 
         Document expectedUpdatedDocument = new Document()
                 .append("symbol", "GOOG_2")
                 .append("price", 10.6)
                 .append("volume", 100);
-        Document updatedDocument = MongoTableTestUtils.getDocument("FooTable", "{symbol:'GOOG_2'}");
+        Document updatedDocument = MongoTableTestUtils.getDocument(uri, "FooTable", "{symbol:'GOOG_2'}");
         Assert.assertEquals(updatedDocument, expectedUpdatedDocument, "Update Failed");
     }
 
@@ -140,7 +142,7 @@ public class UpdateOrInsertMongoTableTest {
         log.info("updateOrInsertMongoTableTest3 - DASC5-931:Configure siddhi to perform insert/update when there " +
                 "are some of matching records exist");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -169,14 +171,14 @@ public class UpdateOrInsertMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
 
         Document expectedUpdatedDocument = new Document()
                 .append("symbol", "WSO2")
                 .append("price", 57.6)
                 .append("volume", 100);
-        Document updatedDocument = MongoTableTestUtils.getDocument("FooTable", "{symbol:'WSO2'}");
+        Document updatedDocument = MongoTableTestUtils.getDocument(uri, "FooTable", "{symbol:'WSO2'}");
         Assert.assertEquals(updatedDocument, expectedUpdatedDocument, "Update Failed");
     }
 
@@ -184,8 +186,6 @@ public class UpdateOrInsertMongoTableTest {
     public void updateOrInsertMongoTableTest4() {
         log.info("updateOrInsertMongoTableTest4 - DASC5-932:[N] Configure siddhi to perform insert/update with " +
                 "a non existing stream");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -212,8 +212,6 @@ public class UpdateOrInsertMongoTableTest {
         log.info("updateOrInsertMongoTableTest5 - DASC5-933:[N] Configure siddhi to perform insert/update with an " +
                 "undefined MongoDB Document");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -239,8 +237,6 @@ public class UpdateOrInsertMongoTableTest {
         log.info("updateOrInsertMongoTableTest6 - DASC5-934:[N] Configure siddhi to perform insert/update on " +
                 "MongoDB Document with a non-existing attribute");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -265,8 +261,6 @@ public class UpdateOrInsertMongoTableTest {
     public void updateOrInsertMongoTableTest7() {
         log.info("updateOrInsertMongoTableTest7 - DASC5-935:[N] Configure siddhi to perform insert/update on " +
                 "MongoDB Document incorrect siddhi query");
-
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +

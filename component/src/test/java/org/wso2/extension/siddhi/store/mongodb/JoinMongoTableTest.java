@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JoinMongoTableTest {
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
@@ -46,7 +48,7 @@ public class JoinMongoTableTest {
     @BeforeClass
     public void init() {
         log.info("== Mongo Table JOIN tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -64,7 +66,7 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery1 -" +
                 "DASC5-915:Read events from a MongoDB collection successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -124,8 +126,6 @@ public class JoinMongoTableTest {
     public void testMongoTableJoinQuery2() {
         log.info("testMongoTableJoinQuery2DASC5-916:Read events from a non existing MongoDB collection");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -151,7 +151,6 @@ public class JoinMongoTableTest {
     public void testMongoTableJoinQuery3() {
         log.info("testMongoTableJoinQuery3 - " +
                 "DASC5-917:Read events from a MongoDB collection by sending through non existing stream");
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -180,7 +179,7 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery4 - " +
                 "DASC5-918:Read events from a MongoDB collection for less attributes than total attribute list");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -239,8 +238,6 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery5 - " +
                 "DASC5-919:Read events from a MongoDB collection for non existing attributes");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
@@ -267,7 +264,7 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery6");
         //Object reads
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +

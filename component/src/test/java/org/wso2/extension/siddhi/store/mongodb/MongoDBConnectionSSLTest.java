@@ -28,12 +28,14 @@ import org.wso2.siddhi.core.SiddhiManager;
 public class MongoDBConnectionSSLTest {
     private static final Logger log = Logger.getLogger(MongoDBConnectionSSLTest.class);
 
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table Secure Connection tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
+        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
     }
 
     @AfterClass
@@ -46,7 +48,7 @@ public class MongoDBConnectionSSLTest {
         log.info("mongoTableSSLConnectionTest1 - " +
                 "   DASC5-862:Defining a MongoDB table with by defining ssl in mongodburl");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -58,7 +60,7 @@ public class MongoDBConnectionSSLTest {
         siddhiAppRuntime.start();
         siddhiAppRuntime.shutdown();
 
-        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists(uri, "FooTable");
         Assert.assertEquals(doesCollectionExists, true, "Definition failed");
     }
 
@@ -67,7 +69,7 @@ public class MongoDBConnectionSSLTest {
         log.info("mongoTableSSLConnectionTest2 - " +
                 "DASC5-863:Defining a MongoDB table with multiple options defined in mongodburl");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
@@ -79,7 +81,7 @@ public class MongoDBConnectionSSLTest {
         siddhiAppRuntime.start();
         siddhiAppRuntime.shutdown();
 
-        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists("FooTable");
+        boolean doesCollectionExists = MongoTableTestUtils.doesCollectionExists(uri, "FooTable");
         Assert.assertEquals(doesCollectionExists, true, "Definition failed");
     }
 }
