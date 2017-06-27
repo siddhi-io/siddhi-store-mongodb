@@ -31,12 +31,11 @@ public class DefineMongoTableTest {
 
     private static final Logger log = Logger.getLogger(DefineMongoTableTest.class);
 
-    private static String uri;
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table DEFINITION tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

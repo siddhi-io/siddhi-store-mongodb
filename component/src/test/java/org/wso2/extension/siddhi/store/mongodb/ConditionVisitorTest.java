@@ -33,12 +33,11 @@ public class ConditionVisitorTest {
 
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
 
-    private String uri;
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection Condition Visitor tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

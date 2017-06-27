@@ -38,15 +38,14 @@ public class ContainsMongoTableTest {
 
     private static final Log log = LogFactory.getLog(ContainsMongoTableTest.class);
 
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);
-    private String uri;
     private int waitTime = 50;
     private int timeout = 30000;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection IN tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

@@ -33,12 +33,11 @@ public class UpdateMongoTableTest {
 
     private static final Logger log = Logger.getLogger(UpdateMongoTableTest.class);
 
-    private static String uri;
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table UPDATE tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

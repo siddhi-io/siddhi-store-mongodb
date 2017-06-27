@@ -40,15 +40,15 @@ public class MongoTableTestUtils {
     private MongoTableTestUtils() {
     }
 
-    public static String resolveUri(String uri) {
+    public static String resolveBaseUri(String uri) {
         return uri
                 .replace("{{mongo.credentials}}", getMongoCredentials())
                 .replace("{{mongo.servers}}", getAddressOfContainers())
                 .replace("{{mongo.database}}", getMongoDatabaseName());
     }
 
-    public static String resolveUri() {
-        return resolveUri(MONGO_CLIENT_URI);
+    public static String resolveBaseUri() {
+        return resolveBaseUri(MONGO_CLIENT_URI);
     }
 
     private static String getAddressOfContainers() {

@@ -39,7 +39,7 @@ public class JoinMongoTableTest {
 
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
 
-    private static String uri;
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
@@ -47,7 +47,6 @@ public class JoinMongoTableTest {
     @BeforeClass
     public void init() {
         log.info("== Mongo Table JOIN tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

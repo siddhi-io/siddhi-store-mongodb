@@ -33,12 +33,11 @@ public class DeleteFromMongoTableTest {
 
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
 
-    private String uri;
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection DELETE tests started ==");
-        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
