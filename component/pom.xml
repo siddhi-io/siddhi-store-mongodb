@@ -207,8 +207,8 @@
                         <configuration>
                             <systemProperties>
                                 <property>
-                                    <name>mongo.servers</name>
-                                    <value>${mongo.servers}</value>
+                                    <name>mongo.primary</name>
+                                    <value>${mongo.primary}:27017,127.0.0.1:27017,127.0.0.1:27018</value>
                                 </property>
                                 <property>
                                     <name>mongo.database.name</name>

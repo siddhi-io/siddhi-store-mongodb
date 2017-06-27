@@ -7,9 +7,13 @@ services:
   mongo_2:
     image: mongo
     command: mongod --smallfiles --replSet rs
+    ports:
+          - 127.0.0.1:27017:27017
   mongo_3:
     image: mongo
     command: mongod --smallfiles --replSet rs
+    ports:
+      - 127.0.0.1:27018:27017
   mongo_setup:
     image: wdhif/mongo-replicaset-setup
     links:
