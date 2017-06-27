@@ -31,15 +31,14 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class ConditionVisitorTest {
 
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private final Log log = LogFactory.getLog(ConditionVisitor.class);
+
     private String uri;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection Condition Visitor tests started ==");
-        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

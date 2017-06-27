@@ -28,16 +28,15 @@ import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 
 public class DefineMongoTableTest {
+
     private static final Logger log = Logger.getLogger(DefineMongoTableTest.class);
 
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table DEFINITION tests started ==");
-        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

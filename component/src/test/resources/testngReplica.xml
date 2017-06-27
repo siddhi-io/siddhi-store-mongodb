@@ -1,9 +1,0 @@
-<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
-
-<suite name="MonogStoreTestSuite" verbose="1">
-    <test name="MonogoStoreTest - Replica">
-        <classes>
-            <class name="org.wso2.extension.siddhi.store.mongodb.MongoDBMultipleHostsConnectionTest"/>
-        </classes>
-    </test>
-</suite>

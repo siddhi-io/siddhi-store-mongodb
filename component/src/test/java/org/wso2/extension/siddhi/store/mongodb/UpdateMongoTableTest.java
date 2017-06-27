@@ -30,16 +30,15 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class UpdateMongoTableTest {
+
     private static final Logger log = Logger.getLogger(UpdateMongoTableTest.class);
 
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table UPDATE tests started ==");
-        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

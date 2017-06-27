@@ -90,7 +90,6 @@
                                     <alias>das-mongo</alias>
                                     <name>mongo:3.4</name>
                                     <run>
-                                        <namingStrategy>alias</namingStrategy>
                                         <env>
                                             <MONGO_INITDB_ROOT_USERNAME>admin</MONGO_INITDB_ROOT_USERNAME>
                                             <MONGO_INITDB_ROOT_PASSWORD>admin</MONGO_INITDB_ROOT_PASSWORD>
@@ -146,84 +145,6 @@
                 </plugins>
             </build>
         </profile>
-
-        <profile>
-            <id>local-mongod-replica</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>io.fabric8</groupId>
-                        <artifactId>docker-maven-plugin</artifactId>
-                        <version>${fabric8.docker.version}</version>
-                        <executions>
-                            <execution>
-                                <id>start-docker-for-mongo</id>
-                                <phase>pre-integration-test</phase>
-                                <goals>
-                                    <goal>start</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>stop-docker-for-mongo</id>
-                                <phase>post-integration-test</phase>
-                                <goals>
-                                    <goal>stop</goal>
-                                    <goal>remove</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <images>
-                                <image>
-                                    <alias>das-mongo-replica</alias>
-                                    <external>
-                                        <type>compose</type>
-                                        <basedir>src/test/resources</basedir>
-                                        <composeFile>docker-compose.yml</composeFile>
-                                    </external>
-                                </image>
-                            </images>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>integration-test-for-mongo</id>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>integration-test</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>verify-for-mongo</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>verify</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <systemProperties>
-                                <property>
-                                    <name>mongo.primary</name>
-                                    <value>${mongo.primary}:27017,127.0.0.1:27017,127.0.0.1:27018</value>
-                                </property>
-                                <property>
-                                    <name>mongo.database.name</name>
-                                    <value>admin</value>
-                                </property>
-                            </systemProperties>
-                            <suiteXmlFiles>
-                                <suiteXmlFile>src/test/resources/testngReplica.xml</suiteXmlFile>
-                            </suiteXmlFiles>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
     </profiles>
 
     <build>

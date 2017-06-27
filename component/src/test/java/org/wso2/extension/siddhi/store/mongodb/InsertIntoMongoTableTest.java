@@ -32,16 +32,15 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 import java.util.HashMap;
 
 public class InsertIntoMongoTableTest {
+
     private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
 
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String uri;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table INSERT tests started ==");
-        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass

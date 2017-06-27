@@ -33,6 +33,8 @@ import java.util.function.Consumer;
 public class MongoTableTestUtils {
 
     private static final Log log = LogFactory.getLog(MongoTableTestUtils.class);
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private static String databaseName = "admin";
 
     private MongoTableTestUtils() {
@@ -43,6 +45,10 @@ public class MongoTableTestUtils {
                 .replace("{{mongo.credentials}}", getMongoCredentials())
                 .replace("{{mongo.servers}}", getAddressOfContainers())
                 .replace("{{mongo.database}}", getMongoDatabaseName());
+    }
+
+    public static String resolveUri() {
+        return resolveUri(MONGO_CLIENT_URI);
     }
 
     private static String getAddressOfContainers() {

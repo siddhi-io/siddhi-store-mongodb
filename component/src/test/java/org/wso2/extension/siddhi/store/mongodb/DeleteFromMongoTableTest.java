@@ -30,16 +30,15 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class DeleteFromMongoTableTest {
+
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
 
-    private static final String MONGO_CLIENT_URI =
-            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
     private String uri;
 
     @BeforeClass
     public void init() {
         log.info("== MongoDB Collection DELETE tests started ==");
-        uri = MongoTableTestUtils.resolveUri(MONGO_CLIENT_URI);
+        uri = MongoTableTestUtils.resolveUri();
     }
 
     @AfterClass
