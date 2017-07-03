@@ -42,6 +42,16 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +61,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.net.SocketFactory;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 
+import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_KEY_STORE_FILE;
+import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_KEY_STORE_PASSWORD;
+import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_TRUST_STORE_FILE;
+import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_TRUST_STORE_PASSWORD;
 
 /**
  * Class which holds the utility methods which are used by various units in the MongoDB Event Table implementation.
@@ -390,10 +410,13 @@ public class MongoTableUtils {
      * Utility method which can be used to create MongoClientOptionsBuilder from values defined in the
      * deployment yaml file.
      *
-     * @param configReader {@link ConfigReader} Configuration Reader
+     * @param storeAnnotation the source annotation which contains the needed parameters.
+     * @param configReader    {@link ConfigReader} Configuration Reader
      * @return MongoClientOptions.Builder
      */
-    public static MongoClientOptions.Builder extractMongoClientOptionsBuilder(ConfigReader configReader) {
+    public static MongoClientOptions.Builder extractMongoClientOptionsBuilder
+    (Annotation storeAnnotation, ConfigReader configReader) {
+
         MongoClientOptions.Builder mongoClientOptionsBuilder = MongoClientOptions.builder();
         try {
             mongoClientOptionsBuilder.connectionsPerHost(
@@ -459,10 +482,112 @@ public class MongoTableUtils {
                 mongoClientOptionsBuilder.applicationName(applicationName);
             }
 
+            String secureConnectionEnabled = storeAnnotation.getElement(
+                                                            MongoTableConstants.ANNOTATION_ELEMENT_SECURE_CONNECTION);
+            secureConnectionEnabled = secureConnectionEnabled == null ? "false" : secureConnectionEnabled;
+
+            if (secureConnectionEnabled.equalsIgnoreCase("true")) {
+                mongoClientOptionsBuilder.sslEnabled(true);
+                String trustStore = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_TRUSTSTORE);
+                trustStore = trustStore == null ?
+                        configReader.readConfig("trustStore", DEFAULT_TRUST_STORE_FILE) : trustStore;
+
+                String trustStorePassword =
+                        storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_TRUSTSTOREPASS);
+                trustStorePassword = trustStorePassword == null ?
+                        configReader.readConfig("trustStorePassword", DEFAULT_TRUST_STORE_PASSWORD) :
+                        trustStorePassword;
+
+                String keyStore = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_KEYSTORE);
+                keyStore = keyStore == null ?
+                        configReader.readConfig("keyStore", DEFAULT_KEY_STORE_FILE) : keyStore;
+
+                String keyStorePassword = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_STOREPASS);
+                keyStorePassword = keyStorePassword == null ?
+                        configReader.readConfig("keyStorePassword", DEFAULT_KEY_STORE_PASSWORD) :
+                        keyStorePassword;
+
+                mongoClientOptionsBuilder.socketFactory(MongoTableUtils
+                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword));
+            }
             return mongoClientOptionsBuilder;
         } catch (IllegalArgumentException e) {
             throw new MongoTableException("Values Read from config readers have illegal values : ", e);
         }
+    }
+
+    private static SocketFactory extractSocketFactory(
+            String trustStore, String trustStorePassword, String keyStore, String keyStorePassword) {
+        TrustManager[] trustManagers;
+        KeyManager[] keyManagers;
+
+        try (InputStream trustStream = new FileInputStream(trustStore)) {
+            char[] trustStorePass = trustStorePassword.toCharArray();
+            KeyStore trustStoreJKS = KeyStore.getInstance(KeyStore.getDefaultType());
+            trustStoreJKS.load(trustStream, trustStorePass);
+            TrustManagerFactory trustFactory =
+                    TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            trustFactory.init(trustStoreJKS);
+            trustManagers = trustFactory.getTrustManagers();
+        } catch (FileNotFoundException e) {
+            throw new MongoTableException("Trust store file not found for secure connections to mongodb. " +
+                    "Trust Store file path : '" + trustStore + "'.", e);
+        } catch (IOException e) {
+            throw new MongoTableException("I/O Exception in creating trust store for secure connections to mongodb. " +
+                    "Trust Store file path : '" + trustStore + "'.", e);
+        } catch (CertificateException e) {
+            throw new MongoTableException("Certificates in the trust store could not be loaded for secure " +
+                    "connections to mongodb. Trust Store file path : '" + trustStore + "'.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new MongoTableException("The algorithm used to check the integrity of the trust store cannot be " +
+                    "found. Trust Store file path : '" + trustStore + "'.", e);
+        } catch (KeyStoreException e) {
+            throw new MongoTableException("Exception in creating trust store, no Provider supports aKeyStoreSpi " +
+                    "implementation for the specified type. Trust Store file path : '" + trustStore + "'.", e);
+        }
+
+        try (InputStream keyStream = new FileInputStream(keyStore)) {
+            char[] keyStorePass = keyStorePassword.toCharArray();
+            KeyStore keyStoreJKS = KeyStore.getInstance(KeyStore.getDefaultType());
+            keyStoreJKS.load(keyStream, keyStorePass);
+            KeyManagerFactory keyManagerFactory =
+                    KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            keyManagerFactory.init(keyStoreJKS, keyStorePass);
+            keyManagers = keyManagerFactory.getKeyManagers();
+        } catch (FileNotFoundException e) {
+            throw new MongoTableException("Key store file not found for secure connections to mongodb. " +
+                    "Key Store file path : '" + keyStore + "'.", e);
+        } catch (IOException e) {
+            throw new MongoTableException("I/O Exception in creating trust store for secure connections to mongodb. " +
+                    "Key Store file path : '" + keyStore + "'.", e);
+        } catch (CertificateException e) {
+            throw new MongoTableException("Certificates in the trust store could not be loaded for secure " +
+                    "connections to mongodb. Key Store file path : '" + keyStore + "'.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new MongoTableException("The algorithm used to check the integrity of the trust store cannot be " +
+                    "found. Key Store file path : '" + keyStore + "'.", e);
+        } catch (KeyStoreException e) {
+            throw new MongoTableException("Exception in creating trust store, no Provider supports aKeyStoreSpi " +
+                    "implementation for the specified type. Key Store file path : '" + keyStore + "'.", e);
+        } catch (UnrecoverableKeyException e) {
+            throw new MongoTableException("Key in the keystore cannot be recovered. " +
+                    "Key Store file path : '" + keyStore + "'.", e);
+        }
+
+        try {
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(keyManagers, trustManagers, null);
+            SSLContext.setDefault(sslContext);
+            return sslContext.getSocketFactory();
+        } catch (KeyManagementException e) {
+            throw new MongoTableException("Error in validating the key in the key store/ trust store. " +
+                    "Trust Store file path : '" + trustStore + "'. " +
+                    "Key Store file path : '" + keyStore + "'.", e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new MongoTableException(" SSL Algorithm used to create SSL Socket Factory for mongodb connections " +
+                    "is not found.", e);
+        }
+
     }
 }
 

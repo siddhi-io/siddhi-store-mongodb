@@ -25,6 +25,11 @@ public class MongoTableConstants {
     //Annotation field names
     public static final String ANNOTATION_ELEMENT_URI = "mongodb.uri";
     public static final String ANNOTATION_ELEMENT_COLLECTION_NAME = "collection.name";
+    public static final String ANNOTATION_ELEMENT_KEYSTORE = "key.store";
+    public static final String ANNOTATION_ELEMENT_STOREPASS = "key.store.password";
+    public static final String ANNOTATION_ELEMENT_TRUSTSTORE = "trust.store";
+    public static final String ANNOTATION_ELEMENT_TRUSTSTOREPASS = "trust.store.password";
+    public static final String ANNOTATION_ELEMENT_SECURE_CONNECTION = "secure.connection";
 
     //Mongo Operators
     public static final String MONGO_COMPARE_LESS_THAN = "$lt";
@@ -77,6 +82,11 @@ public class MongoTableConstants {
     public static final String REQUIRED_REPLICA_SET_NAME = "requiredReplicaSetName";
     public static final String APPLICATION_NAME = "applicationName";
     public static final String READ_PREFERENCE = "readPreference";
+
+    public static final String DEFAULT_TRUST_STORE_FILE = "${carbon.home}/resources/security/client-truststore.jks";
+    public static final String DEFAULT_TRUST_STORE_PASSWORD = "wso2carbon";
+    public static final String DEFAULT_KEY_STORE_FILE = "${carbon.home}/resources/security/client-truststore.jks";
+    public static final String DEFAULT_KEY_STORE_PASSWORD = "wso2carbon";
 
     private MongoTableConstants() {
     }

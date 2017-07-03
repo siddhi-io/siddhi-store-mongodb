@@ -30,6 +30,10 @@ Features Supported
       cursorFinalizerEnabled: false
       requiredReplicaSetName: 'rs0'
       sslEnabled: false
+      keyStore: '${carbon.home}/resources/security/client-truststore.jks'
+      keyStorePassword: 'wso2carbon'
+      trustStore: '${carbon.home}/resources/security/client-truststore.jks'
+      trustStorePassword: 'wso2carbon'
       connectTimeout:1000
       connectionsPerHost: 15
       minConnectionsPerHost: 0
@@ -57,7 +61,7 @@ Features Supported
  ##### Example Siddhi Queries
  ###### Defining an Event Table
  <pre>
- @Store(type="mongodb", mongodb.uri="mongodb://admin:admin@localhost:27017/Foo?ssl=true")
+ @Store(type="mongodb", mongodb.uri="mongodb://admin:admin@localhost:27017/Foo")
  @PrimaryKey("symbol")
  @IndexBy("symbol 1 {background:true}")
  define table FooTable (symbol string, price float, volume long);</pre>
@@ -66,8 +70,8 @@ Features Supported
 * https://docs.wso2.com/display/DAS400/Configuring+Event+Tables+to+Store+Data
 
 ## How to Contribute
-* Please report issues at [Siddhi Github Issue Tacker] https://github.com/wso2-extensions/siddhi-store-mongodb/issues
-* Send your bug fixes pull requests to [master branch] (https://github.com/wso2-extensions/siddhi-store-mongodb/tree/master) 
+* Please report issues at [Siddhi Github Issue Tacker](https://github.com/wso2-extensions/siddhi-store-mongodb/issues)
+* Send your bug fixes pull requests to [master branch](https://github.com/wso2-extensions/siddhi-store-mongodb/tree/master) 
 
 ## Contact us 
 Siddhi developers can be contacted via the mailing lists:

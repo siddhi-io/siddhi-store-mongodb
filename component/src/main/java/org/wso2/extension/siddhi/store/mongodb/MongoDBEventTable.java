@@ -80,8 +80,34 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                 @Parameter(name = "collection.name",
                         description = "The name of the collection in the store this Event Table should" +
                                 " be persisted as.",
+                        optional = true,
                         defaultValue = "Name of the event table.",
-                        type = {DataType.STRING}, optional = true)
+                        type = {DataType.STRING}),
+                @Parameter(name = "secure.connection",
+                        description = "Describes enabling the SSL for the mongodb connection",
+                        optional = true,
+                        defaultValue = "false",
+                        type = {DataType.STRING}),
+                @Parameter(name = "trust.store",
+                        description = "File path to the trust store.",
+                        optional = true,
+                        defaultValue = "${carbon.home}/resources/security/client-truststore.jks",
+                        type = {DataType.STRING}),
+                @Parameter(name = "trust.store.password",
+                        description = "Password to access the trust store",
+                        optional = true,
+                        defaultValue = "wso2carbon",
+                        type = {DataType.STRING}),
+                @Parameter(name = "key.store",
+                        description = "File path to the keystore.",
+                        optional = true,
+                        defaultValue = "${carbon.home}/resources/security/client-truststore.jks",
+                        type = {DataType.STRING}),
+                @Parameter(name = "key.store.password",
+                        description = "Password to access the keystore",
+                        optional = true,
+                        defaultValue = "wso2carbon",
+                        type = {DataType.STRING})
         },
         systemParameter = {
                 @SystemParameter(name = "applicationName",
@@ -104,6 +130,22 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "the connection with TLS/SSL. false: Initiate the connection without TLS/SSL.",
                         defaultValue = "false",
                         possibleParameters = {"true", "false"}),
+                @SystemParameter(name = "trustStore",
+                        description = "File path to the trust store.",
+                        defaultValue = "${carbon.home}/resources/security/client-truststore.jks",
+                        possibleParameters = "Any valid file path."),
+                @SystemParameter(name = "trustStorePassword",
+                        description = "Password to access the trust store",
+                        defaultValue = "wso2carbon",
+                        possibleParameters = "Any valid password."),
+                @SystemParameter(name = "keyStore",
+                        description = "File path to the keystore.",
+                        defaultValue = "${carbon.home}/resources/security/client-truststore.jks",
+                        possibleParameters = "Any valid file path."),
+                @SystemParameter(name = "keyStorePassword",
+                        description = "Password to access the keystore",
+                        defaultValue = "wso2carbon",
+                        possibleParameters = "Any valid password."),
                 @SystemParameter(name = "connectTimeout",
                         description = "The time in milliseconds to attempt a connection before timing out.",
                         defaultValue = "10000",
@@ -279,7 +321,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
         String mongoClientURI = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_URI);
         if (mongoClientURI != null) {
             MongoClientOptions.Builder mongoClientOptionsBuilder =
-                    MongoTableUtils.extractMongoClientOptionsBuilder(configReader);
+                    MongoTableUtils.extractMongoClientOptionsBuilder(storeAnnotation, configReader);
             try {
                 this.mongoClientURI = new MongoClientURI(mongoClientURI, mongoClientOptionsBuilder);
                 this.databaseName = this.mongoClientURI.getDatabase();

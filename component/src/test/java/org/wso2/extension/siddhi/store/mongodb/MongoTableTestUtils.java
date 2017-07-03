@@ -66,6 +66,9 @@ public class MongoTableTestUtils {
         if (!isEmpty(mongoUsername) && !isEmpty(mongoPassword)) {
             return mongoUsername + ":" + mongoPassword + "@";
         } else {
+            if (!isEmpty(mongoUsername)) {
+                return mongoUsername + "@";
+            }
             return "";
         }
     }
