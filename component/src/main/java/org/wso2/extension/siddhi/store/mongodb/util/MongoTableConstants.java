@@ -87,6 +87,7 @@ public class MongoTableConstants {
     public static final String DEFAULT_TRUST_STORE_PASSWORD = "wso2carbon";
     public static final String DEFAULT_KEY_STORE_FILE = "${carbon.home}/resources/security/client-truststore.jks";
     public static final String DEFAULT_KEY_STORE_PASSWORD = "wso2carbon";
+    public static final String VARIABLE_CARBON_HOME = "carbon.home";
 
     private MongoTableConstants() {
     }

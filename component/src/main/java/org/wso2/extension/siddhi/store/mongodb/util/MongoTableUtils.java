@@ -72,6 +72,7 @@ import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.D
 import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_KEY_STORE_PASSWORD;
 import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_TRUST_STORE_FILE;
 import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.DEFAULT_TRUST_STORE_PASSWORD;
+import static org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants.VARIABLE_CARBON_HOME;
 
 /**
  * Class which holds the utility methods which are used by various units in the MongoDB Event Table implementation.
@@ -491,6 +492,7 @@ public class MongoTableUtils {
                 String trustStore = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_TRUSTSTORE);
                 trustStore = trustStore == null ?
                         configReader.readConfig("trustStore", DEFAULT_TRUST_STORE_FILE) : trustStore;
+                trustStore = resolveCarbonHome(trustStore);
 
                 String trustStorePassword =
                         storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_TRUSTSTOREPASS);
@@ -501,6 +503,7 @@ public class MongoTableUtils {
                 String keyStore = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_KEYSTORE);
                 keyStore = keyStore == null ?
                         configReader.readConfig("keyStore", DEFAULT_KEY_STORE_FILE) : keyStore;
+                keyStore = resolveCarbonHome(keyStore);
 
                 String keyStorePassword = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_STOREPASS);
                 keyStorePassword = keyStorePassword == null ?
@@ -588,6 +591,16 @@ public class MongoTableUtils {
                     "is not found.", e);
         }
 
+    }
+
+    private static String resolveCarbonHome(String filePath) {
+        String carbonHome = "";
+        if (System.getProperty(VARIABLE_CARBON_HOME) != null) {
+            carbonHome = System.getProperty(VARIABLE_CARBON_HOME);
+        } else if (System.getenv(VARIABLE_CARBON_HOME) != null) {
+            carbonHome = System.getenv(VARIABLE_CARBON_HOME);
+        }
+        return filePath.replaceAll("\\$\\{carbon.home}", carbonHome);
     }
 }
 
