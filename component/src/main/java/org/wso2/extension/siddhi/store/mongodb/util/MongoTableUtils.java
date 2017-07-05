@@ -38,6 +38,7 @@ import org.bson.conversions.Bson;
 import org.bson.json.JsonParseException;
 import org.wso2.extension.siddhi.store.mongodb.MongoCompiledCondition;
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -102,8 +103,9 @@ public class MongoTableUtils {
                     if (!isEmpty(element.getValue()) && attributeNames.contains(element.getValue())) {
                         primaryKeyIndex.append(element.getValue(), 1);
                     } else {
-                        throw new MongoTableException("Annotation '" + primaryKey.getName() + "' contains value '" +
-                                element.getValue() + "' which is not present in the attributes of the Event Table.");
+                        throw new SiddhiAppCreationException("Annotation '" + primaryKey.getName() + "' contains " +
+                                "value '" + element.getValue() + "' which is not present in the attributes of the " +
+                                "Event Table.");
                     }
                 }
         );
@@ -142,7 +144,7 @@ public class MongoTableUtils {
                     }
                 }
             } else {
-                throw new MongoTableException("Annotation '" + indices.getName() + "' contains illegal " +
+                throw new SiddhiAppCreationException("Annotation '" + indices.getName() + "' contains illegal " +
                         "value : '" + index.getValue() + "'. Please check your query and try again.");
             }
         }).collect(Collectors.toList());
@@ -484,7 +486,7 @@ public class MongoTableUtils {
             }
 
             String secureConnectionEnabled = storeAnnotation.getElement(
-                                                            MongoTableConstants.ANNOTATION_ELEMENT_SECURE_CONNECTION);
+                    MongoTableConstants.ANNOTATION_ELEMENT_SECURE_CONNECTION);
             secureConnectionEnabled = secureConnectionEnabled == null ? "false" : secureConnectionEnabled;
 
             if (secureConnectionEnabled.equalsIgnoreCase("true")) {

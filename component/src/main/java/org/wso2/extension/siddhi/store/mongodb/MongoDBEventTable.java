@@ -44,6 +44,7 @@ import org.wso2.siddhi.annotation.Parameter;
 import org.wso2.siddhi.annotation.SystemParameter;
 import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ConditionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
@@ -301,7 +302,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
         try {
             this.mongoClient = new MongoClient(this.mongoClientURI);
         } catch (MongoException e) {
-            throw new MongoTableException("Annotation 'Store' contains illegal value for " +
+            throw new SiddhiAppCreationException("Annotation 'Store' contains illegal value for " +
                     "element 'mongodb.uri' as '" + this.mongoClientURI + "'. Please check " +
                     "your query and try again.", e);
         }
@@ -324,12 +325,12 @@ public class MongoDBEventTable extends AbstractRecordTable {
                 this.mongoClientURI = new MongoClientURI(mongoClientURI, mongoClientOptionsBuilder);
                 this.databaseName = this.mongoClientURI.getDatabase();
             } catch (IllegalArgumentException e) {
-                throw new MongoTableException("Annotation '" + storeAnnotation.getName() + "' contains illegal " +
-                        "value for 'mongodb.uri' as '" + mongoClientURI + "'. Please check your query and try " +
-                        "again.", e);
+                throw new SiddhiAppCreationException("Annotation '" + storeAnnotation.getName() + "' contains " +
+                        "illegal value for 'mongodb.uri' as '" + mongoClientURI + "'. Please check your query and " +
+                        "try again.", e);
             }
         } else {
-            throw new MongoTableException("Annotation '" + storeAnnotation.getName() +
+            throw new SiddhiAppCreationException("Annotation '" + storeAnnotation.getName() +
                     "' must contain the element 'mongodb.uri'. Please check your query and try again.");
         }
     }
@@ -404,9 +405,9 @@ public class MongoDBEventTable extends AbstractRecordTable {
             if (!parsedRecords.isEmpty()) {
                 this.getCollectionObject().bulkWrite(parsedRecords);
             }
-        }  catch (MongoSocketOpenException e) {
+        } catch (MongoSocketOpenException e) {
             throw new ConnectionUnavailableException(e);
-        }  catch (MongoBulkWriteException e) {
+        } catch (MongoBulkWriteException e) {
             List<com.mongodb.bulk.BulkWriteError> writeErrors = e.getWriteErrors();
             int failedIndex;
             Object failedModel;
@@ -456,7 +457,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected RecordIterator<Object[]> find(Map<String, Object> findConditionParameterMap,
                                             CompiledCondition compiledCondition)
-                                            throws ConnectionUnavailableException {
+            throws ConnectionUnavailableException {
         try {
             Document findFilter = MongoTableUtils
                     .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
@@ -485,7 +486,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
 
     @Override
     protected void delete(List<Map<String, Object>> deleteConditionParameterMaps, CompiledCondition compiledCondition)
-        throws ConnectionUnavailableException {
+            throws ConnectionUnavailableException {
         List<DeleteManyModel<Document>> parsedRecords = deleteConditionParameterMaps.stream().map(
                 (Map<String, Object> conditionParameterMap) -> {
                     Document deleteFilter = MongoTableUtils
@@ -498,7 +499,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void update(List<Map<String, Object>> updateConditionParameterMaps,
                           CompiledCondition compiledCondition, List<Map<String, Object>> updateValues)
-                            throws ConnectionUnavailableException {
+            throws ConnectionUnavailableException {
         List<UpdateManyModel<Document>> parsedRecords = updateConditionParameterMaps.stream().map(
                 conditionParameterMap -> {
                     int ordinal = updateConditionParameterMaps.indexOf(conditionParameterMap);
@@ -538,31 +539,31 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void connect() throws ConnectionUnavailableException {
         if (!this.initialCollectionTest) {
-        if (!this.collectionExists()) {
-            try {
-                this.getDatabaseObject().createCollection(this.collectionName);
-                this.createIndices(expectedIndexModels);
-            } catch (MongoSocketOpenException e) {
-                throw new ConnectionUnavailableException(e);
-            } catch (MongoException e) {
-                this.destroy();
-                throw new MongoTableException("Creating mongo collection '" + this.collectionName
-                        + "' is not successful due to " + e.getLocalizedMessage(), e);
+            if (!this.collectionExists()) {
+                try {
+                    this.getDatabaseObject().createCollection(this.collectionName);
+                    this.createIndices(expectedIndexModels);
+                } catch (MongoSocketOpenException e) {
+                    throw new ConnectionUnavailableException(e);
+                } catch (MongoException e) {
+                    this.destroy();
+                    throw new MongoTableException("Creating mongo collection '" + this.collectionName
+                            + "' is not successful due to " + e.getLocalizedMessage(), e);
+                }
+            } else {
+                MongoCursor<Document> existingIndicesIterator;
+                try {
+                    existingIndicesIterator = this.getCollectionObject().listIndexes().iterator();
+                } catch (MongoSocketOpenException e) {
+                    throw new ConnectionUnavailableException(e);
+                } catch (MongoException e) {
+                    this.destroy();
+                    throw new MongoTableException("Retrieving indexes from  mongo collection '" + this.collectionName
+                            + "' is not successful due to " + e.getLocalizedMessage(), e);
+                }
+                MongoTableUtils.checkExistingIndices(expectedIndexModels, existingIndicesIterator);
             }
-        } else {
-            MongoCursor<Document> existingIndicesIterator;
-            try {
-                existingIndicesIterator = this.getCollectionObject().listIndexes().iterator();
-            } catch (MongoSocketOpenException e) {
-                throw new ConnectionUnavailableException(e);
-            } catch (MongoException e) {
-                this.destroy();
-                throw new MongoTableException("Retrieving indexes from  mongo collection '" + this.collectionName
-                        + "' is not successful due to " + e.getLocalizedMessage(), e);
-            }
-            MongoTableUtils.checkExistingIndices(expectedIndexModels, existingIndicesIterator);
-        }
-        this.initialCollectionTest = true;
+            this.initialCollectionTest = true;
         } else {
             try {
                 this.mongoClient.getDatabase(this.databaseName).listCollectionNames();
