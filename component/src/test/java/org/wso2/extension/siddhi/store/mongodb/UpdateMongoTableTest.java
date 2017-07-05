@@ -30,7 +30,10 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class UpdateMongoTableTest {
+
     private static final Logger log = Logger.getLogger(UpdateMongoTableTest.class);
+
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
@@ -46,13 +49,13 @@ public class UpdateMongoTableTest {
     public void updateFromMongoTableTest1() throws InterruptedException {
         log.info("updateFromMongoTableTest1 - DASC5-893:Update events of a MongoDB table successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -78,14 +81,14 @@ public class UpdateMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
 
         Document expectedUpdatedDocument = new Document()
                 .append("symbol", "IBM")
                 .append("price", 575.6)
                 .append("volume", 500);
-        Document updatedDocument = MongoTableTestUtils.getDocument("FooTable", "{symbol:'IBM'}");
+        Document updatedDocument = MongoTableTestUtils.getDocument(uri, "FooTable", "{symbol:'IBM'}");
         Assert.assertEquals(updatedDocument, expectedUpdatedDocument, "Update Failed");
     }
 
@@ -94,13 +97,13 @@ public class UpdateMongoTableTest {
         log.info("updateFromMongoTableTest2 - DASC5-894:Updates events of a MongoDB table when query has less " +
                 "attributes to select from");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -126,7 +129,7 @@ public class UpdateMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
     }
 
@@ -135,13 +138,11 @@ public class UpdateMongoTableTest {
         log.info("updateFromMongoTableTest3 - DASC5-895:Update events of a MongoDB table when query has more " +
                 "attributes to select from");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -164,13 +165,11 @@ public class UpdateMongoTableTest {
     public void updateFromMongoTableTest4() {
         log.info("updateFromMongoTableTest4 - DASC5-896:Updates events of a non existing MongoDB table");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -194,13 +193,11 @@ public class UpdateMongoTableTest {
         log.info("updateFromMongoTableTest5 - DASC5-897:Updates events of a MongoDB table by selecting from non " +
                 "existing stream");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -224,13 +221,11 @@ public class UpdateMongoTableTest {
         log.info("updateFromMongoTableTest6 - DASC5-899:Updates events of a MongoDB table based on a non-existing " +
                 "attribute");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -253,13 +248,11 @@ public class UpdateMongoTableTest {
     public void updateFromMongoTableTest7() {
         log.info("updateFromMongoTableTest7 - DASC5-900:Updates events of a MongoDB table for non-existing attributes");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -283,13 +276,13 @@ public class UpdateMongoTableTest {
         log.info("updateFromMongoTableTest8 - DASC5-901:Updates events of a MongoDB table for non-existing " +
                 "attribute value");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo') " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "') " +
                 "@PrimaryKey('symbol','price')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -315,7 +308,7 @@ public class UpdateMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Update failed");
     }
 }

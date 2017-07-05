@@ -16,7 +16,8 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -45,11 +46,12 @@
     </profiles>
 
     <properties>
-        <siddhi.version>4.0.0-M9</siddhi.version>
+        <siddhi.version>4.0.0-M13</siddhi.version>
         <junit.version>4.12</junit.version>
         <commons.logging.version>1.1.1</commons.logging.version>
         <testng.version>6.11</testng.version>
         <mongodb.driver.version>3.4.2</mongodb.driver.version>
+        <fabric8.docker.version>0.21.0</fabric8.docker.version>
     </properties>
 
     <scm>

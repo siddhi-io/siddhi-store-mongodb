@@ -33,50 +33,79 @@ import java.util.function.Consumer;
 public class MongoTableTestUtils {
 
     private static final Log log = LogFactory.getLog(MongoTableTestUtils.class);
-    private static final String MONGO_CLIENT_URI = "mongodb://admin:admin@127.0.0.1/Foo";
-    private static final String DATABASE_NAME = "Foo";
-    private static MongoClient mongoClient;
+    private static final String MONGO_CLIENT_URI =
+            "mongodb://{{mongo.credentials}}{{mongo.servers}}/{{mongo.database}}";
+    private static String databaseName = "admin";
 
     private MongoTableTestUtils() {
     }
 
-    private static MongoClient getMongoClient() {
-        if (mongoClient != null) {
-            return mongoClient;
-        } else {
-            try {
-                return mongoClient = new MongoClient(new MongoClientURI(MONGO_CLIENT_URI));
-            } catch (Exception e) {
-                log.debug("Creating Mongo client failed due to " + e.getMessage(), e);
-                throw e;
-            }
+    public static String resolveBaseUri(String uri) {
+        return uri
+                .replace("{{mongo.credentials}}", getMongoCredentials())
+                .replace("{{mongo.servers}}", getAddressOfContainers())
+                .replace("{{mongo.database}}", getMongoDatabaseName());
+    }
 
+    public static String resolveBaseUri() {
+        return resolveBaseUri(MONGO_CLIENT_URI);
+    }
+
+    private static String getAddressOfContainers() {
+        String mongoServers = System.getProperty("mongo.servers");
+        if (!isEmpty(mongoServers)) {
+            return mongoServers;
+        } else {
+            return "172.17.0.2:27017";
         }
     }
 
-    public static void dropCollection(String collectionName) {
-        try {
-            getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).drop();
+    private static String getMongoCredentials() {
+        String mongoUsername = System.getProperty("mongo.username");
+        String mongoPassword = System.getProperty("mongo.password");
+        if (!isEmpty(mongoUsername) && !isEmpty(mongoPassword)) {
+            return mongoUsername + ":" + mongoPassword + "@";
+        } else {
+            if (!isEmpty(mongoUsername)) {
+                return mongoUsername + "@";
+            }
+            return "";
+        }
+    }
+
+    private static String getMongoDatabaseName() {
+        String mongoDatabaseName = System.getProperty("mongo.database.name");
+        if (!isEmpty(mongoDatabaseName)) {
+            databaseName = mongoDatabaseName;
+        }
+        return databaseName;
+    }
+
+    private static boolean isEmpty(String field) {
+        return (field == null || field.trim().length() == 0);
+    }
+
+    public static void dropCollection(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            mongoClient.getDatabase(databaseName).getCollection(collectionName).drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static long getDocumentsCount(String collectionName) {
-        try {
-            return getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).count();
+    public static long getDocumentsCount(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            return mongoClient.getDatabase(databaseName).getCollection(collectionName).count();
         } catch (MongoException e) {
             log.debug("Getting rows in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static boolean doesCollectionExists(String customCollectionName) {
-        try {
-            for (String collectionName : getMongoClient().getDatabase(DATABASE_NAME).listCollectionNames()) {
+    public static boolean doesCollectionExists(String uri, String customCollectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            for (String collectionName : mongoClient.getDatabase(databaseName).listCollectionNames()) {
                 if (customCollectionName.equals(collectionName)) {
                     return true;
                 }
@@ -84,15 +113,14 @@ public class MongoTableTestUtils {
             return false;
         } catch (MongoException e) {
             log.debug("Checking whether collection was created failed due to" + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static List<Document> getIndexList(String collectionName) {
-        try {
+    private static List<Document> getIndexList(String uri, String collectionName) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
             ListIndexesIterable<Document> existingIndexesIterable =
-                    getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName).listIndexes();
+                    mongoClient.getDatabase(databaseName).getCollection(collectionName).listIndexes();
             List<Document> existingIndexDocuments = new ArrayList<>();
             existingIndexesIterable.forEach((Consumer<? super Document>) existingIndex -> {
                 existingIndex.remove("ns");
@@ -101,14 +129,13 @@ public class MongoTableTestUtils {
             return existingIndexDocuments;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static Document getIndex(String collectionName, String indexName) {
+    public static Document getIndex(String uri, String collectionName, String indexName) {
         try {
-            List<Document> existingIndexList = getIndexList(collectionName);
+            List<Document> existingIndexList = getIndexList(uri, collectionName);
             for (Document existingIndex : existingIndexList) {
                 if (existingIndex.get("name").equals(indexName)) {
                     return existingIndex;
@@ -117,32 +144,29 @@ public class MongoTableTestUtils {
             return null;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static Document getDocument(String collectionName, String findFilter) {
-        try {
+    public static Document getDocument(String uri, String collectionName, String findFilter) {
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
             Document findFilterDocument = Document.parse(findFilter);
-            Document firstFind = getMongoClient().getDatabase(DATABASE_NAME).getCollection(collectionName)
+            Document firstFind = mongoClient.getDatabase(databaseName).getCollection(collectionName)
                     .find(findFilterDocument).first();
             firstFind.remove("_id");
             return firstFind;
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }
 
-    public static void createCollection(String collectionName) {
-        dropCollection(collectionName);
-        try {
-            getMongoClient().getDatabase(DATABASE_NAME).createCollection(collectionName);
+    public static void createCollection(String uri, String collectionName) {
+        dropCollection(uri, collectionName);
+        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+            mongoClient.getDatabase(databaseName).createCollection(collectionName);
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
-            mongoClient.close();
             throw e;
         }
     }

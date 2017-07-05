@@ -36,8 +36,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ContainsMongoTableTest {
 
-    private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
+    private static final Log log = LogFactory.getLog(ContainsMongoTableTest.class);
 
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
@@ -62,14 +63,14 @@ public class ContainsMongoTableTest {
         log.info("containsMongoTableTest1 - " +
                 "DASC5-911:Configure siddhi to check whether particular records exist in a MongoDB Collection");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
-                "@source(type='inMemory') " +
+                "    " +
                 "define stream FooStream (symbol string, price float, volume long);" +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -123,14 +124,14 @@ public class ContainsMongoTableTest {
         log.info("containsMongoTableTest2 - " +
                 "DASC5-912:Configure siddhi to check whether record exist when OutputStream is already exists");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "@source(type='inMemory') " +
                 "define stream FooStream (symbol string, price float, volume long);" +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);" +
                 "@source(type='inMemory')" +
                 "define stream OutputStream (symbol string, price float, volume long);";

@@ -36,8 +36,10 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JoinMongoTableTest {
+
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
 
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);
     private int waitTime = 50;
     private int timeout = 30000;
@@ -62,13 +64,13 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery1 -" +
                 "DASC5-915:Read events from a MongoDB collection successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -122,13 +124,11 @@ public class JoinMongoTableTest {
     public void testMongoTableJoinQuery2() {
         log.info("testMongoTableJoinQuery2DASC5-916:Read events from a non existing MongoDB collection");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -149,13 +149,12 @@ public class JoinMongoTableTest {
     public void testMongoTableJoinQuery3() {
         log.info("testMongoTableJoinQuery3 - " +
                 "DASC5-917:Read events from a MongoDB collection by sending through non existing stream");
-        MongoTableTestUtils.dropCollection("FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -178,13 +177,13 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery4 - " +
                 "DASC5-918:Read events from a MongoDB collection for less attributes than total attribute list");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -237,13 +236,11 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery5 - " +
                 "DASC5-919:Read events from a MongoDB collection for non existing attributes");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -265,13 +262,13 @@ public class JoinMongoTableTest {
         log.info("testMongoTableJoinQuery6");
         //Object reads
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, input Object); " +
                 "define stream FooStream (symbol string); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, input Object);";
         String query = "" +
                 "@info(name = 'query1') " +

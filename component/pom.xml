@@ -18,7 +18,8 @@
   ~ under the License.
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -57,8 +58,181 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>mongod</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>${fabric8.docker.version}</version>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-mongo</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-mongo</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>das-mongo</alias>
+                                    <name>mongo:3.4</name>
+                                    <run>
+                                        <env>
+                                            <MONGO_INITDB_ROOT_USERNAME>admin</MONGO_INITDB_ROOT_USERNAME>
+                                            <MONGO_INITDB_ROOT_PASSWORD>admin</MONGO_INITDB_ROOT_PASSWORD>
+                                        </env>
+                                    </run>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-mongo</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-mongo</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>mongo.servers</name>
+                                    <value>${docker.container.das-mongo.ip}:27017</value>
+                                </property>
+                                <property>
+                                    <name>mongo.username</name>
+                                    <value>admin</value>
+                                </property>
+                                <property>
+                                    <name>mongo.password</name>
+                                    <value>admin</value>
+                                </property>
+                                <property>
+                                    <name>mongo.database.name</name>
+                                    <value>admin</value>
+                                </property>
+                            </systemProperties>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngStandalone.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>mongod-ssl</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.fabric8</groupId>
+                        <artifactId>docker-maven-plugin</artifactId>
+                        <version>${fabric8.docker.version}</version>
+                        <executions>
+                            <execution>
+                                <id>start-docker-for-mongo</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>start</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-for-mongo</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>stop</goal>
+                                    <goal>remove</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <images>
+                                <image>
+                                    <alias>das-mongo-ssl</alias>
+                                    <name>rzhilkibaev/mongo-x509-auth-ssl</name>
+                                </image>
+                            </images>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>integration-test-for-mongo</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>verify-for-mongo</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>mongo.servers</name>
+                                    <value>${docker.container.das-mongo-ssl.ip}:27017</value>
+                                </property>
+                                <property>
+                                    <name>mongo.username</name>
+                                    <value>C=US,ST=CA,L=San Francisco,O=Jaspersoft,OU=JSDev,CN=admin</value>
+                                </property>
+                                <property>
+                                    <name>mongo.database.name</name>
+                                    <value>admin</value>
+                                </property>
+                            </systemProperties>
+                            <suiteXmlFiles>
+                                <suiteXmlFile>src/test/resources/testngSecureSSL.xml</suiteXmlFile>
+                            </suiteXmlFiles>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -81,15 +255,6 @@
                             META-INF=target/classes/META-INF
                         </Include-Resource>
                     </instructions>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <suiteXmlFiles>
-                        <suiteXmlFile>src/test/resources/testng.xml</suiteXmlFile>
-                    </suiteXmlFiles>
                 </configuration>
             </plugin>
         </plugins>

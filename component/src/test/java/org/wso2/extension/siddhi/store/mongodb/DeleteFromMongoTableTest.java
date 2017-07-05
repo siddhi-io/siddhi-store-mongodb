@@ -30,7 +30,10 @@ import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class DeleteFromMongoTableTest {
+
     private static final Log log = LogFactory.getLog(DeleteFromMongoTableTest.class);
+
+    private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass
     public void init() {
@@ -47,13 +50,13 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest1 - " +
                 "DASC5-903:Delete an event of a MongoDB table successfully");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "@PrimaryKey('symbol')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
@@ -78,7 +81,7 @@ public class DeleteFromMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 1, "Deletion failed");
     }
 
@@ -88,13 +91,11 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest2 - " +
                 "DASC5-904:Delete an event from a non existing MongoDB table");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -116,13 +117,11 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest3 - " +
                 "DASC5-905:Delete an event from a MongoDB table by selecting from non existing stream");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -144,13 +143,11 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest4 - " +
                 "DASC5-906:Delete an event from a MongoDB table based on a non-existing attribute");
 
-        MongoTableTestUtils.dropCollection("FooTable");
-
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -171,13 +168,13 @@ public class DeleteFromMongoTableTest {
         log.info("deleteFromMongoTableTest5 - " +
                 "DASC5-909:Delete an event from a MongoDB table based on a non-existing attribute value");
 
-        MongoTableTestUtils.dropCollection("FooTable");
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "define stream StockStream (symbol string, price float, volume long); " +
                 "define stream DeleteStockStream (symbol string, price float, volume long); " +
-                "@store(type = 'mongodb' , mongodb.uri='mongodb://admin:admin@127.0.0.1/Foo')" +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
                 "define table FooTable (symbol string, price float, volume long);";
         String query = "" +
                 "@info(name = 'query1') " +
@@ -202,7 +199,7 @@ public class DeleteFromMongoTableTest {
 
         siddhiAppRuntime.shutdown();
 
-        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount("FooTable");
+        long totalDocumentsInCollection = MongoTableTestUtils.getDocumentsCount(uri, "FooTable");
         Assert.assertEquals(totalDocumentsInCollection, 3, "Deletion failed");
     }
 }
