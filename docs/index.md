@@ -42,3 +42,7 @@ Siddhi developers can be contacted via the mailing lists:
 **We welcome your feedback and contribution.**
 
 Siddhi SP Team
+
+## API Docs:
+
+1. <a href="./api/1.0.3-SNAPSHOT.md">1.0.3-SNAPSHOT</a>
