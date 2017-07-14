@@ -8,7 +8,7 @@ extra:
     accent: teal
 pages:
 - Welcome to WSO2 Siddhi Store MongoDB: index.md
-- Api:
+- API Docs:
   - 1.0.3-SNAPSHOT: api/1.0.3-SNAPSHOT.md
 - About:
   - License: about/license.md
