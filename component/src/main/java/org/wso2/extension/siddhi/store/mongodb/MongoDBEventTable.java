@@ -75,16 +75,16 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                 "in a MongoDB of user's choice.",
         parameters = {
                 @Parameter(name = "mongodb.uri",
-                        description = "The MongoDB URI for the MongoDB data store. The uri must be of the format " +
-                                "mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]" +
+                        description = "The MongoDB URI for the MongoDB data store. The uri must be of the format \n" +
+                                "mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]\n" +
                                 "The options specified in the uri will override any connection options specified in " +
-                                "the deployment yaml.",
+                                "the deployment yaml file.",
                         type = {DataType.STRING}),
                 @Parameter(name = "collection.name",
                         description = "The name of the collection in the store this Event Table should" +
                                 " be persisted as.",
                         optional = true,
-                        defaultValue = "Name of the event table.",
+                        defaultValue = "Name of the siddhi event table.",
                         type = {DataType.STRING}),
                 @Parameter(name = "secure.connection",
                         description = "Describes enabling the SSL for the mongodb connection",
@@ -249,16 +249,27 @@ import static org.wso2.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
         examples = {
                 @Example(
                         syntax = "@Store(type=\"mongodb\"," +
-                                "mongodb.uri=\"mongodb://admin:admin@localhost/Foo?ssl=true\")\n" +
+                                "mongodb.uri=\"mongodb://admin:admin@localhost/Foo\")\n" +
                                 "@PrimaryKey(\"symbol\")\n" +
                                 "@IndexBy(\"volume 1 {background:true,unique:true}\")\n" +
                                 "define table FooTable (symbol string, price float, volume long);",
                         description = "This will create a collection called FooTable for the events to be saved " +
-                                "with symbol being saved inside _id as Primary Key and index for the field volume " +
-                                "will be created in ascending order with the index option to create the index " +
-                                "in the background. Prerequisites : 1. A MongoDB server instance should be started.\n" +
-                                "2. User should have the necessary privileges and access rights to connect to " +
-                                "the MongoDB data store of choice.\n"
+                                "with symbol as Primary Key(unique index at mongod level) and index for the field " +
+                                "volume will be created in ascending order with the index option to create the index " +
+                                "in the background.\n\n" +
+                                "Note: \n" +
+                                "@PrimaryKey: This specifies a list of comma-separated values to be treated as " +
+                                "unique fields in the table. Each record in the table must have a unique combination " +
+                                "of values for the fields specified here.\n\n" +
+                                "@IndexBy: This specifies the fields that must be indexed at the database level. " +
+                                "You can specify multiple values as a come-separated list. A single value to be in " +
+                                "the format,\n“<FieldName> <SortOrder> <IndexOptions>”\n" +
+                                "<SortOrder> - ( 1) for Ascending and (-1) for Descending\n" +
+                                "<IndexOptions> - Index Options must be defined inside curly brackets. {} to be " +
+                                "used for default options. Options must follow the standard mongodb index options " +
+                                "format. Reference : " +
+                                "https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/\n" +
+                                "Example : “symbol 1 {“unique”:true}”\n"
                 )
         }
 )
