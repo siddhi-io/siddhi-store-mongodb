@@ -46,8 +46,9 @@ import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.exception.ConnectionUnavailableException;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
-import org.wso2.siddhi.core.table.record.ConditionBuilder;
+import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
+import org.wso2.siddhi.core.table.record.RecordTableCompiledUpdateSet;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.annotation.Annotation;
@@ -508,32 +509,36 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     @Override
-    protected void update(List<Map<String, Object>> updateConditionParameterMaps,
-                          CompiledCondition compiledCondition, List<Map<String, Object>> updateValues)
+    protected void update(CompiledCondition compiledCondition,
+                          List<Map<String, Object>> list,
+                          RecordTableCompiledUpdateSet recordTableCompiledUpdateSet,
+                          List<Map<String, Object>> list1)
             throws ConnectionUnavailableException {
-        List<UpdateManyModel<Document>> parsedRecords = updateConditionParameterMaps.stream().map(
+        List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
-                    int ordinal = updateConditionParameterMaps.indexOf(conditionParameterMap);
+                    int ordinal = list.indexOf(conditionParameterMap);
                     Document updateFilter = MongoTableUtils
                             .resolveCondition((MongoCompiledCondition) compiledCondition, conditionParameterMap);
                     Document updateDocument = new Document()
-                            .append("$set", updateValues.get(ordinal));
+                            .append("$set", list1.get(ordinal));
                     return new UpdateManyModel<Document>(updateFilter, updateDocument);
                 }).collect(Collectors.toList());
         this.bulkWrite(parsedRecords);
     }
 
     @Override
-    protected void updateOrAdd(List<Map<String, Object>> updateConditionParameterMaps,
-                               CompiledCondition compiledCondition, List<Map<String, Object>> updateValues,
-                               List<Object[]> addingRecords) throws ConnectionUnavailableException {
-        List<UpdateManyModel<Document>> parsedRecords = updateConditionParameterMaps.stream().map(
+    protected void updateOrAdd(CompiledCondition compiledCondition,
+                               List<Map<String, Object>> list,
+                               RecordTableCompiledUpdateSet recordTableCompiledUpdateSet,
+                               List<Map<String, Object>> list1, List<Object[]> list2)
+            throws ConnectionUnavailableException {
+        List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
-                    int ordinal = updateConditionParameterMaps.indexOf(conditionParameterMap);
+                    int ordinal = list.indexOf(conditionParameterMap);
                     Document updateFilter = MongoTableUtils
                             .resolveCondition((MongoCompiledCondition) compiledCondition, conditionParameterMap);
                     Document updateDocument = new Document()
-                            .append("$set", updateValues.get(ordinal));
+                            .append("$set", list1.get(ordinal));
                     UpdateOptions updateOptions = new UpdateOptions().upsert(true);
                     return new UpdateManyModel<Document>(updateFilter, updateDocument, updateOptions);
                 }).collect(Collectors.toList());
@@ -541,9 +546,16 @@ public class MongoDBEventTable extends AbstractRecordTable {
     }
 
     @Override
-    protected CompiledCondition compileCondition(ConditionBuilder conditionBuilder) {
+    protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
         MongoConditionVisitor visitor = new MongoConditionVisitor();
-        conditionBuilder.build(visitor);
+        expressionBuilder.build(visitor);
+        return new MongoCompiledCondition(visitor.getCompiledCondition(), visitor.getPlaceholders());
+    }
+
+    @Override
+    protected CompiledCondition compileSetAttribute(ExpressionBuilder expressionBuilder) {
+        MongoSetConditionVisitor visitor = new MongoSetConditionVisitor();
+        expressionBuilder.build(visitor);
         return new MongoCompiledCondition(visitor.getCompiledCondition(), visitor.getPlaceholders());
     }
 

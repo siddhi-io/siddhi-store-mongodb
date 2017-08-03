@@ -23,9 +23,9 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 
 public class DefineMongoTableTest {
 
@@ -111,7 +111,7 @@ public class DefineMongoTableTest {
         Assert.assertEquals(indexActual, indexExcepted, "Primary Key Definition Failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest4() {
         log.info("mongoTableDefinitionTest4 - " +
                 "DASC5-857:Defining a MongoDB table without defining a value for Primary Key field");
@@ -126,7 +126,7 @@ public class DefineMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest5() {
         log.info("mongoTableDefinitionTest5 - " +
                 "DASC5-858:Defining a MongoDB table with an invalid value for Primary Key field");
@@ -141,7 +141,7 @@ public class DefineMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest6() {
         log.info("mongoTableDefinitionTest6 - " +
                 "DASC5-859:Defining a MongoDB table without having a mongodb uri field");
@@ -156,7 +156,7 @@ public class DefineMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest7() {
         log.info("mongoTableDefinitionTest7 - " +
                 "DASC5-860:Defining a MongoDB table without defining a value for mongodb uri field");
@@ -171,7 +171,7 @@ public class DefineMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest8() {
         log.info("mongoTableDefinitionTest8 - " +
                 "DASC5-861:Defining a MongoDBS table with an invalid value for mongodb uri field");
@@ -228,7 +228,7 @@ public class DefineMongoTableTest {
         Assert.assertEquals(doesCollectionExists, true, "Definition failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest11() {
         log.info("mongoTableDefinitionTest11 - " +
                 "DASC5-866:Defining a MongoDB table without a value for an option defined in mongodburl");
@@ -296,7 +296,7 @@ public class DefineMongoTableTest {
         Assert.assertEquals(priceIndexActual, priceIndexExpected, "Index Creation Failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest14() {
         log.info("mongoTableDefinitionTest14 - " +
                 "DASC5-869:Defining a MongoDB table without defining a value for indexing column within IndexBy field");
@@ -312,7 +312,7 @@ public class DefineMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest15() {
         log.info("mongoTableDefinitionTest15 - " +
                 "DASC5-870:Defining a MongoDB table with an invalid value for indexing column within IndexBy field");
@@ -382,7 +382,7 @@ public class DefineMongoTableTest {
         Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest18() {
         log.info("mongoTableDefinitionTest18 - " +
                 "DASC5-874:Defining a MongoDB table by defining non existing options within IndexBy field");
@@ -409,7 +409,7 @@ public class DefineMongoTableTest {
         Assert.assertEquals(indexActual, indexExcepted, "Index Definition Failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void mongoTableDefinitionTest19() {
         log.info("mongoTableDefinitionTest19 - " +
                 "DASC5-875:Defining a MongoDB table by defining an option with an invalid value within IndexBy field");
