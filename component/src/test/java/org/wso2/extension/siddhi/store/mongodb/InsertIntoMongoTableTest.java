@@ -295,7 +295,7 @@ public class InsertIntoMongoTableTest {
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
 
         String uri = MongoTableTestUtils
-                .resolveBaseUri("mongodb://admin121:admin123@{{docker.ip}}:{{docker.port}}/{{mongo.database}}");
+                .resolveBaseUri("mongodb://admin121:admin123@{{mongo.servers}}/{{mongo.database}}");
 
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
