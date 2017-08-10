@@ -26,12 +26,11 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.core.table.record.ConditionVisitor;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class ConditionVisitorTest {
 
-    private final Log log = LogFactory.getLog(ConditionVisitor.class);
+    private final Log log = LogFactory.getLog(ConditionVisitorTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
 
