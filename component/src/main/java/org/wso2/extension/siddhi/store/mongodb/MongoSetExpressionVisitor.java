@@ -19,7 +19,7 @@ package org.wso2.extension.siddhi.store.mongodb;
 
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.extension.siddhi.store.mongodb.util.Constant;
-import org.wso2.siddhi.core.table.record.BaseConditionVisitor;
+import org.wso2.siddhi.core.table.record.BaseExpressionVisitor;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
@@ -31,14 +31,14 @@ import java.util.Stack;
  * Class which is used by the Siddhi runtime for instructions on converting the SiddhiQL condition to the condition
  * format understood by the MongoDB.
  */
-public class MongoSetConditionVisitor extends BaseConditionVisitor {
+public class MongoSetExpressionVisitor extends BaseExpressionVisitor {
     private Stack<String> conditionOperands;
     private Map<String, Object> placeholders;
 
     private int streamVarCount;
     private int constantCount;
 
-    public MongoSetConditionVisitor() {
+    public MongoSetExpressionVisitor() {
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.conditionOperands = new Stack<>();
@@ -199,7 +199,7 @@ public class MongoSetConditionVisitor extends BaseConditionVisitor {
 
     @Override
     public void beginVisitAttributeFunction(String namespace, String functionName) {
-        throw new MongoTableException("MongoDB Event Table does not support SET function.");
+       throw new MongoTableException("MongoDB Event Table does not support SET function.");
     }
 
 

@@ -48,8 +48,8 @@ import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.table.record.AbstractRecordTable;
 import org.wso2.siddhi.core.table.record.ExpressionBuilder;
 import org.wso2.siddhi.core.table.record.RecordIterator;
-import org.wso2.siddhi.core.table.record.RecordTableCompiledUpdateSet;
 import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import org.wso2.siddhi.core.util.collection.operator.CompiledExpression;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.annotation.Annotation;
 import org.wso2.siddhi.query.api.definition.Attribute;
@@ -511,9 +511,8 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void update(CompiledCondition compiledCondition,
                           List<Map<String, Object>> list,
-                          RecordTableCompiledUpdateSet recordTableCompiledUpdateSet,
-                          List<Map<String, Object>> list1)
-            throws ConnectionUnavailableException {
+                          Map<String, CompiledExpression> map,
+                          List<Map<String, Object>> list1) throws ConnectionUnavailableException {
         List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
                     int ordinal = list.indexOf(conditionParameterMap);
@@ -529,9 +528,9 @@ public class MongoDBEventTable extends AbstractRecordTable {
     @Override
     protected void updateOrAdd(CompiledCondition compiledCondition,
                                List<Map<String, Object>> list,
-                               RecordTableCompiledUpdateSet recordTableCompiledUpdateSet,
-                               List<Map<String, Object>> list1, List<Object[]> list2)
-            throws ConnectionUnavailableException {
+                               Map<String, CompiledExpression> map,
+                               List<Map<String, Object>> list1,
+                               List<Object[]> list2) throws ConnectionUnavailableException {
         List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
                     int ordinal = list.indexOf(conditionParameterMap);
@@ -547,14 +546,14 @@ public class MongoDBEventTable extends AbstractRecordTable {
 
     @Override
     protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
-        MongoConditionVisitor visitor = new MongoConditionVisitor();
+        MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         expressionBuilder.build(visitor);
         return new MongoCompiledCondition(visitor.getCompiledCondition(), visitor.getPlaceholders());
     }
 
     @Override
     protected CompiledCondition compileSetAttribute(ExpressionBuilder expressionBuilder) {
-        MongoSetConditionVisitor visitor = new MongoSetConditionVisitor();
+        MongoSetExpressionVisitor visitor = new MongoSetExpressionVisitor();
         expressionBuilder.build(visitor);
         return new MongoCompiledCondition(visitor.getCompiledCondition(), visitor.getPlaceholders());
     }

@@ -20,7 +20,7 @@ package org.wso2.extension.siddhi.store.mongodb;
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.extension.siddhi.store.mongodb.util.Constant;
 import org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants;
-import org.wso2.siddhi.core.table.record.BaseConditionVisitor;
+import org.wso2.siddhi.core.table.record.BaseExpressionVisitor;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import org.wso2.siddhi.query.api.expression.condition.Compare;
 
@@ -34,14 +34,14 @@ import java.util.regex.Pattern;
  * Class which is used by the Siddhi runtime for instructions on converting the SiddhiQL condition to the condition
  * format understood by the MongoDB.
  */
-public class MongoConditionVisitor extends BaseConditionVisitor {
+public class MongoExpressionVisitor extends BaseExpressionVisitor {
     private Stack<String> conditionOperands;
     private Map<String, Object> placeholders;
 
     private int streamVarCount;
     private int constantCount;
 
-    public MongoConditionVisitor() {
+    public MongoExpressionVisitor() {
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.conditionOperands = new Stack<>();
