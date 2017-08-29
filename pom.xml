@@ -16,9 +16,9 @@
   ~ specific language governing permissions and limitations
   ~ under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
@@ -40,6 +40,7 @@
             </activation>
             <modules>
                 <module>component</module>
+                <module>coverage-report</module>
             </modules>
         </profile>
     </profiles>
@@ -51,6 +52,8 @@
         <testng.version>6.11</testng.version>
         <mongodb.driver.version>3.4.2</mongodb.driver.version>
         <fabric8.docker.version>0.21.0</fabric8.docker.version>
+        <jacoco.plugin.version>0.7.8</jacoco.plugin.version>
+        <jacoco.ant.version>0.7.8</jacoco.ant.version>
     </properties>
 
     <scm>
@@ -88,9 +91,23 @@
                 <version>${testng.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>org.jacoco.ant</artifactId>
+                <version>${jacoco.ant.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.wso2.siddhi</groupId>

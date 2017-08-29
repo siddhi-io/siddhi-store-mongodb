@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>siddhi-store-mongodb-parent</artifactId>
+        <groupId>org.wso2.extension.siddhi.store.mongodb</groupId>
+        <version>1.0.4-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>coverage-report</artifactId>
+
+    <profiles>
+        <profile>
+            <id>test-coverage-report-aggregation</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-jacoco-dependencies</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <includeTypes>jar</includeTypes>
+                                    <includeArtifactIds>org.jacoco.ant</includeArtifactIds>
+                                    <stripVersion>true</stripVersion>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target xmlns:jacoco="antlib:org.jacoco.ant">
+                                        <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+                                            <classpath path="${project.build.directory}"/>
+                                        </taskdef>
+                                        <jacoco:merge destfile="${project.build.directory}/merged.exec">
+                                            <fileset dir="${component.basedir}/target" includes="*.exec"/>
+                                        </jacoco:merge>
+                                        <jacoco:report>
+                                            <executiondata>
+                                                <file file="${project.build.directory}/merged.exec"/>
+                                            </executiondata>
+                                            <structure name="Siddhi-store-mongodb Tests">
+                                                <classfiles>
+                                                    <fileset dir="${component.basedir}/target/classes">
+                                                        <exclude name="**/*Constants.class"/>
+                                                        <exclude name="**/*Exception.class"/>
+                                                    </fileset>
+                                                </classfiles>
+                                                <sourcefiles encoding="UTF-8">
+                                                    <fileset dir="${component.basedir}/src/main/java"/>
+                                                </sourcefiles>
+                                            </structure>
+                                            <html destdir="${project.build.directory}/coverage-reports"/>
+                                        </jacoco:report>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.jacoco</groupId>
+                                <artifactId>org.jacoco.ant</artifactId>
+                                <version>${jacoco.ant.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+    <properties>
+        <component.basedir>../component</component.basedir>
+    </properties>
+
+</project>
