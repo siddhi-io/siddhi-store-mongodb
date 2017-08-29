@@ -27,7 +27,7 @@
 
     <groupId>org.wso2.extension.siddhi.store.mongodb</groupId>
     <artifactId>siddhi-store-mongodb-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Siddhi Store Mongodb Extension Parent</name>
     <url>https://github.com/wso2-extensions/siddhi-store-mongodb</url>
