@@ -27,10 +27,10 @@ import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.query.output.callback.QueryCallback;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.core.util.SiddhiTestHelper;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -120,7 +120,7 @@ public class JoinMongoTableTest {
         Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMongoTableJoinQuery2() {
         log.info("testMongoTableJoinQuery2DASC5-916:Read events from a non existing MongoDB collection");
 
@@ -145,7 +145,7 @@ public class JoinMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMongoTableJoinQuery3() {
         log.info("testMongoTableJoinQuery3 - " +
                 "DASC5-917:Read events from a MongoDB collection by sending through non existing stream");
@@ -231,7 +231,7 @@ public class JoinMongoTableTest {
         Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void testMongoTableJoinQuery5() {
         log.info("testMongoTableJoinQuery5 - " +
                 "DASC5-919:Read events from a MongoDB collection for non existing attributes");

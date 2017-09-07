@@ -23,10 +23,11 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class ConditionVisitorTest {
 
@@ -44,7 +45,7 @@ public class ConditionVisitorTest {
         log.info("== MongoDB Collection IN tests completed ==");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void conditionBuilderTest1() {
         log.info("conditionBuilderTest1");
 
@@ -68,7 +69,7 @@ public class ConditionVisitorTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void conditionBuilderTest2() {
         log.info("conditionBuilderTest2");
 
@@ -536,7 +537,7 @@ public class ConditionVisitorTest {
         Assert.assertEquals(totalDocumentsInCollection, 2, "Deletion failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void conditionBuilderTest15() throws InterruptedException {
         log.info("conditionBuilderTest15");
 
@@ -608,7 +609,7 @@ public class ConditionVisitorTest {
         Assert.assertEquals(totalDocumentsInCollection, 0, "Deletion failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = MongoTableException.class)
     public void conditionBuilderTest17() {
         log.info("conditionBuilderTest17");
 
@@ -633,7 +634,7 @@ public class ConditionVisitorTest {
     }
 
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void conditionBuilderTest18() {
         log.info("conditionBuilderTest18");
 

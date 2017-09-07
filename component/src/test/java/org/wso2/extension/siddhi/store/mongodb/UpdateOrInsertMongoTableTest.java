@@ -26,8 +26,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 public class UpdateOrInsertMongoTableTest {
 
@@ -180,7 +180,7 @@ public class UpdateOrInsertMongoTableTest {
         Assert.assertEquals(updatedDocument, expectedUpdatedDocument, "Update Failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void updateOrInsertMongoTableTest4() {
         log.info("updateOrInsertMongoTableTest4 - DASC5-932:[N] Configure siddhi to perform insert/update with " +
                 "a non existing stream");
@@ -205,7 +205,7 @@ public class UpdateOrInsertMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void updateOrInsertMongoTableTest5() {
         log.info("updateOrInsertMongoTableTest5 - DASC5-933:[N] Configure siddhi to perform insert/update with an " +
                 "undefined MongoDB Document");
@@ -230,7 +230,7 @@ public class UpdateOrInsertMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void updateOrInsertMongoTableTest6() {
         log.info("updateOrInsertMongoTableTest6 - DASC5-934:[N] Configure siddhi to perform insert/update on " +
                 "MongoDB Document with a non-existing attribute");
@@ -255,7 +255,7 @@ public class UpdateOrInsertMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void updateOrInsertMongoTableTest7() {
         log.info("updateOrInsertMongoTableTest7 - DASC5-935:[N] Configure siddhi to perform insert/update on " +
                 "MongoDB Document incorrect siddhi query");
