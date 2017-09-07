@@ -40,7 +40,7 @@
             </activation>
             <modules>
                 <module>component</module>
-                <module>coverage-report</module>
+                <module>coverage-reports</module>
             </modules>
         </profile>
     </profiles>

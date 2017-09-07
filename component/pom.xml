@@ -79,7 +79,7 @@
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <configuration>
-                                    <destFile>${basedir}/target/jacoco.exec</destFile>
+                                    <destFile>${basedir}/target/coverage-reports/jacoco.exec</destFile>
                                     <propertyName>jcoverage.command</propertyName>
                                 </configuration>
                             </execution>
@@ -190,7 +190,7 @@
                                     <goal>prepare-agent</goal>
                                 </goals>
                                 <configuration>
-                                    <destFile>${basedir}/target/jacoco-ssl.exec</destFile>
+                                    <destFile>${basedir}/target/coverage-reports/jacoco-ssl.exec</destFile>
                                     <propertyName>jcoverage.command</propertyName>
                                 </configuration>
                             </execution>
