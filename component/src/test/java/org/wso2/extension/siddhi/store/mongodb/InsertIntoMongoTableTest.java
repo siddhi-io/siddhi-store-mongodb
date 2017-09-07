@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import org.wso2.siddhi.query.api.exception.DuplicateDefinitionException;
 import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
@@ -154,7 +155,7 @@ public class InsertIntoMongoTableTest {
         Assert.assertEquals(totalDocumentsInCollection, 0, "Insertion failed");
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void insertIntoMongoTableTest5() {
         log.info("insertIntoMongoTableTest5 - " +
                 "DASC5-883:[N] Insert events to a MongoDB table by selecting from non existing stream");
@@ -176,7 +177,7 @@ public class InsertIntoMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void insertIntoMongoTableTest6() {
         log.info("insertIntoMongoTableTest6 - " +
                 "DASC5-888:[N] Insert events to a MongoDB table when the stream has not defined");

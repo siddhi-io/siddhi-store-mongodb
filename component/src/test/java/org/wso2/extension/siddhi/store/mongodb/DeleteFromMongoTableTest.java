@@ -25,8 +25,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-import org.wso2.siddhi.query.api.exception.SiddhiAppValidationException;
 
 
 public class DeleteFromMongoTableTest {
@@ -86,7 +86,7 @@ public class DeleteFromMongoTableTest {
     }
 
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void deleteFromMongoTableTest2() {
         log.info("deleteFromMongoTableTest2 - " +
                 "DASC5-904:Delete an event from a non existing MongoDB table");
@@ -112,7 +112,7 @@ public class DeleteFromMongoTableTest {
     }
 
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void deleteFromMongoTableTest3() {
         log.info("deleteFromMongoTableTest3 - " +
                 "DASC5-905:Delete an event from a MongoDB table by selecting from non existing stream");
@@ -138,7 +138,7 @@ public class DeleteFromMongoTableTest {
         siddhiAppRuntime.shutdown();
     }
 
-    @Test(expectedExceptions = SiddhiAppValidationException.class)
+    @Test(expectedExceptions = SiddhiAppCreationException.class)
     public void deleteFromMongoTableTest4() {
         log.info("deleteFromMongoTableTest4 - " +
                 "DASC5-906:Delete an event from a MongoDB table based on a non-existing attribute");

@@ -40,13 +40,13 @@
             </activation>
             <modules>
                 <module>component</module>
-                <module>coverage-report</module>
+                <module>coverage-reports</module>
             </modules>
         </profile>
     </profiles>
 
     <properties>
-        <siddhi.version>4.0.0-M52</siddhi.version>
+        <siddhi.version>4.0.0-M61</siddhi.version>
         <junit.version>4.12</junit.version>
         <commons.logging.version>1.1.1</commons.logging.version>
         <testng.version>6.11</testng.version>
