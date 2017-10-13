@@ -53,6 +53,8 @@
         <fabric8.docker.version>0.21.0</fabric8.docker.version>
         <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
         <jacoco.ant.version>0.7.9</jacoco.ant.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <scm>
