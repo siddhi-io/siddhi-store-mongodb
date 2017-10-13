@@ -51,8 +51,8 @@
         <testng.version>6.11</testng.version>
         <mongodb.driver.version>3.4.2</mongodb.driver.version>
         <fabric8.docker.version>0.21.0</fabric8.docker.version>
-        <jacoco.plugin.version>0.7.8</jacoco.plugin.version>
-        <jacoco.ant.version>0.7.8</jacoco.ant.version>
+        <jacoco.plugin.version>0.7.9</jacoco.plugin.version>
+        <jacoco.ant.version>0.7.9</jacoco.ant.version>
     </properties>
 
     <scm>
