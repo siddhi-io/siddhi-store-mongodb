@@ -15,6 +15,7 @@ google_analytics:
 pages:
 - Welcome to WSO2 Siddhi Store Mongodb: index.md
 - API Docs:
-  - 1.0.5-SNAPSHOT: api/1.0.5-SNAPSHOT.md
+  - 1.0.7: api/1.0.7.md
+  - latest: api/latest.md
 - License: license.md
 theme: material
