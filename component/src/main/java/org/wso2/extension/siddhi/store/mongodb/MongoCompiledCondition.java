@@ -37,7 +37,7 @@ public class MongoCompiledCondition implements CompiledCondition {
     }
 
     @Override
-    public CompiledCondition cloneCompiledCondition(String key) {
+    public CompiledCondition cloneCompilation(String key) {
         return null;
     }
 
@@ -52,5 +52,4 @@ public class MongoCompiledCondition implements CompiledCondition {
     public Map<String, Object> getPlaceholders() {
         return placeholders;
     }
-
 }
