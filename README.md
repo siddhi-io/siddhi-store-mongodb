@@ -10,7 +10,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.12">1.0.12</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.13">1.0.13</a>.
 
 ## Prerequisites
 
@@ -49,7 +49,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.12/#mongodb-store">mongodb</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>)*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.13/#mongodb-store">mongodb</a> *(<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>)*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
 
 ## How to Contribute
  
