@@ -194,6 +194,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#jenkins-build-status" title="Jenkins Build Status" class="md-nav__link">
     Jenkins Build Status
   </a>
@@ -255,6 +262,18 @@
       </label>
       <ul class="md-nav__list" data-md-scrollfix>
         
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/1.0.15/" title="1.0.15" class="md-nav__link">
+      1.0.15
+    </a>
+  </li>
+
         
           
           
@@ -423,6 +442,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#jenkins-build-status" title="Jenkins Build Status" class="md-nav__link">
     Jenkins Build Status
   </a>
@@ -481,7 +507,7 @@ Find some useful links below:</p>
 <li><a target="_blank" href="https://github.com/wso2-extensions/siddhi-store-mongodb/issues">Issue tracker</a></li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.14">1.0.14</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.15">1.0.15</a>.</p>
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
 <li>A MongoDB server instance should be started.</li>
@@ -508,6 +534,44 @@ Find some useful links below:</p>
      &lt;/dependency&gt;
 </code></pre>
 
+<h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)</h2>
+<p>The MongoDB functionality are tested with the docker base integration test framework. The test framework initializes the docker container according to the given profile before executing the test suite.</p>
+<ol>
+<li>
+<p>Install and run docker in daemon mode.</p>
+<ul>
+<li>
+<p>Installing docker on Linux,<br>
+   Note:<br>    These commands retrieve content from get.docker.com web in a quiet output-document mode and install.Then we need to stop docker service as it needs to restart docker in daemon mode. After that, we need to export docker daemon host.</p>
+<blockquote>
+<p>wget -qO- https://get.docker.com/ | sh</p>
+<p>sudo service dockerd stop</p>
+<p>export DOCKER_HOST=tcp://172.17.0.1:4326</p>
+<p>docker daemon -H tcp://172.17.0.1:4326</p>
+</blockquote>
+</li>
+<li>
+<p>On installing docker on Mac, see <a target="_blank" href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></p>
+</li>
+<li>
+<p>On installing docker on Windows, see <a target="_blank" href="https://docs.docker.com/docker-for-windows/">Get started with Docker for Windows</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>To run the integration tests, issue the following commands.</p>
+<ul>
+<li>
+<p>MongoDB without SSL connection</p>
+<p><code>mvn verify -P mongod -Ddocker.removeVolumes=true</code></p>
+</li>
+<li>
+<p>MongoDB with SSL connection</p>
+<p><code>mvn verify -P mongod-ssl -Ddocker.removeVolumes=true</code></p>
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="jenkins-build-status">Jenkins Build Status</h2>
 <hr />
 <table>
@@ -527,7 +591,7 @@ Find some useful links below:</p>
 <hr />
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.14/#mongodb-store">mongodb</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a></em><br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div></li>
+<li><a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.15/#mongodb-store">mongodb</a> <em><a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a></em><br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div></li>
 </ul>
 <h2 id="how-to-contribute">How to Contribute</h2>
 <ul>
@@ -577,13 +641,13 @@ Find some useful links below:</p>
       <nav class="md-footer-nav__inner md-grid">
         
         
-          <a href="api/1.0.14/" title="1.0.14" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="api/1.0.15/" title="1.0.15" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.14
+                1.0.15
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
