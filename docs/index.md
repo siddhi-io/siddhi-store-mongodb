@@ -10,7 +10,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.14">1.0.14</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.15">1.0.15</a>.
 
 ## Prerequisites
 
@@ -37,6 +37,41 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
      </dependency>
 ```
 
+## Running Integration tests in docker containers(Optional)
+
+The MongoDB functionality are tested with the docker base integration test framework. The test framework initializes the docker container according to the given profile before executing the test suite.
+
+1. Install and run docker in daemon mode.
+
+    *  Installing docker on Linux,<br>
+       Note:<br>    These commands retrieve content from get.docker.com web in a quiet output-document mode and install.Then we need to stop docker service as it needs to restart docker in daemon mode. After that, we need to export docker daemon host.
+       
+        > wget -qO- https://get.docker.com/ | sh
+        >
+        > sudo service dockerd stop
+        >
+        > export DOCKER_HOST=tcp://172.17.0.1:4326
+        >
+        > docker daemon -H tcp://172.17.0.1:4326
+
+    *  On installing docker on Mac, see <a target="_blank" href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a>
+
+    *  On installing docker on Windows, see <a target="_blank" href="https://docs.docker.com/docker-for-windows/">Get started with Docker for Windows</a>
+   
+2. To run the integration tests, issue the following commands.
+
+    * MongoDB without SSL connection
+    
+           ```
+           mvn verify -P mongod -Ddocker.removeVolumes=true
+           ```
+
+    * MongoDB with SSL connection
+           
+           ```
+           mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
+           ```
+           
 ## Jenkins Build Status
 
 ---
@@ -49,7 +84,7 @@ Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/si
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.14/#mongodb-store">mongodb</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.0.15/#mongodb-store">mongodb</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
 
 ## How to Contribute
  
