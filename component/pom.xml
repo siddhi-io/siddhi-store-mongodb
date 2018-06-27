@@ -319,7 +319,10 @@
                             org.wso2.extension.siddhi.store.mongodb.*
                         </Export-Package>
                         <Import-Package>
-                            *;resolution:=optional
+                            org.apache.commons.logging.*;version="${commons.logging.version.range}",
+                            org.wso2.siddhi.annotation.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.core.*;version="${siddhi.version.range}",
+                            org.wso2.siddhi.query.api.*;version="${siddhi.version.range}",
                         </Import-Package>
                         <Include-Resource>
                             META-INF=target/classes/META-INF
