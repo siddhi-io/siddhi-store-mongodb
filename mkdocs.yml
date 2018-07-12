@@ -1,19 +1,36 @@
-site_name: Siddhi-Store-Mongodb
+site_name: Siddhi Store MongoDB
+site_description: Siddhi Store MongoDB Extension
+site_author: WSO2
+site_url: https://wso2-extensions.github.io/siddhi-store-mongodb/
 extra_css:
 - stylesheets/extra.css
 extra_javascript:
 - javascripts/extra.js
-site_favicon: images/favicon.ico
-extra:
+repo_name: Siddhi-Store-MongoDB
+repo_url: https://github.com/wso2-extensions/siddhi-store-mongodb
+copyright: Copyright &copy; 2011 - 2018 WSO2
+theme:
+  name: 'material'
   logo: images/siddhi-logo-w.svg
+  favicon: images/favicon.ico
   palette:
     primary: teal
     accent: teal
 google_analytics:
 - UA-103065-28
 - auto
+extra:
+  social:
+  - type: github
+    link: https://github.com/wso2/siddhi
+  - type: linkedin
+    link: https://www.linkedin.com/groups/13553064
+markdown_extensions:
+  - admonition
+  - toc(permalink=true)
+  - codehilite(guess_lang=false)
 pages:
-- Welcome to WSO2 Siddhi Store Mongodb: index.md
+- Welcome : index.md
 - API Docs:
   - 1.0.15: api/1.0.15.md
   - 1.0.14: api/1.0.14.md
@@ -26,4 +43,3 @@ pages:
   - 1.0.7: api/1.0.7.md
   - latest: api/latest.md
 - License: license.md
-theme: material
