@@ -46,13 +46,10 @@ The MongoDB functionality are tested with the docker base integration test frame
     *  Installing docker on Linux,<br>
        Note:<br>    These commands retrieve content from get.docker.com web in a quiet output-document mode and install.Then we need to stop docker service as it needs to restart docker in daemon mode. After that, we need to export docker daemon host.
        
-        > wget -qO- https://get.docker.com/ | sh
-        >
-        > sudo service dockerd stop
-        >
-        > export DOCKER_HOST=tcp://172.17.0.1:4326
-        >
-        > docker daemon -H tcp://172.17.0.1:4326
+            wget -qO- https://get.docker.com/ | sh
+            sudo service dockerd stop
+            export DOCKER_HOST=tcp://172.17.0.1:4326
+            docker daemon -H tcp://172.17.0.1:4326
 
     *  On installing docker on Mac, see <a target="_blank" href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a>
 
@@ -62,15 +59,11 @@ The MongoDB functionality are tested with the docker base integration test frame
 
     * MongoDB without SSL connection
     
-           ```
-           mvn verify -P mongod -Ddocker.removeVolumes=true
-           ```
+            mvn verify -P mongod -Ddocker.removeVolumes=true
 
     * MongoDB with SSL connection
            
-           ```
-           mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
-           ```
+            mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
            
 ## Jenkins Build Status
 
