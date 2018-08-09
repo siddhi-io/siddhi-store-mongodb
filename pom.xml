@@ -45,7 +45,7 @@
     </profiles>
 
     <properties>
-        <siddhi.version>4.1.38</siddhi.version>
+        <siddhi.version>4.2.0</siddhi.version>
         <siddhi.version.range>[4.1.38,5.0)</siddhi.version.range>
         <junit.version>4.12</junit.version>
         <commons.logging.version>1.1.1</commons.logging.version>
