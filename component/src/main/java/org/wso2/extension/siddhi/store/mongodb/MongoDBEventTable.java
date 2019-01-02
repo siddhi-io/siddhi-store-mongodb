@@ -311,13 +311,6 @@ public class MongoDBEventTable extends AbstractRecordTable {
         this.collectionName = MongoTableUtils.isEmpty(customCollectionName) ?
                 tableDefinition.getId() : customCollectionName;
         this.initialCollectionTest = false;
-        try {
-            this.mongoClient = new MongoClient(this.mongoClientURI);
-        } catch (MongoException e) {
-            throw new SiddhiAppCreationException("Annotation 'Store' contains illegal value for " +
-                    "element 'mongodb.uri' as '" + this.mongoClientURI + "'. Please check " +
-                    "your query and try again.", e);
-        }
     }
 
     /**
@@ -377,6 +370,15 @@ public class MongoDBEventTable extends AbstractRecordTable {
      * @return a new {@link MongoDatabase} instance from the Mongo client.
      */
     private MongoDatabase getDatabaseObject() {
+        if (this.mongoClient == null) {
+            try {
+                this.mongoClient = new MongoClient(this.mongoClientURI);
+            } catch (MongoException e) {
+                throw new SiddhiAppCreationException("Annotation 'Store' contains illegal value for " +
+                        "element 'mongodb.uri' as '" + this.mongoClientURI + "'. Please check " +
+                        "your query and try again.", e);
+            }
+        }
         return this.mongoClient.getDatabase(this.databaseName);
     }
 
@@ -386,7 +388,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
      * @return a new {@link MongoCollection} instance from the Mongo client.
      */
     private MongoCollection<Document> getCollectionObject() {
-        return this.mongoClient.getDatabase(this.databaseName).getCollection(this.collectionName);
+        return this.getDatabaseObject().getCollection(this.collectionName);
     }
 
     /**
@@ -588,7 +590,7 @@ public class MongoDBEventTable extends AbstractRecordTable {
             this.initialCollectionTest = true;
         } else {
             try {
-                this.mongoClient.getDatabase(this.databaseName).listCollectionNames();
+                this.getDatabaseObject().listCollectionNames();
             } catch (MongoSocketOpenException e) {
                 throw new ConnectionUnavailableException(e);
             }
@@ -601,6 +603,8 @@ public class MongoDBEventTable extends AbstractRecordTable {
 
     @Override
     protected void destroy() {
-        this.mongoClient.close();
+        if (this.mongoClient != null) {
+            this.mongoClient.close();
+        }
     }
 }
