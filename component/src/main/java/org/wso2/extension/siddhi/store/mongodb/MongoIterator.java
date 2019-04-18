@@ -19,8 +19,8 @@ package org.wso2.extension.siddhi.store.mongodb;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
+import io.siddhi.core.table.record.RecordIterator;
 import org.bson.Document;
-import org.wso2.siddhi.core.table.record.RecordIterator;
 
 import java.io.IOException;
 import java.util.ArrayList;

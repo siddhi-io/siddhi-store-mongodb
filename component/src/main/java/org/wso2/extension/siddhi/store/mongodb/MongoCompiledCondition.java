@@ -17,7 +17,7 @@
  */
 package org.wso2.extension.siddhi.store.mongodb;
 
-import org.wso2.siddhi.core.util.collection.operator.CompiledCondition;
+import io.siddhi.core.util.collection.operator.CompiledCondition;
 
 import java.util.Map;
 
@@ -34,11 +34,6 @@ public class MongoCompiledCondition implements CompiledCondition {
     public MongoCompiledCondition(String compiledQuery, Map<String, Object> parameters) {
         this.compiledQuery = compiledQuery;
         this.placeholders = parameters;
-    }
-
-    @Override
-    public CompiledCondition cloneCompilation(String key) {
-        return null;
     }
 
     public String getCompiledQuery() {
