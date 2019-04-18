@@ -17,12 +17,12 @@
  */
 package org.wso2.extension.siddhi.store.mongodb;
 
+import io.siddhi.core.table.record.BaseExpressionVisitor;
+import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.condition.Compare;
 import org.wso2.extension.siddhi.store.mongodb.exception.MongoTableException;
 import org.wso2.extension.siddhi.store.mongodb.util.Constant;
 import org.wso2.extension.siddhi.store.mongodb.util.MongoTableConstants;
-import org.wso2.siddhi.core.table.record.BaseExpressionVisitor;
-import org.wso2.siddhi.query.api.definition.Attribute;
-import org.wso2.siddhi.query.api.expression.condition.Compare;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -17,7 +17,7 @@
  */
 package org.wso2.extension.siddhi.store.mongodb.exception;
 
-import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
+import io.siddhi.core.exception.SiddhiAppCreationException;
 
 /**
  * Represents an unchecked exception which may be thrown during runtime, from which we may not expect the Siddhi runtime
