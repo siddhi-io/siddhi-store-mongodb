@@ -10,7 +10,7 @@ Find some useful links below:
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.1.0">1.1.0</a>.
+Latest API Docs is <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/2.0.0">2.0.0</a>.
 
 ## Prerequisites
 
@@ -77,7 +77,7 @@ The MongoDB functionality are tested with the docker base integration test frame
 
 ## Features
 
-* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/1.1.0/#mongodb-store">mongodb</a> *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#store">(Store)</a>*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
+* <a target="_blank" href="https://wso2-extensions.github.io/siddhi-store-mongodb/api/2.0.0/#mongodb-store">mongodb</a> *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#store">(Store)</a>*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
 
 ## How to Contribute
  
