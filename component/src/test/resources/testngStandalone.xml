@@ -3,16 +3,16 @@
 <suite name="MonogStoreTestSuite" verbose="1">
     <test name="MonogoStoreTest - Standalone">
         <classes>
-            <class name="org.wso2.extension.siddhi.store.mongodb.DefineMongoTableTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.ConditionVisitorTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.ContainsMongoTableTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.DeleteFromMongoTableTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.InsertIntoMongoTableTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.JoinMongoTableTest"/>
-            <class name="org.wso2.extension.siddhi.store.mongodb.UpdateOrInsertMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.DefineMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.ConditionVisitorTest"/>
+            <class name="io.siddhi.extension.store.mongodb.ContainsMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.DeleteFromMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.InsertIntoMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.JoinMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.UpdateOrInsertMongoTableTest"/>
             <!-- Skipping update test till set is implemented-->
             <!--
-                        <class name="org.wso2.extension.siddhi.store.mongodb.UpdateMongoTableTest" />
+                        <class name="io.siddhi.extension.store.mongodb.UpdateMongoTableTest" />
             -->
         </classes>
     </test>

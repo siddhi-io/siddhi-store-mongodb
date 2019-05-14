@@ -3,7 +3,7 @@
 <suite name="MonogStoreTestSuite" verbose="1">
     <test name="MonogoStoreTest - Standalone">
         <classes>
-            <class name="org.wso2.extension.siddhi.store.mongodb.MongoDBConnectionSSLTest"/>
+            <class name="io.siddhi.extension.store.mongodb.MongoDBConnectionSSLTest"/>
         </classes>
     </test>
 </suite>
