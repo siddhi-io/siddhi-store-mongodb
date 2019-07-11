@@ -1,8 +1,8 @@
-# API Docs - v2.0.1
+# API Docs - v2.0.2-SNAPSHOT
 
 ## Store
 
-### mongodb *<a target="_blank" href="http://siddhi.io/documentation/siddhi-5.x/query-guide-5.x/#store">(Store)</a>*
+### mongodb *<a target="_blank" href="https://siddhi.io/en/v5.0/docs/query-guide/#store">(Store)</a>*
 
 <p style="word-wrap: break-word">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p>
 
@@ -255,5 +255,5 @@
 @IndexBy("volume 1 {background:true,unique:true}")
 define table FooTable (symbol string, price float, volume long);
 ```
-<p style="word-wrap: break-word">This will create a collection called FooTable for the events to be saved with symbol as Primary Key(unique index at mongod level) and index for the field volume will be created in ascending order with the index option to create the index in the background.<br><br>Note: <br>@PrimaryKey: This specifies a list of comma-separated values to be treated as unique fields in the table. Each record in the table must have a unique combination of values for the fields specified here.<br><br>@IndexBy: This specifies the fields that must be indexed at the database level. You can specify multiple values as a come-separated list. A single value to be in the format,<br>?&lt;FieldName&gt; &lt;SortOrder&gt; &lt;IndexOptions&gt;?<br>&lt;SortOrder&gt; - ( 1) for Ascending and (-1) for Descending<br>&lt;IndexOptions&gt; - Index Options must be defined inside curly brackets. {} to be used for default options. Options must follow the standard mongodb index options format. Reference : https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/<br>Example : ?symbol 1 {?unique?:true}?<br></p>
+<p style="word-wrap: break-word">This will create a collection called FooTable for the events to be saved with symbol as Primary Key(unique index at mongod level) and index for the field volume will be created in ascending order with the index option to create the index in the background.<br><br>Note: <br>@PrimaryKey: This specifies a list of comma-separated values to be treated as unique fields in the table. Each record in the table must have a unique combination of values for the fields specified here.<br><br>@IndexBy: This specifies the fields that must be indexed at the database level. You can specify multiple values as a come-separated list. A single value to be in the format,<br>“&lt;FieldName&gt; &lt;SortOrder&gt; &lt;IndexOptions&gt;”<br>&lt;SortOrder&gt; - ( 1) for Ascending and (-1) for Descending<br>&lt;IndexOptions&gt; - Index Options must be defined inside curly brackets. {} to be used for default options. Options must follow the standard mongodb index options format. Reference : https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/<br>Example : “symbol 1 {“unique”:true}”<br></p>
 

@@ -29,7 +29,7 @@
     <version>2.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Siddhi Store Mongodb Extension Parent</name>
-    <url>https://github.com/wso2-extensions/siddhi-store-mongodb</url>
+    <url>https://github.com/siddhi-io/siddhi-store-mongodb</url>
 
     <profiles>
         <profile>
@@ -60,9 +60,9 @@
     </properties>
 
     <scm>
-        <connection>scm:git:https://github.com/wso2-extensions/siddhi-store-mongodb.git</connection>
-        <url>https://github.com/wso2-extensions/siddhi-store-mongodb.git</url>
-        <developerConnection>scm:git:https://github.com/wso2-extensions/siddhi-store-mongodb.git</developerConnection>
+        <connection>scm:git:https://github.com/siddhi-io/siddhi-store-mongodb.git</connection>
+        <url>https://github.com/siddhi-io/siddhi-store-mongodb.git</url>
+        <developerConnection>scm:git:https://github.com/siddhi-io/siddhi-store-mongodb.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
 
