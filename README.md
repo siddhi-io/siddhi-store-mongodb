@@ -27,11 +27,11 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-s
 
 ## Dependencies 
 
-There are no other dependencies needed for this extension.
+MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
 
 ## Installation
 
-For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.
+For installing this extension on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.
 
 ## Running Integration tests in docker containers(Optional)
 
