@@ -312,7 +312,6 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>
-                            com.mongodb.*;
                             org.bson.*;
                         </Private-Package>
                         <Export-Package>
