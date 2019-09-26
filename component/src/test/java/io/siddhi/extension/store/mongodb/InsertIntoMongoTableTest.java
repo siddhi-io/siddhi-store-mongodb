@@ -26,6 +26,7 @@ import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -290,10 +291,14 @@ public class InsertIntoMongoTableTest {
         Assert.assertEquals(totalDocumentsInCollection, 2, "Insertion failed");
     }
 
-    @Test(expectedExceptions = MongoTableException.class)
+    @Test
     public void insertIntoMongoTableTest10() {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
+
+        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntime.class);
+        UnitTestAppender appender = new UnitTestAppender();
+        siddhiAppLogger.addAppender(appender);
 
         String uri = MongoTableTestUtils
                 .resolveBaseUri("mongodb://admin121:admin123@{{mongo.servers}}/{{mongo.database}}");
@@ -312,6 +317,15 @@ public class InsertIntoMongoTableTest {
                 "insert into FooTable;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         siddhiAppRuntime.start();
+
+        if (appender.getMessages() != null) {
+            AssertJUnit.assertTrue(appender.getMessages().contains("Error in retrieving collection names " +
+                    "from the database 'admin' : "));
+        } else {
+            AssertJUnit.fail();
+        }
+        siddhiAppLogger.removeAppender(appender);
+
         siddhiAppRuntime.shutdown();
     }
 
