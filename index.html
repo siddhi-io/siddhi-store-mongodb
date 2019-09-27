@@ -313,6 +313,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
     Support and Contribution
   </a>
@@ -357,6 +364,18 @@
   <li class="md-nav__item">
     <a href="api/latest/" title="latest" class="md-nav__link">
       latest
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="api/2.0.2/" title="2.0.2" class="md-nav__link">
+      2.0.2
     </a>
   </li>
 
@@ -650,6 +669,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#running-integration-tests-in-docker-containersoptional" title="Running Integration tests in docker containers(Optional)" class="md-nav__link">
+    Running Integration tests in docker containers(Optional)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#support-and-contribution" title="Support and Contribution" class="md-nav__link">
     Support and Contribution
   </a>
@@ -690,15 +716,54 @@
 <li>Versions 1.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.store.mongodb/siddhi-store-mongodb">here</a>.</li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.1">2.0.1</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2">2.0.2</a>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.1/#mongodb-store">mongodb</a> <em><a target="_blank" href="https://siddhi.io/en/v5.0/docs/query-guide/#store">(Store)</a></em><br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div></li>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2/#mongodb-store">mongodb</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div></li>
 </ul>
 <h2 id="dependencies">Dependencies</h2>
-<p>There are no other dependencies needed for this extension.</p>
+<p>MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.</p>
 <h2 id="installation">Installation</h2>
-<p>For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
+<p>For installing this extension on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
+<h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)</h2>
+<p>The MongoDB functionality are tested with the docker base integration test framework. The test framework initializes the docker container according to the given profile before executing the test suite.</p>
+<ol>
+<li>
+<p>Install and run docker in daemon mode.</p>
+<ul>
+<li>
+<p>Installing docker on Linux,<br>
+   Note:<br>    These commands retrieve content from get.docker.com web in a quiet output-document mode and install.Then we need to stop docker service as it needs to restart docker in daemon mode. After that, we need to export docker daemon host.</p>
+<pre><code>wget -qO- https://get.docker.com/ | sh
+sudo service dockerd stop
+export DOCKER_HOST=tcp://172.17.0.1:4326
+docker daemon -H tcp://172.17.0.1:4326
+</code></pre>
+</li>
+<li>
+<p>On installing docker on Mac, see <a target="_blank" href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></p>
+</li>
+<li>
+<p>On installing docker on Windows, see <a target="_blank" href="https://docs.docker.com/docker-for-windows/">Get started with Docker for Windows</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>To run the integration tests, issue the following commands.</p>
+<ul>
+<li>
+<p>MongoDB without SSL connection</p>
+<pre><code>mvn verify -P mongod -Ddocker.removeVolumes=true
+</code></pre>
+</li>
+<li>
+<p>MongoDB with SSL connection</p>
+<pre><code>mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
+</code></pre>
+</li>
+</ul>
+</li>
+</ol>
 <h2 id="support-and-contribution">Support and Contribution</h2>
 <ul>
 <li>
