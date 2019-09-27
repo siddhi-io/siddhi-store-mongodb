@@ -18,6 +18,7 @@
 package io.siddhi.extension.store.mongodb;
 
 import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiAppRuntimeImpl;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
@@ -295,7 +296,7 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
 
-        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntime.class);
+        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntimeImpl.class);
         UnitTestAppender appender = new UnitTestAppender();
         siddhiAppLogger.addAppender(appender);
 
