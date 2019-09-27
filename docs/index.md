@@ -19,19 +19,47 @@ For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and i
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.1">2.0.1</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2">2.0.2</a>.
 
 ## Features
 
-* <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.1/#mongodb-store">mongodb</a> *<a target="_blank" href="https://siddhi.io/en/v5.0/docs/query-guide/#store">(Store)</a>*<br><div style="padding-left: 1em;"><p>Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></div>
+* <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2/#mongodb-store">mongodb</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div>
 
 ## Dependencies 
 
-There are no other dependencies needed for this extension.
+MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
 
 ## Installation
 
-For installing this extension on various siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.
+For installing this extension on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.
+
+## Running Integration tests in docker containers(Optional)
+
+The MongoDB functionality are tested with the docker base integration test framework. The test framework initializes the docker container according to the given profile before executing the test suite.
+
+1. Install and run docker in daemon mode.
+
+    *  Installing docker on Linux,<br>
+       Note:<br>    These commands retrieve content from get.docker.com web in a quiet output-document mode and install.Then we need to stop docker service as it needs to restart docker in daemon mode. After that, we need to export docker daemon host.
+       
+            wget -qO- https://get.docker.com/ | sh
+            sudo service dockerd stop
+            export DOCKER_HOST=tcp://172.17.0.1:4326
+            docker daemon -H tcp://172.17.0.1:4326
+
+    *  On installing docker on Mac, see <a target="_blank" href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a>
+
+    *  On installing docker on Windows, see <a target="_blank" href="https://docs.docker.com/docker-for-windows/">Get started with Docker for Windows</a>
+   
+2. To run the integration tests, issue the following commands.
+
+    * MongoDB without SSL connection
+    
+            mvn verify -P mongod -Ddocker.removeVolumes=true
+
+    * MongoDB with SSL connection
+           
+            mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
 
 ## Support and Contribution
 
