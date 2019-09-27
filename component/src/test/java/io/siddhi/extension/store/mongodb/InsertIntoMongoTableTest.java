@@ -291,7 +291,7 @@ public class InsertIntoMongoTableTest {
     }
 
     @Test
-    public void insertIntoMongoTableTest10() {
+    public void insertIntoMongoTableTest10() throws InterruptedException {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
 
@@ -316,6 +316,7 @@ public class InsertIntoMongoTableTest {
                 "insert into FooTable;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         siddhiAppRuntime.start();
+        Thread.sleep(5000);
 
         if (appender.getMessages() != null) {
             AssertJUnit.assertTrue(appender.getMessages().contains("Error in retrieving collection names " +
