@@ -18,6 +18,7 @@
 package io.siddhi.extension.store.mongodb;
 
 import io.siddhi.core.SiddhiAppRuntime;
+import io.siddhi.core.SiddhiAppRuntimeImpl;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
@@ -291,11 +292,11 @@ public class InsertIntoMongoTableTest {
     }
 
     @Test
-    public void insertIntoMongoTableTest10() {
+    public void insertIntoMongoTableTest10() throws InterruptedException {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
 
-        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntime.class);
+        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntimeImpl.class);
         UnitTestAppender appender = new UnitTestAppender();
         siddhiAppLogger.addAppender(appender);
 
@@ -316,6 +317,7 @@ public class InsertIntoMongoTableTest {
                 "insert into FooTable;";
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
         siddhiAppRuntime.start();
+        Thread.sleep(5000);
 
         if (appender.getMessages() != null) {
             AssertJUnit.assertTrue(appender.getMessages().contains("Error in retrieving collection names " +
