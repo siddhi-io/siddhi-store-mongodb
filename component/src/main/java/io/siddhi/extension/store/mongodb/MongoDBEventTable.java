@@ -294,23 +294,24 @@ public class MongoDBEventTable extends AbstractRecordTable {
                 .getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations());
         Annotation primaryKeys = AnnotationHelper
                 .getAnnotation(ANNOTATION_PRIMARY_KEY, tableDefinition.getAnnotations());
-        Annotation indices = AnnotationHelper
-                .getAnnotation(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
+        List<Annotation> indices = AnnotationHelper
+                .getAnnotations(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
 
         this.initializeConnectionParameters(storeAnnotation, configReader);
-
-        this.expectedIndexModels = new ArrayList<>();
-        IndexModel primaryKey = MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames);
-        if (primaryKey != null) {
-            this.expectedIndexModels.add(primaryKey);
-        }
-        this.expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames));
 
         String customCollectionName = storeAnnotation.getElement(
                 MongoTableConstants.ANNOTATION_ELEMENT_COLLECTION_NAME);
         this.collectionName = MongoTableUtils.isEmpty(customCollectionName) ?
                 tableDefinition.getId() : customCollectionName;
         this.initialCollectionTest = false;
+
+        this.expectedIndexModels = new ArrayList<>();
+        IndexModel primaryKey = MongoTableUtils.extractPrimaryKey(primaryKeys, this.attributeNames);
+        if (primaryKey != null) {
+            this.expectedIndexModels.add(primaryKey);
+        }
+        this.expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames,
+                this.collectionName));
     }
 
     /**
