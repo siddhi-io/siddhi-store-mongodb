@@ -253,25 +253,30 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         syntax = "@Store(type=\"mongodb\"," +
                                 "mongodb.uri=\"mongodb://admin:admin@localhost/Foo\")\n" +
                                 "@PrimaryKey(\"symbol\")\n" +
-                                "@IndexBy(\"volume 1 {background:true,unique:true}\")\n" +
+                                "@Index(\"volume:1\", {background:true,unique:true}\")\n" +
                                 "define table FooTable (symbol string, price float, volume long);",
                         description = "This will create a collection called FooTable for the events to be saved " +
-                                "with symbol as Primary Key(unique index at mongod level) and index for the field " +
+                                "with symbol as Primary Key(unique index at mongoDB level) and index for the field " +
                                 "volume will be created in ascending order with the index option to create the index " +
                                 "in the background.\n\n" +
                                 "Note: \n" +
                                 "@PrimaryKey: This specifies a list of comma-separated values to be treated as " +
                                 "unique fields in the table. Each record in the table must have a unique combination " +
                                 "of values for the fields specified here.\n\n" +
-                                "@IndexBy: This specifies the fields that must be indexed at the database level. " +
+                                "@Index: This specifies the fields that must be indexed at the database level. " +
                                 "You can specify multiple values as a come-separated list. A single value to be in " +
-                                "the format,\n“<FieldName> <SortOrder> <IndexOptions>”\n" +
-                                "<SortOrder> - ( 1) for Ascending and (-1) for Descending\n" +
-                                "<IndexOptions> - Index Options must be defined inside curly brackets. {} to be " +
-                                "used for default options. Options must follow the standard mongodb index options " +
-                                "format. Reference : " +
-                                "https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/\n" +
-                                "Example : “symbol 1 {“unique”:true}”\n"
+                                "the format,\n`<FieldName>:<SortOrder>`. The last element is optional through which " +
+                                "a valid index options can be passed.\n" +
+                                "\t\t<SortOrder> : 1 for Ascending & -1 for Descending. " +
+                                "Optional, with default value as 1.\n" +
+                                "\t\t<IndexOptions> : Index Options must be defined inside curly brackets.\n" +
+                                "\t\t\tOptions must follow the standard mongodb index options format.\n" +
+                                "\t\t\thttps://docs.mongodb.com/manual/reference/method/db.collection.createIndex/" +
+                                "\n\n" +
+                                "Example 1: @Index(`'symbol:1'`, `'{\"unique\":true}'`)\n" +
+                                "Example 2: @Index(`'symbol'`, `'{\"unique\":true}'`)\n" +
+                                "Example 3: @Index(`'symbol:1'`, `'volume:-1'`, `'{\"unique\":true}'`)\n"
+
                 )
         }
 )
