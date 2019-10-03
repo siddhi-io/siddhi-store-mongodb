@@ -45,6 +45,7 @@ public class MongoTableConstants {
     public static final String REG_SIMPLE_EXPRESSION = "^\\{(\\S*):\\{.*}}$";
     public static final String REG_STREAMVAR_OR_CONST = "^strVar\\d*|^const\\d*";
     public static final String REG_INDEX_BY = "^(\\S*)(\\s1|\\s-1)?(\\s\\{.*})?$";
+    public static final String REG_INDEX_BY_NEW_OPTIONS = "^\\{.*\\}$";
 
     //Mongo filters for condition builder
     public static final String MONGO_AND_FILTER = "{$and:[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]}";
