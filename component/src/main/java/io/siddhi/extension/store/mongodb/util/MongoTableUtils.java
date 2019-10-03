@@ -112,6 +112,43 @@ public class MongoTableUtils {
         return new IndexModel(primaryKeyIndex, new IndexOptions().unique(true));
     }
 
+    public static List<IndexModel> extractIndexModels(Annotation indices, List<String> attributeNames,
+                                                      String tableName) {
+        if (indices == null) {
+            return new ArrayList<>();
+        }
+        log.warn("MongoDB definition uses depreciated @IndexBy. Please use @Index annotation");
+        Pattern indexBy = Pattern.compile(MongoTableConstants.REG_INDEX_BY);
+        return indices.getElements().stream().map(index -> {
+            Matcher matcher = indexBy.matcher(index.getValue());
+            if (matcher.matches() && attributeNames.contains(matcher.group(1))) {
+                Map<String, Integer> indexFields = new HashMap<>();
+                if (matcher.groupCount() == 4) {
+                    indexFields.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
+                    return createIndexModel(indexFields, matcher.group(3).trim(), tableName);
+                } else {
+                    if (matcher.groupCount() == 3) {
+                        if (matcher.group(3) == null) {
+                            indexFields.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
+                            return createIndexModel(indexFields, null, tableName);
+                        } else {
+                            indexFields.put(matcher.group(1), 1);
+                            return createIndexModel(indexFields, matcher.group(3).trim(), tableName);
+                        }
+                    } else {
+                        indexFields.put(matcher.group(1), 1);
+                        return createIndexModel(indexFields, null, tableName);
+                    }
+                }
+            } else {
+                throw new SiddhiAppCreationException("Annotation '@IndexBy' in table '" + tableName +
+                        "' contains illegal value : '" + index.getValue() + "'. " +
+                        "Please check your query and try again.");
+            }
+        }).collect(Collectors.toList());
+    }
+
+
     /**
      * Utility method which can be used to check if the given Indices are valid  and return List of
      * MongoDB Index Models when valid.
@@ -126,46 +163,55 @@ public class MongoTableUtils {
             return new ArrayList<>();
         }
 
-        Pattern indexBy = Pattern.compile(MongoTableConstants.REG_INDEX_BY);
-        Matcher depreciatedMatcher = indexBy.matcher(indices.get(0).getElements().get(0).getValue());
-        if (depreciatedMatcher.matches()) {
-            log.warn("MongoDB definition uses depreciated, please see example in API docs to know about the latest " +
-                    "syntax.");
-            if (indices.size() != 1) {
-                throw new SiddhiAppCreationException("Annotation 'IndexBy' in depreciated syntax can only be defined " +
-                        "once. Please see example in API docs to know about the latest syntax to create more " +
-                        "than one index.");
-            }
-            return indices.get(0).getElements().stream().map(index -> {
-                Matcher matcher = indexBy.matcher(index.getValue());
-                if (matcher.matches() && attributeNames.contains(matcher.group(1))) {
-                    Map<String, Integer> indexFields = new HashMap<>();
-                    if (matcher.groupCount() == 4) {
-                        indexFields.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
-                        return createIndexModel(indexFields, matcher.group(3).trim(), tableName);
-                    } else {
-                        if (matcher.groupCount() == 3) {
-                            if (matcher.group(3) == null) {
-                                indexFields.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
-                                return createIndexModel(indexFields, null, tableName);
-                            } else {
-                                indexFields.put(matcher.group(1), 1);
-                                return createIndexModel(indexFields, matcher.group(3).trim(), tableName);
-                            }
-                        } else {
-                            indexFields.put(matcher.group(1), 1);
-                            return createIndexModel(indexFields, null, tableName);
-                        }
-                    }
-                } else {
-                    throw new SiddhiAppCreationException("Annotation '" + indices.get(0).getName() + "' contains " +
-                            "illegal value : '" + index.getValue() + "'. Please check your query and try again.");
-                }
-            }).collect(Collectors.toList());
-        }
+        Pattern indexByOptions = Pattern.compile(MongoTableConstants.REG_INDEX_BY_NEW_OPTIONS);
 
-        // todo Support new syntax
-        return new ArrayList<>();
+        return indices.stream().map((indexAnnotation) -> {
+            String indexOptions = null;
+            int elementsSize = indexAnnotation.getElements().size();
+            Matcher optionsMatcher =
+                    indexByOptions.matcher(indexAnnotation.getElements().get(elementsSize - 1).getValue());
+            if (optionsMatcher.matches()) {
+                indexOptions = indexAnnotation.getElements().get(elementsSize - 1).getValue();
+                indexAnnotation.getElements().remove(elementsSize - 1);
+            }
+            Map<String, Integer> indexFields = new HashMap<>();
+            indexAnnotation.getElements().forEach((indexElement) -> {
+                String[] splitFields = indexElement.getValue().split(":");
+                if (splitFields.length != 1 && splitFields.length != 2) {
+                    throw new SiddhiAppCreationException("Annotation 'Index' for table '" + tableName +
+                            "' contains illegal value : '" + indexElement.getValue() +
+                            "'. Please check your query and try again.");
+                } else {
+                    if (!attributeNames.contains(splitFields[0])) {
+                        throw new SiddhiAppCreationException("Annotation 'Index' for table '" + tableName +
+                                "' contains unknown attributes : '" + indexElement.getValue() + "'. " +
+                                "Please check your query and try again.");
+                    }
+                    if (splitFields.length == 2) {
+                        int sortOrder;
+                        try {
+                            sortOrder = Integer.parseInt(splitFields[1]);
+                            if (sortOrder != 1 && sortOrder != -1) {
+                                throw new SiddhiAppCreationException("Annotation 'Index' for table '" + tableName +
+                                        "' contains illegal value for <Sort order>: found, '" +
+                                        indexElement.getValue() + "' expected 1/-1. Please check your query and " +
+                                        "try again.");
+                            }
+                        } catch (NumberFormatException e) {
+                            throw new SiddhiAppCreationException("Annotation 'Index' for table '" + tableName +
+                                    "' contains illegal value for <Sort order>: found, '" + indexElement.getValue() +
+                                    "' expected 1/-1. Please check your query and try again.");
+                        }
+                        indexFields.put(splitFields[0], sortOrder);
+                    } else {
+                        indexFields.put(splitFields[0], 1);
+                    }
+
+                }
+            });
+            return createIndexModel(indexFields, indexOptions, tableName);
+
+        }).collect(Collectors.toList());
     }
 
     /**
@@ -397,7 +443,6 @@ public class MongoTableUtils {
             indexOptionsMap.put("defaultLanguage", expectedIndexOptions.getDefaultLanguage());
             indexOptionsMap.put("textVersion", expectedIndexOptions.getTextVersion());
             indexOptionsMap.put("sphereVersion", expectedIndexOptions.getSphereVersion());
-            indexOptionsMap.put("textVersion", expectedIndexOptions.getTextVersion());
             indexOptionsMap.put("bits", expectedIndexOptions.getBits());
             indexOptionsMap.put("min", expectedIndexOptions.getMin());
             indexOptionsMap.put("max", expectedIndexOptions.getMax());

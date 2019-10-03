@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_INDEX;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_INDEX_BY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_PRIMARY_KEY;
 import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
@@ -294,8 +295,6 @@ public class MongoDBEventTable extends AbstractRecordTable {
                 .getAnnotation(ANNOTATION_STORE, tableDefinition.getAnnotations());
         Annotation primaryKeys = AnnotationHelper
                 .getAnnotation(ANNOTATION_PRIMARY_KEY, tableDefinition.getAnnotations());
-        List<Annotation> indices = AnnotationHelper
-                .getAnnotations(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
 
         this.initializeConnectionParameters(storeAnnotation, configReader);
 
@@ -310,8 +309,18 @@ public class MongoDBEventTable extends AbstractRecordTable {
         if (primaryKey != null) {
             this.expectedIndexModels.add(primaryKey);
         }
-        this.expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames,
-                this.collectionName));
+
+        List<Annotation> indices = AnnotationHelper
+                .getAnnotations(ANNOTATION_INDEX, tableDefinition.getAnnotations());
+        if (!indices.isEmpty()) {
+            this.expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indices, this.attributeNames,
+                    this.collectionName));
+        } else {
+            Annotation indexBy = AnnotationHelper
+                    .getAnnotation(ANNOTATION_INDEX_BY, tableDefinition.getAnnotations());
+            this.expectedIndexModels.addAll(MongoTableUtils.extractIndexModels(indexBy, this.attributeNames,
+                    this.collectionName));
+        }
     }
 
     /**
