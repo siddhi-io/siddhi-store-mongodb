@@ -80,7 +80,8 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         description = "The MongoDB URI for the MongoDB data store. The uri must be of the format \n" +
                                 "mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]\n" +
                                 "The options specified in the uri will override any connection options specified in " +
-                                "the deployment yaml file.",
+                                "the deployment yaml file.\n Note: The user should have read permissions to the admin" +
+                                "db as well as read/write permissions to the database accessed.",
                         type = {DataType.STRING}),
                 @Parameter(name = "collection.name",
                         description = "The name of the collection in the store this Event Table should" +
