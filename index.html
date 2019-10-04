@@ -374,6 +374,18 @@
 
 
   <li class="md-nav__item">
+    <a href="api/2.0.3/" title="2.0.3" class="md-nav__link">
+      2.0.3
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
     <a href="api/2.0.2/" title="2.0.2" class="md-nav__link">
       2.0.2
     </a>
@@ -716,13 +728,13 @@
 <li>Versions 1.x and lower with group id <code>org.wso2.extension.siddhi.*</code> from <a target="_blank" href="https://mvnrepository.com/artifact/org.wso2.extension.siddhi.store.mongodb/siddhi-store-mongodb">here</a>.</li>
 </ul>
 <h2 id="latest-api-docs">Latest API Docs</h2>
-<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2">2.0.2</a>.</p>
+<p>Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.3">2.0.3</a>.</p>
 <h2 id="features">Features</h2>
 <ul>
-<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2/#mongodb-store">mongodb</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div></li>
+<li><a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.3/#mongodb-store">mongodb</a> <em>(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)</em><br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div></li>
 </ul>
 <h2 id="dependencies">Dependencies</h2>
-<p>MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.</p>
+<p>MongoDB connector jar and its dependencies should be added to the runtime (mongodb-java-driver-3.4.2, includes all the dependencies). For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.</p>
 <h2 id="installation">Installation</h2>
 <p>For installing this extension on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding extensions</a>.</p>
 <h2 id="running-integration-tests-in-docker-containersoptional">Running Integration tests in docker containers(Optional)</h2>
@@ -752,14 +764,18 @@ docker daemon -H tcp://172.17.0.1:4326
 <p>To run the integration tests, issue the following commands.</p>
 <ul>
 <li>
-<p>MongoDB without SSL connection</p>
+<p>MongoDB 3.4 without SSL connection</p>
 <pre><code>mvn verify -P mongod -Ddocker.removeVolumes=true
 </code></pre>
 </li>
 <li>
-<p>MongoDB with SSL connection</p>
+<p>MongoDB 3.4 with SSL connection</p>
 <pre><code>mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
 </code></pre>
+</li>
+<li>
+<p>MongoDB 4.2 
+        mvn verify -P mongod4 -Ddocker.removeVolumes=true</p>
 </li>
 </ul>
 </li>
