@@ -29,6 +29,10 @@ jobs:
       name: MongoDB SSL
       script:
         - mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
+    - stage: test
+      name: MongoDB 4.2
+      script:
+        - mvn verify -P mongod4 -Ddocker.removeVolumes=true
 
 cache:
   bundler: true

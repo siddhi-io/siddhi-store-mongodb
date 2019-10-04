@@ -53,13 +53,16 @@ The MongoDB functionality are tested with the docker base integration test frame
    
 2. To run the integration tests, issue the following commands.
 
-    * MongoDB without SSL connection
+    * MongoDB 3.4 without SSL connection
     
             mvn verify -P mongod -Ddocker.removeVolumes=true
 
-    * MongoDB with SSL connection
+    * MongoDB 3.4 with SSL connection
            
             mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
+    
+    * MongoDB 4.2 
+            mvn verify -P mongod4 -Ddocker.removeVolumes=true
 
 ## Support and Contribution
 
