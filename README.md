@@ -27,7 +27,7 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-s
 
 ## Dependencies 
 
-MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
+MongoDB connector jar and its dependencies should be added to the runtime (mongodb-java-driver-3.4.2, includes all the dependencies). For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
 
 ## Installation
 
