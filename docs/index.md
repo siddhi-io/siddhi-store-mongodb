@@ -19,15 +19,15 @@ For information on <a target="_blank" href="https://siddhi.io/">Siddhi</a> and i
 
 ## Latest API Docs 
 
-Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2">2.0.2</a>.
+Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.3">2.0.3</a>.
 
 ## Features
 
-* <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.2/#mongodb-store">mongodb</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div>
+* <a target="_blank" href="https://siddhi-io.github.io/siddhi-store-mongodb/api/2.0.3/#mongodb-store">mongodb</a> *(<a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">Store</a>)*<br> <div style="padding-left: 1em;"><p><p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p></p></div>
 
 ## Dependencies 
 
-MongoDB connector jar should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
+MongoDB connector jar and its dependencies should be added to the runtime (mongodb-java-driver-3.4.2, includes all the dependencies). For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
 
 ## Installation
 
@@ -53,13 +53,16 @@ The MongoDB functionality are tested with the docker base integration test frame
    
 2. To run the integration tests, issue the following commands.
 
-    * MongoDB without SSL connection
+    * MongoDB 3.4 without SSL connection
     
             mvn verify -P mongod -Ddocker.removeVolumes=true
 
-    * MongoDB with SSL connection
+    * MongoDB 3.4 with SSL connection
            
             mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
+    
+    * MongoDB 4.2 
+            mvn verify -P mongod4 -Ddocker.removeVolumes=true
 
 ## Support and Contribution
 
