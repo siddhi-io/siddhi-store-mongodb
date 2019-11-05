@@ -67,7 +67,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        compileString.append(":{\'$literal\':\'?\'}");
+        compileString.append(":{\'$literal\':\'"+id+"\'}");
     }
 
     @Override

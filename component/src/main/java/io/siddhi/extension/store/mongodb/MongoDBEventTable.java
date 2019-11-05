@@ -656,7 +656,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     countOfStreamVarInOrderby--;
                 }
                 if(selectQuery!=null){
-                    selectQuery = selectQuery.replaceFirst("\\?",""+parameterMap.values().toArray()[i]);
+                    selectQuery = selectQuery.replaceFirst(""+parameterMap.keySet().toArray()[i],""+parameterMap.values().toArray()[i]);
                 }
             }
         }
@@ -800,6 +800,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
 
     private String groupbyString(List<SelectAttributeBuilder> selectAttributeBuilders,List<ExpressionBuilder> groupByExpressionBuilders){
 
+        List<String> groupbyAttributesList = new ArrayList<>();
+
         List<MongoSetExpressionVisitor> collectGroupby =
                 groupByExpressionBuilders.stream().map((groupByExpressionBuilder -> {
                     MongoSetExpressionVisitor visitor = new MongoSetExpressionVisitor();
@@ -812,6 +814,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
 
         for(MongoSetExpressionVisitor value : collectGroupby){
             String groupbyAttribute = value.getConditionOperands().get(0);
+            groupbyAttributesList.add(groupbyAttribute);
             if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
                 compiledGroupbyJSON.append("\'$");
                 compiledGroupbyJSON.append(groupbyAttribute);
@@ -833,17 +836,22 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
 
         for (MongoSelectExpressionVisitor value : collect) {
             String rename = selectAttributeBuilders.get(i).getRename();
-            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                compiledGroupbyJSON.append(rename);
-                compiledGroupbyJSON.append(value.getCompiledCondition());
-                compiledGroupbyJSON.append('}');
-                if(collect.indexOf(value) == (collect.size() -1)){
+//            log.info(rename);
+//            if(groupbyAttributesList.contains(rename)){
+                //
+//            }else{
+                if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+                    compiledGroupbyJSON.append(rename);
+                    compiledGroupbyJSON.append(value.getCompiledCondition());
                     compiledGroupbyJSON.append('}');
-                }else{
-                    compiledGroupbyJSON.append(',');
+                    if(collect.indexOf(value) == (collect.size() -1)){
+                        compiledGroupbyJSON.append('}');
+                    }else{
+                        compiledGroupbyJSON.append(',');
+                    }
                 }
-            }
-            i++;
+                i++;
+//            }
         }
 
         compiledGroupbyJSON.append("}");
