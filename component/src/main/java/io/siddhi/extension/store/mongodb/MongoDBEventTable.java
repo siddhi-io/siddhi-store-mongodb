@@ -23,6 +23,7 @@ import com.mongodb.MongoClientOptions;
 import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import com.mongodb.MongoSocketOpenException;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -39,11 +40,12 @@ import io.siddhi.annotation.SystemParameter;
 import io.siddhi.annotation.util.DataType;
 import io.siddhi.core.exception.ConnectionUnavailableException;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import io.siddhi.core.table.record.AbstractRecordTable;
+import io.siddhi.core.table.record.AbstractQueryableRecordTable;
 import io.siddhi.core.table.record.ExpressionBuilder;
 import io.siddhi.core.table.record.RecordIterator;
 import io.siddhi.core.util.collection.operator.CompiledCondition;
 import io.siddhi.core.util.collection.operator.CompiledExpression;
+import io.siddhi.core.util.collection.operator.CompiledSelection;
 import io.siddhi.core.util.config.ConfigReader;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.extension.store.mongodb.util.MongoTableConstants;
@@ -281,7 +283,7 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                 )
         }
 )
-public class MongoDBEventTable extends AbstractRecordTable {
+public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private static final Log log = LogFactory.getLog(MongoDBEventTable.class);
 
     private MongoClientURI mongoClientURI;
@@ -622,5 +624,287 @@ public class MongoDBEventTable extends AbstractRecordTable {
         if (this.mongoClient != null) {
             this.mongoClient.close();
         }
+    }
+
+    @Override
+    protected RecordIterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
+                                             CompiledSelection compiledSelection, Attribute[] outputAttributes)
+            throws ConnectionUnavailableException {
+
+        Document findFilter = MongoTableUtils
+                .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
+
+        String selectQuery = ((MongoDBCompileSelection)compiledSelection).getCompileSelectQuery();
+        String groupbyQuery = ((MongoDBCompileSelection) compiledSelection).getGroupby();
+        String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
+        String orderbyQuery = ((MongoDBCompileSelection) compiledSelection).getOrderby();
+        Long limit = ((Long)((MongoDBCompileSelection)compiledSelection).getLimit());
+        Long offset = ((Long)((MongoDBCompileSelection)compiledSelection).getOffset());
+
+        int countOfStreamVarInOrderby = 0;
+
+        if(parameterMap.values().size()>0){
+            if(orderbyQuery.length()>0){
+                for(int i=0; i < orderbyQuery.length(); i++)
+                {    if(orderbyQuery.charAt(i) == '?')
+                    countOfStreamVarInOrderby++;
+                }
+            }
+            for(int i=0;i<parameterMap.values().size();i++){
+                if(countOfStreamVarInOrderby>0){
+                    orderbyQuery = orderbyQuery.replaceFirst("\\?",""+parameterMap.keySet().toArray()[i]);
+                    countOfStreamVarInOrderby--;
+                }
+                if(selectQuery!=null){
+                    selectQuery = selectQuery.replaceFirst("\\?",""+parameterMap.values().toArray()[i]);
+                }
+            }
+        }
+
+        List<Document> aggregateList = new ArrayList<>();
+
+        if(findFilter.isEmpty() != true){
+            Document matchFilter = new Document("$match",findFilter);
+            aggregateList.add(matchFilter);
+        }
+
+        if(groupbyQuery != null){
+            Document groupby = Document.parse(groupbyQuery);
+            aggregateList.add(groupby);
+        }
+
+
+        if(selectQuery!=null){
+            Document project = Document.parse(selectQuery);
+            aggregateList.add(project);
+        }
+
+        if(havingQuery != null){
+            Document having = Document.parse(havingQuery);
+            aggregateList.add(having);
+        }
+
+        if(orderbyQuery != null){
+            Document orderby = Document.parse(orderbyQuery);
+            aggregateList.add(orderby);
+        }
+
+
+        if(offset != null){
+            Document offsetFilter = new Document("$skip",offset);
+            aggregateList.add(offsetFilter);
+        }
+
+        if(limit != null){
+            Document limitFilter = new Document("$limit",limit);
+            aggregateList.add(limitFilter);
+        }
+
+        List<String> attributeList = new ArrayList<>();
+
+        for (int i=0;i<outputAttributes.length;i++){
+            attributeList.add(outputAttributes[i].getName());
+        }
+
+        AggregateIterable<Document> aggregate = this.getCollectionObject().aggregate(aggregateList);
+
+        MongoCursor<Document> iterator = aggregate.iterator();
+
+        while (iterator.hasNext()) {
+            log.info(iterator.next());
+        }
+
+        return new MongoIterator(aggregate, attributeList);
+    }
+
+    @Override
+    protected CompiledSelection compileSelection(List<SelectAttributeBuilder> selectAttributeBuilders,
+                                                 List<ExpressionBuilder> groupByExpressionBuilders,
+                                                 ExpressionBuilder havingExpressionBuilder,
+                                                 List<OrderByAttributeBuilder> orderByAttributeBuilders,
+                                                 Long limit, Long offset) {
+        String project = null;
+        String groupby = null;
+        String having = null;
+        String orderby = null;
+
+        if(groupByExpressionBuilders==null){
+            project = projectionString(selectAttributeBuilders);
+        }else{
+            groupby = groupbyString(selectAttributeBuilders, groupByExpressionBuilders);
+        }
+
+        if(havingExpressionBuilder != null){
+            having = havingString(havingExpressionBuilder);
+        }
+
+        if(orderByAttributeBuilders != null){
+            orderby = orderbyString(orderByAttributeBuilders);
+        }
+
+        return new MongoDBCompileSelection(project, groupby, having , orderby , limit, offset);
+
+    }
+
+    private String projectionString(List<SelectAttributeBuilder> selectAttributeBuilders){
+
+        List<MongoSelectExpressionVisitor> collect =
+                selectAttributeBuilders.stream().map((selectAttributeBuilder -> {
+                    ExpressionBuilder expressionBuilder = selectAttributeBuilder.getExpressionBuilder();
+                    MongoSelectExpressionVisitor visitor = new MongoSelectExpressionVisitor();
+                    expressionBuilder.build(visitor);
+                    return visitor;
+                })).collect(Collectors.toList());
+
+        StringBuilder compiledSelectionJSON = new StringBuilder();
+        compiledSelectionJSON.append("{$project:{_id:0, ");
+
+        int i=0;
+
+        for (MongoSelectExpressionVisitor value : collect) {
+            String rename = selectAttributeBuilders.get(i).getRename();
+            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+                compiledSelectionJSON.append(rename);
+                compiledSelectionJSON.append(value.getCompiledCondition());
+                if(collect.indexOf(value) == (collect.size() -1)){
+                    compiledSelectionJSON.append('}');
+                }else{
+                    compiledSelectionJSON.append(',');
+                }
+            }else if(value.getStreamVarCount() == 1 && value.getConstantCount()==0){
+                compiledSelectionJSON.append(rename);
+                compiledSelectionJSON.append(value.getCompiledCondition());
+                if(collect.indexOf(value) == (collect.size() -1)){
+                    compiledSelectionJSON.append('}');
+                }else{
+                    compiledSelectionJSON.append(',');
+                }
+            }
+            else if(value.getStreamVarCount() == 0 && value.getConstantCount()==1){
+                compiledSelectionJSON.append(rename);
+                compiledSelectionJSON.append(value.getCompiledCondition());
+                if(collect.indexOf(value) == (collect.size() -1)){
+                    compiledSelectionJSON.append('}');
+                }else{
+                    compiledSelectionJSON.append(',');
+                }
+            }
+            i++;
+        }
+        compiledSelectionJSON.append('}');
+
+        log.info(compiledSelectionJSON);
+
+        return compiledSelectionJSON.toString();
+    }
+
+    private String groupbyString(List<SelectAttributeBuilder> selectAttributeBuilders,List<ExpressionBuilder> groupByExpressionBuilders){
+
+        List<MongoSetExpressionVisitor> collectGroupby =
+                groupByExpressionBuilders.stream().map((groupByExpressionBuilder -> {
+                    MongoSetExpressionVisitor visitor = new MongoSetExpressionVisitor();
+                    groupByExpressionBuilder.build(visitor);
+                    return visitor;
+                })).collect(Collectors.toList());
+
+        StringBuilder compiledGroupbyJSON = new StringBuilder();
+        compiledGroupbyJSON.append("{$group:{_id:");
+
+        for(MongoSetExpressionVisitor value : collectGroupby){
+            String groupbyAttribute = value.getConditionOperands().get(0);
+            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+                compiledGroupbyJSON.append("\'$");
+                compiledGroupbyJSON.append(groupbyAttribute);
+                compiledGroupbyJSON.append('\'');
+            }
+        }
+
+        compiledGroupbyJSON.append(',');
+
+        List<MongoSelectExpressionVisitor> collect =
+                selectAttributeBuilders.stream().map((selectAttributeBuilder -> {
+                    ExpressionBuilder expressionBuilder = selectAttributeBuilder.getExpressionBuilder();
+                    MongoSelectExpressionVisitor visitor = new MongoSelectExpressionVisitor();
+                    expressionBuilder.build(visitor);
+                    return visitor;
+                })).collect(Collectors.toList());
+
+        int i=0;
+
+        for (MongoSelectExpressionVisitor value : collect) {
+            String rename = selectAttributeBuilders.get(i).getRename();
+            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+                compiledGroupbyJSON.append(rename);
+                compiledGroupbyJSON.append(value.getCompiledCondition());
+                compiledGroupbyJSON.append('}');
+                if(collect.indexOf(value) == (collect.size() -1)){
+                    compiledGroupbyJSON.append('}');
+                }else{
+                    compiledGroupbyJSON.append(',');
+                }
+            }
+            i++;
+        }
+
+        compiledGroupbyJSON.append("}");
+        log.info(compiledGroupbyJSON);
+
+        return compiledGroupbyJSON.toString();
+    }
+
+    private String havingString(ExpressionBuilder havingExpressionBuilder){
+        MongoExpressionVisitor visitor = new MongoExpressionVisitor();
+        havingExpressionBuilder.build(visitor);
+        String having  = visitor.getCompiledCondition();
+        return "{$match:"+having+"}";
+    }
+
+    private String orderbyString(List<OrderByAttributeBuilder> orderByAttributeBuilders){
+        List<MongoSetExpressionVisitor> collectOrderby =
+                orderByAttributeBuilders.stream().map((orderByAttributeBuilder -> {
+                    ExpressionBuilder expressionBuilder = orderByAttributeBuilder.getExpressionBuilder();
+                    MongoSetExpressionVisitor orderbyVisitor = new MongoSetExpressionVisitor();
+                    expressionBuilder.build(orderbyVisitor);
+                    return orderbyVisitor;
+                })).collect(Collectors.toList());
+
+        StringBuilder compiledOrderbyJSON = new StringBuilder();
+        compiledOrderbyJSON.append("{$sort:{");
+
+        int j=0;
+
+        for (MongoSetExpressionVisitor value : collectOrderby) {
+            String order = orderByAttributeBuilders.get(j).getOrder().name();
+            if(value.getStreamVarCount() == 0) {
+                compiledOrderbyJSON.append(value.getCompiledCondition());
+                if(order == "ASC"){
+                    compiledOrderbyJSON.append(":1");
+                }else if(order == "DESC"){
+                    compiledOrderbyJSON.append(":-1");
+                }
+                if(collectOrderby.indexOf(value) == (collectOrderby.size() -1)){
+                    compiledOrderbyJSON.append('}');
+                }else{
+                    compiledOrderbyJSON.append(',');
+                }
+            }
+            else if(value.getStreamVarCount() == 1){
+                compiledOrderbyJSON.append('?');
+                if(order == "ASC"){
+                    compiledOrderbyJSON.append(":1");
+                }else if(order == "DESC"){
+                    compiledOrderbyJSON.append(":-1");
+                }
+                if(collectOrderby.indexOf(value) == (collectOrderby.size() -1)){
+                    compiledOrderbyJSON.append('}');
+                }else{
+                    compiledOrderbyJSON.append(',');
+                }
+            }
+            j++;
+        }
+        compiledOrderbyJSON.append('}');
+
+        return compiledOrderbyJSON.toString();
     }
 }

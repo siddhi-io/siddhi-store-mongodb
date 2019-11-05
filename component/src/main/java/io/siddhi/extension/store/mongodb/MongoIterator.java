@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.store.mongodb;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import io.siddhi.core.table.record.RecordIterator;
@@ -39,6 +40,11 @@ public class MongoIterator implements RecordIterator<Object[]> {
     private Object[] nextDocument;
 
     public MongoIterator(FindIterable documents, List<String> attributeNames) {
+        this.documents = documents.iterator();
+        this.attributeNames = attributeNames;
+    }
+
+    public MongoIterator(AggregateIterable documents, List<String> attributeNames) {
         this.documents = documents.iterator();
         this.attributeNames = attributeNames;
     }
