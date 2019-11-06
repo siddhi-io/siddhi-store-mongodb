@@ -338,10 +338,10 @@ public class JoinMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol != t.symbol "+
                 "select s.symbol as checkSymbol, t.symbol as tblSymbol, t.price as price, '100' as fixedVal, s.volume as streamVolume, s.name as streamName " +
                 "having price < 12 " +
-                "order by streamVolume, checkSymbol "+
+                "order by streamVolume, tblSymbol "+
                 "limit 1 "+
                 "offset 1 "+
                 "insert into OutputStream ;";
@@ -355,7 +355,7 @@ public class JoinMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2","WSO2",10.5,100,"10","prabod"}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2","IBM",8.5,100,"10","prabod"}, event.getData());
                                 break;
                             default:
                                 break;
@@ -371,8 +371,8 @@ public class JoinMongoTableTest {
         siddhiAppRuntime.start();
 
         stockStream.send(new Object[]{"WSO2", 6.5f});
-        stockStream.send(new Object[]{"WSO2", 10.5f});
-        stockStream.send(new Object[]{"WSO2", 9.5f});
+        stockStream.send(new Object[]{"WSO2", 6.5f});
+        stockStream.send(new Object[]{"IBM", 9.5f});
         stockStream.send(new Object[]{"IBM", 8.5f});
         fooStream.send(new Object[]{"WSO2",10,"prabod"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
@@ -402,8 +402,8 @@ public class JoinMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "on s.symbol != t.symbol "+
-                "select sum(t.price) as sumprice, avg(t.weight) as avgweight, min(t.price) as minprice, max(t.price) as maxprice " +
-                "group by t.symbol " +
+                "select t.symbol, avg(t.weight) as avgweight, min(t.price) as minprice, max(t.price) as maxprice " +
+                "group by t.price, t.symbol, t.weight " +
                 "having maxprice > 5 "+
                 "order by maxprice "+
                 "limit 5 "+

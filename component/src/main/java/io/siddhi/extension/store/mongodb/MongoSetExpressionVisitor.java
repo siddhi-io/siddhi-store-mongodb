@@ -67,18 +67,6 @@ public class MongoSetExpressionVisitor extends BaseExpressionVisitor {
         return placeholders;
     }
 
-    public Stack<String> getConditionOperands(){
-        return this.conditionOperands;
-    }
-
-    public int getStreamVarCount(){
-        return this.streamVarCount;
-    }
-
-    public int getConstantCount(){
-        return this.constantCount;
-    }
-
     @Override
     public void beginVisitAnd() {
     }
