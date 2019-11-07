@@ -1,5 +1,6 @@
 package io.siddhi.extension.store.mongodb;
 
+import com.sun.xml.internal.ws.handler.HandlerTube;
 import io.siddhi.core.table.record.BaseExpressionVisitor;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
@@ -22,12 +23,15 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     private String[] supportedFunctions = {"sum", "avg", "min", "max"};
 
+    private int mathOperandCount;
+
     public MongoSelectExpressionVisitor() {
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.conditionOperands = new Stack<>();
         this.placeholders = new HashMap<>();
         this.compileString = new StringBuilder();
+        this.mathOperandCount = 0;
     }
 
     public String getCompiledCondition() {
@@ -49,7 +53,12 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
-        compileString.append(":{\'$literal\':"+value+"}");
+        if(mathOperandCount==0){
+            compileString.append(":{\'$literal\':"+value+"}");
+        }else{
+            compileString.append("{\'$literal\':"+value+"}");
+        }
+
     }
 
     @Override
@@ -58,7 +67,10 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        compileString.append(":\'$"+attributeName+"\'");
+        if(mathOperandCount==0){
+            compileString.append(':');
+        }
+        compileString.append("\'$"+attributeName+"\'");
     }
 
     @Override
@@ -67,11 +79,23 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        compileString.append(":{\'$literal\':\'"+id+"\'}");
+        if(mathOperandCount>0){
+            compileString.append("{\'$literal\':\'"+id+"\'}");
+        }else{
+            if(type.toString() == "STRING"){
+                compileString.append(":{\'$literal\':\'\'"+id+"\'\'}");
+            }else{
+                compileString.append(":{\'$literal\':\'"+id+"\'}");
+            }
+
+        }
     }
 
     @Override
     public void endVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
+        if(mathOperandCount>0){
+            compileString.append(",");
+        }
     }
 
     @Override
@@ -85,9 +109,45 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         }
     }
 
-
     @Override
     public void endVisitAttributeFunction(String namespace, String functionName) {
+    }
+
+    @Override
+    public void beginVisitMath(MathOperator mathOperator) {
+        this.mathOperandCount++;
+        String operatorName = mathOperator.name().toLowerCase();
+        if(mathOperandCount==1){
+            compileString.append(":{$"+operatorName+":[");
+        }else{
+            compileString.append("{$"+operatorName+":[");
+        }
+    }
+
+    @Override
+    public void endVisitMath(MathOperator mathOperator) {
+        if(mathOperandCount==1){
+            compileString.append("]}");
+        }else {
+            compileString.append("]},");
+        }
+        this.mathOperandCount--;
+    }
+
+    @Override
+    public void beginVisitMathLeftOperand(MathOperator mathOperator) {
+    }
+
+    @Override
+    public void endVisitMathLeftOperand(MathOperator mathOperator) {
+    }
+
+    @Override
+    public void beginVisitMathRightOperand(MathOperator mathOperator) {
+    }
+
+    @Override
+    public void endVisitMathRightOperand(MathOperator mathOperator) {
     }
 
 }
