@@ -60,7 +60,7 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                     compiledCondition = compiledCondition.replaceAll(entry.getKey(),
                             constant.getValue().toString());
                 }
-                this.placeholders.remove(entry.getKey());
+//                this.placeholders.remove(entry.getKey());
             }
         }
         return compiledCondition;

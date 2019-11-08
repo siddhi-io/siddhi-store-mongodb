@@ -492,6 +492,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                                             CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         try {
+            log.info("In find()");
             Document findFilter = MongoTableUtils
                     .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
             MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
@@ -635,12 +636,20 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         Document findFilter = MongoTableUtils
                 .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
 
+        log.info(findFilter);
+
+        if (log.isDebugEnabled()) {
+            log.debug("The final compiled query : '" + findFilter + "'");
+        }
+
         String selectQuery = ((MongoDBCompileSelection)compiledSelection).getCompileSelectQuery();
         String groupbyQuery = ((MongoDBCompileSelection) compiledSelection).getGroupby();
         String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
         String orderbyQuery = ((MongoDBCompileSelection) compiledSelection).getOrderby();
         Long limit = ((Long)((MongoDBCompileSelection)compiledSelection).getLimit());
         Long offset = ((Long)((MongoDBCompileSelection)compiledSelection).getOffset());
+
+        log.info(havingQuery);
 
         int countOfStreamVarInOrderby = 0;
 
@@ -678,7 +687,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             aggregateList.add(groupby);
         }
 
-
         if(selectQuery!=null){
             Document project = Document.parse(selectQuery);
             aggregateList.add(project);
@@ -693,7 +701,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             Document orderby = Document.parse(orderbyQuery);
             aggregateList.add(orderby);
         }
-
 
         if(offset != null){
             Document offsetFilter = new Document("$skip",offset);
@@ -795,9 +802,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             }
         }
 
-        compiledSelectionJSON.append('}');
-
-        log.info(compiledSelectionJSON);
+        compiledSelectionJSON.append('}');;
 
         return compiledSelectionJSON.toString();
     }
@@ -887,6 +892,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         havingExpressionBuilder.build(visitor);
         String having  = visitor.getCompiledCondition();
+        log.info(having);
         return "{$match:"+having+"}";
     }
 
