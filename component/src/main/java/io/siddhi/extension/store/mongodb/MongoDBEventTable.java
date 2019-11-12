@@ -58,6 +58,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -639,41 +640,23 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         log.info(findFilter);
 
         if (log.isDebugEnabled()) {
-            log.debug("The final compiled query : '" + findFilter + "'");
+            log.debug("Find filter query : '" + findFilter + "'");
         }
 
         String selectQuery = ((MongoDBCompileSelection)compiledSelection).getCompileSelectQuery();
         String groupbyQuery = ((MongoDBCompileSelection) compiledSelection).getGroupby();
         String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
         String orderbyQuery = ((MongoDBCompileSelection) compiledSelection).getOrderby();
-        Long limit = ((Long)((MongoDBCompileSelection)compiledSelection).getLimit());
-        Long offset = ((Long)((MongoDBCompileSelection)compiledSelection).getOffset());
-
-        log.info(havingQuery);
-
-        int countOfStreamVarInOrderby = 0;
+        Long limit = ((MongoDBCompileSelection)compiledSelection).getLimit();
+        Long offset = ((MongoDBCompileSelection)compiledSelection).getOffset();
 
         if(parameterMap.values().size()>0){
-            if(orderbyQuery != null && !orderbyQuery.isEmpty()){
-                for(int i=0; i < orderbyQuery.length(); i++)
-                {    if(orderbyQuery.charAt(i) == '?')
-                    countOfStreamVarInOrderby++;
-                }
-            }
-            for(int i=0;i<parameterMap.values().size();i++){
-                if(countOfStreamVarInOrderby>0){
-                    orderbyQuery = orderbyQuery.replaceFirst("\\?",""+parameterMap.keySet().toArray()[i]);
-                    countOfStreamVarInOrderby--;
-                }
-            }
             for(int i=0;i<parameterMap.values().size();i++){
                 if(selectQuery!=null){
                     selectQuery = selectQuery.replaceAll("\'"+parameterMap.keySet().toArray()[i]+"\'",""+parameterMap.values().toArray()[i]);
                 }
             }
         }
-
-        log.info(selectQuery);
 
         List<Document> aggregateList = new ArrayList<>();
 
@@ -735,7 +718,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                                                  ExpressionBuilder havingExpressionBuilder,
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders,
                                                  Long limit, Long offset) {
-        String project = null;
+        String project;
         String groupby = null;
         String having = null;
         String orderby = null;
@@ -744,6 +727,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             project = projectionString(selectAttributeBuilders);
         }else{
             groupby = groupbyString(selectAttributeBuilders, groupByExpressionBuilders);
+            String[] arrOfStr = groupby.split(";", 2);
+            project = arrOfStr[1];
+            groupby = arrOfStr[0];
         }
 
         if(havingExpressionBuilder != null){
@@ -775,25 +761,22 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoSelectExpressionVisitor value = collect.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                compiledSelectionJSON.append(rename);
-                compiledSelectionJSON.append(value.getCompiledCondition());
+                compiledSelectionJSON.append(rename).append(value.getCompiledCondition());
                 if(collect.indexOf(value) == (collect.size() -1)){
                     compiledSelectionJSON.append('}');
                 }else{
                     compiledSelectionJSON.append(',');
                 }
-            }else if(value.getStreamVarCount() == 1 && value.getConstantCount()==0){
-                compiledSelectionJSON.append(rename);
-                compiledSelectionJSON.append(value.getCompiledCondition());
+            }else if(value.getStreamVarCount() == 1){
+                compiledSelectionJSON.append(rename).append(value.getCompiledCondition());
                 if(collect.indexOf(value) == (collect.size() -1)){
                     compiledSelectionJSON.append('}');
                 }else{
                     compiledSelectionJSON.append(',');
                 }
             }
-            else if(value.getStreamVarCount() == 0 && value.getConstantCount()==1){
-                compiledSelectionJSON.append(rename);
-                compiledSelectionJSON.append(value.getCompiledCondition());
+            else if(value.getConstantCount()==1){
+                compiledSelectionJSON.append(rename).append(value.getCompiledCondition());
                 if(collect.indexOf(value) == (collect.size() -1)){
                     compiledSelectionJSON.append('}');
                 }else{
@@ -819,6 +802,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 })).collect(Collectors.toList());
 
         StringBuilder compiledGroupbyJSON = new StringBuilder();
+        StringBuilder selectGroupbyString = new StringBuilder();
 
         if(collectGroupby.size()==1){
             compiledGroupbyJSON.append("{$group:{_id:");
@@ -831,20 +815,19 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 String groupbyAttribute = value.getConditionOperands().get(0);
                 groupbyAttributesList.add(groupbyAttribute);
                 if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                    compiledGroupbyJSON.append("\'$");
-                    compiledGroupbyJSON.append(groupbyAttribute);
-                    compiledGroupbyJSON.append('\'');
+                    compiledGroupbyJSON.append("\'$").append(groupbyAttribute).append('\'');
+                    selectGroupbyString.append(groupbyAttribute).append(":{$first:\'$").append(groupbyAttribute).append("\'}");
                 }
             }else {
                 String groupbyAttribute = value.getConditionOperands().get(0);
                 groupbyAttributesList.add(groupbyAttribute);
                 if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                    compiledGroupbyJSON.append(groupbyAttribute+":");
-                    compiledGroupbyJSON.append("\'$");
-                    compiledGroupbyJSON.append(groupbyAttribute);
+                    compiledGroupbyJSON.append(groupbyAttribute+":").append("\'$").append(groupbyAttribute);
                     if(collectGroupby.indexOf(value) == (collectGroupby.size() -1)){
+                        selectGroupbyString.append(groupbyAttribute).append(":{$first:\'$").append(groupbyAttribute).append("\'}");
                         compiledGroupbyJSON.append("\'");
                     }else{
+                        selectGroupbyString.append(groupbyAttribute).append(":{$first:\'$").append(groupbyAttribute).append("\'},");
                         compiledGroupbyJSON.append("\',");
                     }
                 }
@@ -865,27 +848,36 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     return visitor;
                 })).collect(Collectors.toList());
 
+        StringBuilder compiledProjectionJSON = new StringBuilder();
+        compiledProjectionJSON.append("{$project:{_id:0,");
+
         for(int i=0;i<collect.size();i++){
             MongoSelectExpressionVisitor value = collect.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
+            compiledProjectionJSON.append(rename).append(":1");
             if(!groupbyAttributesList.contains(rename)){
                 if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                    compiledGroupbyJSON.append(rename);
-                    compiledGroupbyJSON.append(value.getCompiledCondition());
-                    compiledGroupbyJSON.append('}');
+                    compiledGroupbyJSON.append(rename).append(value.getCompiledCondition()).append('}');
                     if(collect.indexOf(value) == (collect.size() -1)){
-                        compiledGroupbyJSON.append('}');
+                        compiledGroupbyJSON.append(",").append(selectGroupbyString);
+                        compiledGroupbyJSON.append("}");
+                        compiledProjectionJSON.append("}");
                     }else{
                         compiledGroupbyJSON.append(',');
+                        compiledProjectionJSON.append(",");
                     }
                 }
+            }else{
+                compiledProjectionJSON.append(",");
             }
         }
 
-        compiledGroupbyJSON.append("}");
         log.info(compiledGroupbyJSON);
 
-        return compiledGroupbyJSON.toString();
+        compiledGroupbyJSON.append("}");
+        compiledProjectionJSON.append("}");
+
+        return compiledGroupbyJSON.toString()+";"+compiledProjectionJSON;
     }
 
     private String havingString(ExpressionBuilder havingExpressionBuilder){
@@ -897,6 +889,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private String orderbyString(List<OrderByAttributeBuilder> orderByAttributeBuilders){
+
         List<MongoExpressionVisitor> collectOrderby =
                 orderByAttributeBuilders.stream().map((orderByAttributeBuilder -> {
                     ExpressionBuilder expressionBuilder = orderByAttributeBuilder.getExpressionBuilder();
@@ -913,19 +906,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             String order = orderByAttributeBuilders.get(i).getOrder().name();
             if(value.getStreamVarCount() == 0) {
                 compiledOrderbyJSON.append(value.getCompiledCondition());
-                if(order == "ASC"){
-                    compiledOrderbyJSON.append(":1");
-                }else if(order == "DESC"){
-                    compiledOrderbyJSON.append(":-1");
-                }
-                if(collectOrderby.indexOf(value) == (collectOrderby.size() -1)){
-                    compiledOrderbyJSON.append('}');
-                }else{
-                    compiledOrderbyJSON.append(',');
-                }
-            }
-            else if(value.getStreamVarCount() == 1){
-                compiledOrderbyJSON.append('?');
                 if(order == "ASC"){
                     compiledOrderbyJSON.append(":1");
                 }else if(order == "DESC"){
