@@ -6,7 +6,6 @@ import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiTestHelper;
-import io.siddhi.query.compiler.exception.SiddhiParserException;
 import org.apache.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -14,7 +13,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryableMongoTableTest {
@@ -428,7 +426,7 @@ public class QueryableMongoTableTest {
                 "from FooStream as s join FooTable as t " +
                 "select t.symbol, avg(t.weight) as avgweight, min(t.price) as minprice, max(t.price) as maxprice, " +
                         "sum(t.price) as sumprice " +
-                "group by t.symbol " +
+                "group by t.symbol, t.price " +
                 "order by t.symbol DESC "+
                 "insert into OutputStream ;";
 
@@ -461,7 +459,7 @@ public class QueryableMongoTableTest {
 
         stockStream.send(new Object[]{"GOOGLE", 12.5f, 10});
         stockStream.send(new Object[]{"APPLE", 10.5f, 14});
-        stockStream.send(new Object[]{"GOOGLE", 9.5f, 16});
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 16});
         stockStream.send(new Object[]{"APPLE", 8.5f, 18});
         fooStream.send(new Object[]{"GOOGLE",10});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
@@ -469,6 +467,126 @@ public class QueryableMongoTableTest {
         siddhiAppRuntime.shutdown();
 
         Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableJoinQuery8() throws InterruptedException {
+        log.info("testMongoTableJoinQuery8");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float); " +
+                "define stream FooStream (symbol string, volume int, name string); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price float);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "select s.symbol as streamSymbol, t.symbol as tblSymbol, t.price * s.volume as totalCost, " +
+                "t.price * 10 / 100 as discount "+
+                "limit 2 "+
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2","WSO2",65.0,0.65}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"WSO2","IBM",95.0,0.95}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 6.5f});
+        stockStream.send(new Object[]{"IBM", 9.5f});
+        stockStream.send(new Object[]{"GOOGLE", 10.5f});
+        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableJoinQuery9() throws InterruptedException {
+        log.info("testMongoTableJoinQuery9");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price int, isFraud bool); " +
+                "define stream FooStream (symbol string, isChecked bool, isOlderStock bool); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price int, isFraud bool);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol != t.symbol "+
+                "select t.symbol as tblSymbol, (t.isFraud or s.isChecked and s.isOlderStock and true) as isCheckedData " +
+                "having isCheckedData == true and tblSymbol != 'GOOGLE' "+
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"LINUX", true}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"LINUX", 10, true});
+        stockStream.send(new Object[]{"GOOGLE", 12, false});
+        fooStream.send(new Object[]{"WSO2", true, false});
+        SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 1, "Read events failed");
     }
 
 }

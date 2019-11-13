@@ -133,11 +133,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitMath(MathOperator mathOperator) {
-//        if(mathOperandCount==1){
-            compileString.append("]}");
-//        }else {
-//            compileString.append("]},");
-//        }
+        compileString.append("]}");
         this.mathOperandCount--;
     }
 
