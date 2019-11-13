@@ -6,14 +6,8 @@ import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
 
 public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
-
-    private Stack<String> conditionOperands;
-    private Map<String, Object> placeholders;
 
     private int streamVarCount;
     private int constantCount;
@@ -28,8 +22,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public MongoSelectExpressionVisitor() {
         this.streamVarCount = 0;
         this.constantCount = 0;
-        this.conditionOperands = new Stack<>();
-        this.placeholders = new HashMap<>();
         this.compileString = new StringBuilder();
         this.mathOperandCount = 0;
         this.logicalOperatorCount = 0;
@@ -37,10 +29,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     public String getCompiledCondition() {
         return compileString.toString();
-    }
-
-    public Stack<String> getConditionOperands(){
-        return this.conditionOperands;
     }
 
     public int getStreamVarCount(){
@@ -84,9 +72,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if(logicalOperatorCount>0){
-            compileString.append("{\'$literal\':\'"+id+"\'}");
-        }else if(mathOperandCount>0){
+        if(logicalOperatorCount>0 || mathOperandCount>0){
             compileString.append("{\'$literal\':\'"+id+"\'}");
         }else{
             if(type.toString() == "STRING"){
