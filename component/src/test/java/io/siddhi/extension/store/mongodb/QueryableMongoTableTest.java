@@ -119,7 +119,7 @@ public class QueryableMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "on s.symbol == t.symbol "+
-                "select t.symbol, t.amount, s.volume, t.price, '100' as fixedVal " +        //TODO having attributes must be in projection
+                "select t.symbol, s.volume, t.price, '100' as fixedVal " +
                 "having t.amount > 110 and t.price > 10 " +
                 "insert into OutputStream ;";
 
@@ -426,8 +426,8 @@ public class QueryableMongoTableTest {
                 "from FooStream as s join FooTable as t " +
                 "select t.symbol, avg(t.weight) as avgWeight, min(t.price) as minPrice, max(t.price) as maxPrice, " +
                         "sum(t.price) as sumPrice " +
-                "group by t.symbol " +                                          //todo : conflict when renaming select attribute
-                "having avgWeight > 14 "+
+                "group by t.price " +
+                "having avgWeight > 12 "+
                 "order by avgWeight "+
                 "insert into OutputStream ;";
 

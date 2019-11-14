@@ -58,8 +58,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 
-import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -636,18 +636,14 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         Document findFilter = MongoTableUtils
                 .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
 
-        log.info(findFilter);
-
-        if (log.isDebugEnabled()) {
-            log.debug("Find filter query : '" + findFilter + "'");
-        }
-
         String selectQuery = ((MongoDBCompileSelection)compiledSelection).getCompileSelectQuery();
         String groupbyQuery = ((MongoDBCompileSelection) compiledSelection).getGroupby();
         String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
         String orderbyQuery = ((MongoDBCompileSelection) compiledSelection).getOrderby();
         Long limit = ((MongoDBCompileSelection)compiledSelection).getLimit();
         Long offset = ((MongoDBCompileSelection)compiledSelection).getOffset();
+
+        log.info(groupbyQuery);
 
         if(parameterMap.values().size()>0){
             for(int i=0;i<parameterMap.values().size();i++){
@@ -673,6 +669,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             Document project = Document.parse(selectQuery);
             aggregateList.add(project);
         }
+
+        log.info(selectQuery);
 
         if(havingQuery != null){
             Document having = Document.parse(havingQuery);
@@ -725,7 +723,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         if(groupByExpressionBuilders==null){
             project = projectionString(selectAttributeBuilders);
         }else{
-            groupby = groupbyString(selectAttributeBuilders, groupByExpressionBuilders);
+            groupby = groupByString(selectAttributeBuilders, groupByExpressionBuilders);
             String[] arrOfStr = groupby.split(";", 2);
             project = arrOfStr[1];
             groupby = arrOfStr[0];
@@ -736,7 +734,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         }
 
         if(orderByAttributeBuilders != null){
-            orderby = orderbyString(orderByAttributeBuilders);
+            orderby = orderByString(orderByAttributeBuilders);
         }
 
         return new MongoDBCompileSelection(project, groupby, having , orderby , limit, offset);
@@ -789,7 +787,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         return compiledSelectionJSON.toString();
     }
 
-    private String groupbyString(List<SelectAttributeBuilder> selectAttributeBuilders,
+    private String groupByString(List<SelectAttributeBuilder> selectAttributeBuilders,
                                  List<ExpressionBuilder> groupByExpressionBuilders){
 
         List<String> groupByAttributesList = new ArrayList<>();
@@ -857,11 +855,15 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         for(int i=0;i<collect.size();i++){
             MongoSelectExpressionVisitor value = collect.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
-            log.info(rename);
             compiledProjectionJSON.append(rename).append(":1");
             if(!groupByAttributesList.contains(rename)){
                 if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                    compiledGroupbyJSON.append(rename).append(value.getCompiledCondition()).append('}');
+                    String[] supportedFunctions = value.getSupportedFunctions();
+                    if(Arrays.stream(supportedFunctions).parallel().anyMatch(value.getCompiledCondition()::contains)){
+                        compiledGroupbyJSON.append(rename).append(value.getCompiledCondition()).append('}');
+                    }else{
+                        compiledGroupbyJSON.append(rename).append(":{$push").append(value.getCompiledCondition()).append('}');
+                    }
                     if(collect.indexOf(value) == (collect.size() -1)){
                         compiledGroupbyJSON.append(",").append(selectGroupbyString);
                         compiledGroupbyJSON.append("}");
@@ -876,9 +878,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             }
         }
 
-        log.info(compiledGroupbyJSON);
-        log.info(compiledProjectionJSON);
-
         compiledGroupbyJSON.append("}");
         compiledProjectionJSON.append("}");
 
@@ -886,17 +885,13 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private String havingString(ExpressionBuilder havingExpressionBuilder){
-
-        MongoExpressionVisitor visitor = new MongoExpressionVisitor();
-        havingExpressionBuilder.build(visitor);
-        String having  = visitor.getCompiledCondition();
-        log.info(having);
-        return "{$match:"+having+"}";
-
+            MongoExpressionVisitor visitor = new MongoExpressionVisitor();
+            havingExpressionBuilder.build(visitor);
+            String having  = visitor.getCompiledCondition();
+            return "{$match:"+having+"}";
     }
 
-    private String orderbyString(List<OrderByAttributeBuilder> orderByAttributeBuilders){
-
+    private String orderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders){
         List<MongoExpressionVisitor> collectOrderBy =
                 orderByAttributeBuilders.stream().map((orderByAttributeBuilder -> {
                     ExpressionBuilder expressionBuilder = orderByAttributeBuilder.getExpressionBuilder();
