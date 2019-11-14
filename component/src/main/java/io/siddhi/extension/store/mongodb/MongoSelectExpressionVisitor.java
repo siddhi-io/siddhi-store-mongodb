@@ -100,7 +100,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
             }else{
                 compileString.append(":{\'$literal\':\'"+id+"\'}");
             }
-
         }
     }
 
@@ -130,11 +129,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void beginVisitMath(MathOperator mathOperator) {
         this.mathOperandCount++;
         String operatorName = mathOperator.name().toLowerCase();
-        if(mathOperandCount==1){
-            compileString.append(":{$"+operatorName+":[");
-        }else{
-            compileString.append("{$"+operatorName+":[");
-        }
+        compileString.append((mathOperandCount==1) ? ":{$"+operatorName+":[" : "{$"+operatorName+":[" );
     }
 
     @Override
@@ -165,12 +160,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitAnd() {
         this.logicalOperatorCount++;
-        if(logicalOperatorCount==1){
-            compileString.append(":{$and:[");
-        }else{
-            compileString.append("{$and:[");
-        }
-
+        compileString.append((logicalOperatorCount==1) ? ":{$and:[" : "{$and:[");
     }
 
     @Override
@@ -178,23 +168,14 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         if(compileString.charAt(compileString.length() - 1) == ','){
             compileString.setLength(compileString.length() - 1);
         }
-        if(logicalOperatorCount==1){
-            compileString.append("]}");
-        }else{
-            compileString.append("]},");
-        }
-
+        compileString.append((logicalOperatorCount==1) ? "]}" : "]},");
         this.logicalOperatorCount--;
     }
 
     @Override
     public void beginVisitOr() {
         this.logicalOperatorCount++;
-        if(logicalOperatorCount==1){
-            compileString.append(":{$or:[");
-        }else{
-            compileString.append("{$or:[");
-        }
+        compileString.append((logicalOperatorCount==1) ? ":{$or:[" : "{$or:[");
     }
 
     @Override
@@ -202,11 +183,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         if(compileString.charAt(compileString.length() - 1) == ','){
             compileString.setLength(compileString.length() - 1);
         }
-        if(logicalOperatorCount==1){
-            compileString.append("]}");
-        }else{
-            compileString.append("]},");
-        }
+        compileString.append((logicalOperatorCount==1) ? "]}" : "]},");
         this.logicalOperatorCount--;
     }
 

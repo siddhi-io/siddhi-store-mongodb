@@ -424,7 +424,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "select t.symbol, avg(t.weight) as avgWeight, min(t.price) as minPrice, max(t.price) as maxPrice, " +
+                "select t.symbol, t.price, avg(t.weight) as avgWeight, min(t.price) as minPrice, max(t.price) as maxPrice, " +
                         "sum(t.price) as sumPrice " +
                 "group by t.price " +
                 "having avgWeight > 12 "+
