@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -828,7 +828,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private String havingString(ExpressionBuilder havingExpressionBuilder) {
         MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         havingExpressionBuilder.build(visitor);
-        String having = visitor.getCompiledCondition();
+        String having = visitor.getHavingCompiledCondition();
         return "{$match:" + having + "}";
     }
 

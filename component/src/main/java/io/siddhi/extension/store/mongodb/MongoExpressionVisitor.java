@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -60,10 +60,27 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                     compiledCondition = compiledCondition.replaceAll(entry.getKey(),
                             constant.getValue().toString());
                 }
-//                this.placeholders.remove(entry.getKey());
+                this.placeholders.remove(entry.getKey());
             }
         }
         return compiledCondition;
+    }
+
+    public String getHavingCompiledCondition() {
+        String havingCompiledCondition = this.conditionOperands.pop();
+        for (Map.Entry<String, Object> entry : this.placeholders.entrySet()) {
+            if (entry.getValue() instanceof Constant) {
+                Constant constant = (Constant) entry.getValue();
+                if (constant.getType().equals(Attribute.Type.STRING)) {
+                    havingCompiledCondition = havingCompiledCondition.replaceAll(entry.getKey(),
+                            "'" + constant.getValue().toString() + "'");
+                } else {
+                    havingCompiledCondition = havingCompiledCondition.replaceAll(entry.getKey(),
+                            constant.getValue().toString());
+                }
+            }
+        }
+        return havingCompiledCondition;
     }
 
     public Map<String, Object> getPlaceholders() {
