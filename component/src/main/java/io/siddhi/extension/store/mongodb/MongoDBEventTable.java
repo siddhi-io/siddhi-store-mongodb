@@ -631,84 +631,80 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     protected RecordIterator<Object[]> query(Map<String, Object> parameterMap, CompiledCondition compiledCondition,
                                              CompiledSelection compiledSelection, Attribute[] outputAttributes)
             throws ConnectionUnavailableException {
-
         List<Document> aggregateList = new ArrayList<>();
         List<String> attributeList = new ArrayList<>();
-
         Document findFilter = MongoTableUtils
                 .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
-        String selectQuery = ((MongoDBCompileSelection)compiledSelection).getCompileSelectQuery();
-        String groupByQuery = ((MongoDBCompileSelection) compiledSelection).getGroupby();
+        String selectQuery = ((MongoDBCompileSelection) compiledSelection).getCompileSelectQuery();
+        String groupByQuery = ((MongoDBCompileSelection) compiledSelection).getGroupBy();
         String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
-        String orderByQuery = ((MongoDBCompileSelection) compiledSelection).getOrderby();
-        Long limit = ((MongoDBCompileSelection)compiledSelection).getLimit();
-        Long offset = ((MongoDBCompileSelection)compiledSelection).getOffset();
-
-        if(parameterMap.values().size()>0){
-            for(int i=0;i<parameterMap.values().size();i++){
-                if(selectQuery!=null){
-                    selectQuery = selectQuery.replaceAll("\'"+parameterMap.keySet().toArray()[i]+"\'",
-                            ""+parameterMap.values().toArray()[i]);
+        String orderByQuery = ((MongoDBCompileSelection) compiledSelection).getOrderBy();
+        Long limit = ((MongoDBCompileSelection) compiledSelection).getLimit();
+        Long offset = ((MongoDBCompileSelection) compiledSelection).getOffset();
+        if (parameterMap.values().size() > 0) {
+            for (int i = 0; i < parameterMap.values().size(); i++) {
+                if (selectQuery != null) {
+                    selectQuery = selectQuery.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
+                            "" + parameterMap.values().toArray()[i]);
                 }
             }
         }
-        if(!findFilter.isEmpty()){
-            Document matchFilter = new Document("$match",findFilter);
+        if (!findFilter.isEmpty()) {
+            Document matchFilter = new Document("$match", findFilter);
             if (log.isDebugEnabled()) {
                 log.debug("On condition query : '" + matchFilter.toJson());
             }
             aggregateList.add(matchFilter);
         }
-        if(groupByQuery != null){
+        if (groupByQuery != null) {
             Document groupBy = Document.parse(groupByQuery);
             if (log.isDebugEnabled()) {
                 log.debug("GroupBy query : '" + groupBy.toJson());
             }
             aggregateList.add(groupBy);
         }
-        if(selectQuery != null){
+        if (selectQuery != null) {
             Document project = Document.parse(selectQuery);
             if (log.isDebugEnabled()) {
                 log.debug("Select query : '" + project.toJson());
             }
             aggregateList.add(project);
         }
-        if(havingQuery != null){
+        if (havingQuery != null) {
             Document having = Document.parse(havingQuery);
             if (log.isDebugEnabled()) {
                 log.debug("Having query : '" + having.toJson());
             }
             aggregateList.add(having);
         }
-        if(orderByQuery != null){
+        if (orderByQuery != null) {
             Document orderBy = Document.parse(orderByQuery);
             if (log.isDebugEnabled()) {
                 log.debug("OrderBy query : '" + orderBy.toJson());
             }
             aggregateList.add(orderBy);
         }
-        if(offset != null){
-            Document offsetFilter = new Document("$skip",offset);
+        if (offset != null) {
+            Document offsetFilter = new Document("$skip", offset);
             if (log.isDebugEnabled()) {
                 log.debug("Offset query : '" + offsetFilter.toJson());
             }
             aggregateList.add(offsetFilter);
         }
-        if(limit != null){
-            Document limitFilter = new Document("$limit",limit);
+        if (limit != null) {
+            Document limitFilter = new Document("$limit", limit);
             if (log.isDebugEnabled()) {
                 log.debug("Limit query : '" + limitFilter.toJson());
             }
             aggregateList.add(limitFilter);
         }
-        for (int i=0;i<outputAttributes.length;i++){
-            attributeList.add(outputAttributes[i].getName());
+        for (Attribute outputAttribute : outputAttributes) {
+            attributeList.add(outputAttribute.getName());
         }
         AggregateIterable<Document> aggregate = this.getCollectionObject().aggregate(aggregateList);
         if (log.isDebugEnabled()) {
-            MongoCursor<Document> iterator = aggregate.iterator();
-            while (iterator.hasNext()) {
-                log.debug("Result : "+iterator.next().toJson());
+            for (Document document : aggregate) {
+                log.debug("Result : " + document.toJson());
             }
         }
         return new MongoIterator(aggregate, attributeList);
@@ -720,42 +716,41 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                                                  ExpressionBuilder havingExpressionBuilder,
                                                  List<OrderByAttributeBuilder> orderByAttributeBuilders,
                                                  Long limit, Long offset) {
-        String project,groupBy,having,orderBy;
+        String project, groupBy, having, orderBy;
         groupBy = having = orderBy = null;
-        if(groupByExpressionBuilders==null){
+        if (groupByExpressionBuilders == null) {
             project = projectionString(selectAttributeBuilders);
-        }else{
+        } else {
             groupBy = groupByString(selectAttributeBuilders, groupByExpressionBuilders);
             String[] arrOfStr = groupBy.split(";", 2);
             project = arrOfStr[1];
             groupBy = arrOfStr[0];
         }
-        if(havingExpressionBuilder != null){
+        if (havingExpressionBuilder != null) {
             having = havingString(havingExpressionBuilder);
         }
-        if(orderByAttributeBuilders != null){
+        if (orderByAttributeBuilders != null) {
             orderBy = orderByString(orderByAttributeBuilders);
         }
-        return new MongoDBCompileSelection(project, groupBy, having , orderBy , limit, offset);
+        return new MongoDBCompileSelection(project, groupBy, having, orderBy, limit, offset);
     }
 
-    private String projectionString(List<SelectAttributeBuilder> selectAttributeBuilders){
+    private String projectionString(List<SelectAttributeBuilder> selectAttributeBuilders) {
         List<MongoSelectExpressionVisitor> collect = getSelectAttributesList(selectAttributeBuilders);
         StringBuilder compiledSelectionJSON = new StringBuilder();
         compiledSelectionJSON.append("{$project:{_id:0, ");
-        for(int i=0;i<collect.size();i++){
+        for (int i = 0; i < collect.size(); i++) {
             MongoSelectExpressionVisitor value = collect.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
-            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+            if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
                 compiledSelectionJSON.append(rename).append(value.getCompiledCondition())
-                        .append((collect.indexOf(value) == (collect.size() -1)) ? '}' : ',');
-            }else if(value.getStreamVarCount() == 1){
+                        .append((collect.indexOf(value) == (collect.size() - 1)) ? '}' : ',');
+            } else if (value.getStreamVarCount() == 1) {
                 compiledSelectionJSON.append(rename).append(value.getCompiledCondition())
-                        .append((collect.indexOf(value) == (collect.size() -1)) ? '}' : ',');
-            }
-            else if(value.getConstantCount()==1){
+                        .append((collect.indexOf(value) == (collect.size() - 1)) ? '}' : ',');
+            } else if (value.getConstantCount() == 1) {
                 compiledSelectionJSON.append(rename).append(value.getCompiledCondition())
-                        .append((collect.indexOf(value) == (collect.size() -1)) ? '}' : ',');
+                        .append((collect.indexOf(value) == (collect.size() - 1)) ? '}' : ',');
             }
         }
         compiledSelectionJSON.append('}');
@@ -763,35 +758,33 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private String groupByString(List<SelectAttributeBuilder> selectAttributeBuilders,
-                                 List<ExpressionBuilder> groupByExpressionBuilders){
-
+                                 List<ExpressionBuilder> groupByExpressionBuilders) {
         List<String> groupByAttributesList = new ArrayList<>();
         StringBuilder compiledGroupByJSON = new StringBuilder();
         StringBuilder selectGroupByString = new StringBuilder();
         StringBuilder compiledProjectionJSON = new StringBuilder();
-
         List<MongoExpressionVisitor> collectGroupBy =
                 groupByExpressionBuilders.stream().map((groupByExpressionBuilder -> {
                     MongoExpressionVisitor visitor = new MongoExpressionVisitor();
                     groupByExpressionBuilder.build(visitor);
                     return visitor;
                 })).collect(Collectors.toList());
-        compiledGroupByJSON.append((collectGroupBy.size()==1) ? "{$group:{_id:" : "{$group:{_id:{");
-        for(MongoExpressionVisitor value : collectGroupBy){
+        compiledGroupByJSON.append((collectGroupBy.size() == 1) ? "{$group:{_id:" : "{$group:{_id:{");
+        for (MongoExpressionVisitor value : collectGroupBy) {
             String groupByAttribute = value.getConditionOperands().get(0);
             groupByAttributesList.add(groupByAttribute);
-            if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
-                if(collectGroupBy.size()==1){
+            if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
+                if (collectGroupBy.size() == 1) {
                     compiledGroupByJSON.append("\'$").append(groupByAttribute).append('\'');
                     selectGroupByString.append(groupByAttribute).append(":{$first:\'$").
                             append(groupByAttribute).append("\'}");
-                }else{
-                    compiledGroupByJSON.append(groupByAttribute+":").append("\'$").append(groupByAttribute);
-                    if(collectGroupBy.indexOf(value) == (collectGroupBy.size() -1)){
+                } else {
+                    compiledGroupByJSON.append(groupByAttribute).append(":").append("\'$").append(groupByAttribute);
+                    if (collectGroupBy.indexOf(value) == (collectGroupBy.size() - 1)) {
                         selectGroupByString.append(groupByAttribute).append(":{$first:\'$").append(groupByAttribute).
                                 append("\'}");
                         compiledGroupByJSON.append("\'");
-                    }else{
+                    } else {
                         selectGroupByString.append(groupByAttribute).append(":{$first:\'$").append(groupByAttribute).
                                 append("\'},");
                         compiledGroupByJSON.append("\',");
@@ -799,48 +792,47 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 }
             }
         }
-        compiledGroupByJSON.append((groupByAttributesList.size()==1) ? ',' : "},");
-
+        compiledGroupByJSON.append((groupByAttributesList.size() == 1) ? ',' : "},");
         List<MongoSelectExpressionVisitor> collect = getSelectAttributesList(selectAttributeBuilders);
         compiledProjectionJSON.append("{$project:{_id:0,");
-        for(int i=0;i<collect.size();i++){
+        for (int i = 0; i < collect.size(); i++) {
             MongoSelectExpressionVisitor value = collect.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             compiledProjectionJSON.append(rename).append(":1");
-            if(!groupByAttributesList.contains(rename)){
-                if(value.getStreamVarCount() == 0 && value.getConstantCount()==0) {
+            if (!groupByAttributesList.contains(rename)) {
+                if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
                     String[] supportedFunctions = value.getSupportedFunctions();
-                    if(Arrays.stream(supportedFunctions).parallel().anyMatch(value.getCompiledCondition()::contains)){
+                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(value.getCompiledCondition()::contains)) {
                         compiledGroupByJSON.append(rename).append(value.getCompiledCondition()).append('}');
-                    }else{
+                    } else {
                         compiledGroupByJSON.append(rename).append(":{$push").append(value.getCompiledCondition())
                                 .append('}');
                     }
-                    if(collect.indexOf(value) == (collect.size() -1)){
+                    if (collect.indexOf(value) == (collect.size() - 1)) {
                         compiledGroupByJSON.append(",").append(selectGroupByString).append("}");
                         compiledProjectionJSON.append("}");
-                    }else{
+                    } else {
                         compiledGroupByJSON.append(',');
                         compiledProjectionJSON.append(",");
                     }
                 }
-            }else{
+            } else {
                 compiledProjectionJSON.append(",");
             }
         }
         compiledGroupByJSON.append("}");
         compiledProjectionJSON.append("}");
-        return compiledGroupByJSON.toString()+";"+compiledProjectionJSON;
+        return compiledGroupByJSON.toString() + ";" + compiledProjectionJSON;
     }
 
-    private String havingString(ExpressionBuilder havingExpressionBuilder){
-            MongoExpressionVisitor visitor = new MongoExpressionVisitor();
-            havingExpressionBuilder.build(visitor);
-            String having  = visitor.getCompiledCondition();
-            return "{$match:"+having+"}";
+    private String havingString(ExpressionBuilder havingExpressionBuilder) {
+        MongoExpressionVisitor visitor = new MongoExpressionVisitor();
+        havingExpressionBuilder.build(visitor);
+        String having = visitor.getCompiledCondition();
+        return "{$match:" + having + "}";
     }
 
-    private String orderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders){
+    private String orderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders) {
         StringBuilder compiledOrderByJSON = new StringBuilder();
         List<MongoExpressionVisitor> collectOrderBy =
                 orderByAttributeBuilders.stream().map((orderByAttributeBuilder -> {
@@ -850,26 +842,24 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     return orderByVisitor;
                 })).collect(Collectors.toList());
         compiledOrderByJSON.append("{$sort:{");
-        for(int i=0;i<collectOrderBy.size();i++) {
+        for (int i = 0; i < collectOrderBy.size(); i++) {
             MongoExpressionVisitor value = collectOrderBy.get(i);
             String order = orderByAttributeBuilders.get(i).getOrder().name();
-            if(value.getStreamVarCount() == 0) {
-                compiledOrderByJSON.append(value.getCompiledCondition()).append((order == "ASC") ? ":1" : ":-1")
-                        .append((collectOrderBy.indexOf(value) == (collectOrderBy.size() -1)) ? '}' : ',');
+            if (value.getStreamVarCount() == 0) {
+                compiledOrderByJSON.append(value.getCompiledCondition()).append((order.equalsIgnoreCase("ASC")) ? ":1" : ":-1")
+                        .append((collectOrderBy.indexOf(value) == (collectOrderBy.size() - 1)) ? '}' : ',');
             }
         }
         compiledOrderByJSON.append('}');
         return compiledOrderByJSON.toString();
     }
 
-    private List<MongoSelectExpressionVisitor> getSelectAttributesList(List<SelectAttributeBuilder> selectAttributeBuilders){
-        List<MongoSelectExpressionVisitor> collect =
-                selectAttributeBuilders.stream().map((selectAttributeBuilder -> {
-                    ExpressionBuilder expressionBuilder = selectAttributeBuilder.getExpressionBuilder();
-                    MongoSelectExpressionVisitor visitor = new MongoSelectExpressionVisitor();
-                    expressionBuilder.build(visitor);
-                    return visitor;
-                })).collect(Collectors.toList());
-        return collect;
+    private List<MongoSelectExpressionVisitor> getSelectAttributesList(List<SelectAttributeBuilder> selectAttributeBuilders) {
+        return selectAttributeBuilders.stream().map((selectAttributeBuilder -> {
+            ExpressionBuilder expressionBuilder = selectAttributeBuilder.getExpressionBuilder();
+            MongoSelectExpressionVisitor visitor = new MongoSelectExpressionVisitor();
+            expressionBuilder.build(visitor);
+            return visitor;
+        })).collect(Collectors.toList());
     }
 }

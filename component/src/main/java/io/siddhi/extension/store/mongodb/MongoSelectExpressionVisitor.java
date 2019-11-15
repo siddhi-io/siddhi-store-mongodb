@@ -25,15 +25,15 @@ import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
 
+/**
+ * Class representing MongoDB select attribute condition implementation.
+ */
 public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     private int streamVarCount;
     private int constantCount;
-
     private StringBuilder compileString;
-
     private String[] supportedFunctions = {"sum", "avg", "min", "max"};
-
     private int mathOperandCount;
     private int logicalOperatorCount;
 
@@ -49,73 +49,75 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         return compileString.toString();
     }
 
-    public int getStreamVarCount(){
+    public int getStreamVarCount() {
         return this.streamVarCount;
     }
 
-    public int getConstantCount(){
+    public int getConstantCount() {
         return this.constantCount;
     }
 
-    public String[] getSupportedFunctions(){return this.supportedFunctions;}
+    public String[] getSupportedFunctions() {
+        return this.supportedFunctions;
+    }
 
 
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
-        if(mathOperandCount==0  && logicalOperatorCount==0){
+        if (mathOperandCount == 0 && logicalOperatorCount == 0) {
             compileString.append(":");
         }
-        compileString.append("{\'$literal\':"+value+"}");
+        compileString.append("{\'$literal\':").append(value).append("}");
     }
 
     @Override
     public void endVisitConstant(Object value, Attribute.Type type) {
-        if(logicalOperatorCount>0){
+        if (logicalOperatorCount > 0) {
             compileString.append(",");
         }
     }
 
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        if(mathOperandCount==0 && logicalOperatorCount==0){
+        if (mathOperandCount == 0 && logicalOperatorCount == 0) {
             compileString.append(':');
         }
-        compileString.append("\'$"+attributeName+"\'");
+        compileString.append("\'$").append(attributeName).append("\'");
     }
 
     @Override
     public void endVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        if(logicalOperatorCount>0){
+        if (logicalOperatorCount > 0) {
             compileString.append(",");
         }
     }
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if(logicalOperatorCount>0 || mathOperandCount>0){
-            compileString.append("{\'$literal\':\'"+id+"\'}");
-        }else{
-            if(type.toString() == "STRING"){
-                compileString.append(":{\'$literal\':\'\'"+id+"\'\'}");
-            }else{
-                compileString.append(":{\'$literal\':\'"+id+"\'}");
+        if (logicalOperatorCount > 0 || mathOperandCount > 0) {
+            compileString.append("{\'$literal\':\'").append(id).append("\'}");
+        } else {
+            if (type.toString().equalsIgnoreCase("STRING")) {
+                compileString.append(":{\'$literal\':\'\'").append(id).append("\'\'}");
+            } else {
+                compileString.append(":{\'$literal\':\'").append(id).append("\'}");
             }
         }
     }
 
     @Override
     public void endVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if(logicalOperatorCount>0){
+        if (logicalOperatorCount > 0) {
             compileString.append(",");
         }
     }
 
     @Override
     public void beginVisitAttributeFunction(String namespace, String functionName) {
-        if(MongoTableUtils.isEmpty(namespace) &&
-                (Arrays.stream(supportedFunctions).anyMatch(functionName::equals))){
-            compileString.append(":{$"+functionName);
-        } else{
+        if (MongoTableUtils.isEmpty(namespace) &&
+                (Arrays.asList(supportedFunctions).contains(functionName))) {
+            compileString.append(":{$").append(functionName);
+        } else {
             throw new MongoTableException("The RDBMS Event table does not support functions other than \" +\n" +
                     " \"sum(), avg(), min(), max().");
         }
@@ -129,7 +131,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void beginVisitMath(MathOperator mathOperator) {
         this.mathOperandCount++;
         String operatorName = mathOperator.name().toLowerCase();
-        compileString.append((mathOperandCount==1) ? ":{$"+operatorName+":[" : "{$"+operatorName+":[" );
+        compileString.append((mathOperandCount == 1) ? ":{$" + operatorName + ":[" : "{$" + operatorName + ":[");
     }
 
     @Override
@@ -144,7 +146,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitMathLeftOperand(MathOperator mathOperator) {
-        if(mathOperandCount>0){
+        if (mathOperandCount > 0) {
             compileString.append(",");
         }
     }
@@ -160,30 +162,30 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitAnd() {
         this.logicalOperatorCount++;
-        compileString.append((logicalOperatorCount==1) ? ":{$and:[" : "{$and:[");
+        compileString.append((logicalOperatorCount == 1) ? ":{$and:[" : "{$and:[");
     }
 
     @Override
     public void endVisitAnd() {
-        if(compileString.charAt(compileString.length() - 1) == ','){
+        if (compileString.charAt(compileString.length() - 1) == ',') {
             compileString.setLength(compileString.length() - 1);
         }
-        compileString.append((logicalOperatorCount==1) ? "]}" : "]},");
+        compileString.append((logicalOperatorCount == 1) ? "]}" : "]},");
         this.logicalOperatorCount--;
     }
 
     @Override
     public void beginVisitOr() {
         this.logicalOperatorCount++;
-        compileString.append((logicalOperatorCount==1) ? ":{$or:[" : "{$or:[");
+        compileString.append((logicalOperatorCount == 1) ? ":{$or:[" : "{$or:[");
     }
 
     @Override
     public void endVisitOr() {
-        if(compileString.charAt(compileString.length() - 1) == ','){
+        if (compileString.charAt(compileString.length() - 1) == ',') {
             compileString.setLength(compileString.length() - 1);
         }
-        compileString.append((logicalOperatorCount==1) ? "]}" : "]},");
+        compileString.append((logicalOperatorCount == 1) ? "]}" : "]},");
         this.logicalOperatorCount--;
     }
 

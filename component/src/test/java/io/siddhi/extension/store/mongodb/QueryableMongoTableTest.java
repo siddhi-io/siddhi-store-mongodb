@@ -58,7 +58,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol as tblSymbol, t.amount as tblAmount, t.price as tblPrice, s.volume as streamVolume, '100' as fixedVal " +
                 "having tblAmount > 110 and tblPrice > 10 and streamVolume <= 15 " +
                 "insert into OutputStream ;";
@@ -72,7 +72,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",120,12.5,10,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 120, 12.5, 10, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -91,7 +91,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -118,7 +118,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol, t.amount, s.volume, t.price, '100' as fixedVal " +
                 "having t.amount > 110 and t.price > 10 " +
                 "insert into OutputStream ;";
@@ -132,7 +132,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",120,10,12.5,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 120, 10, 12.5, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -151,7 +151,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -178,10 +178,10 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol as tblSymbol, t.amount as tblAmount, t.price as tblPrice, s.volume as streamVolume, '100' as fixedVal " +
                 "having tblAmount > 110 " +
-                "limit 1 "+
+                "limit 1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -193,7 +193,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",120,12.5,10,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 120, 12.5, 10, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -212,7 +212,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -239,11 +239,11 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol as tblSymbol, t.amount as tblAmount, t.price as tblPrice, s.volume as streamVolume, '100' as fixedVal " +
                 "having tblAmount > 110 " +
-                "limit 1 "+
-                "offset 1 "+
+                "limit 1 " +
+                "offset 1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -255,7 +255,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",150,6.5,10,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 150, 6.5, 10, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -274,7 +274,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -301,11 +301,11 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol, t.price, '100' as fixedVal " +
-                "order by t.amount DESC "+
-                "limit 1 "+
-                "offset 1 "+
+                "order by t.amount DESC " +
+                "limit 1 " +
+                "offset 1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -317,7 +317,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",12.5,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 12.5, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -336,7 +336,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -363,11 +363,11 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol as tblSymbol, t.price as tblPrice, '100' as fixedVal " +
-                "order by t.amount DESC, tblPrice DESC "+
-                "limit 1 "+
-                "offset 1 "+
+                "order by t.amount DESC, tblPrice DESC " +
+                "limit 1 " +
+                "offset 1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -379,7 +379,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",9.5,100}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 9.5, 100}, event.getData());
                                 break;
                             default:
                                 break;
@@ -397,7 +397,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 9.5f, 120});
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -425,11 +425,11 @@ public class QueryableMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "select t.symbol, t.price, avg(t.weight) as avgWeight, min(t.price) as minPrice, max(t.price) as maxPrice, " +
-                        "sum(t.price) as sumPrice " +
+                "sum(t.price) as sumPrice " +
                 "group by t.price " +
-                "having avgWeight > 12 "+
-                "order by avgWeight DESC "+
-                "limit 2 "+
+                "having avgWeight > 12 " +
+                "order by avgWeight DESC " +
+                "limit 2 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -442,11 +442,11 @@ public class QueryableMongoTableTest {
                         switch (eventCount.intValue()) {
                             case 1:
                                 String[] result1 = {"APPLE"};
-                                Assert.assertEquals(new Object[]{result1,18.0, 8.5, 8.5}, event.getData());
+                                Assert.assertEquals(new Object[]{result1, 18.0, 8.5, 8.5}, event.getData());
                                 break;
                             case 2:
-                                String[] result2 = {"GOOGLE","IBM"};
-                                Assert.assertEquals(new Object[]{result2,18.0, 8.5, 8.5}, event.getData());
+                                String[] result2 = {"GOOGLE", "IBM"};
+                                Assert.assertEquals(new Object[]{result2, 18.0, 8.5, 8.5}, event.getData());
                                 break;
                             default:
                                 break;
@@ -465,7 +465,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"APPLE", 10.5f, 12});
         stockStream.send(new Object[]{"IBM", 12.5f, 16});
         stockStream.send(new Object[]{"APPLE", 8.5f, 18});
-        fooStream.send(new Object[]{"GOOGLE",10});
+        fooStream.send(new Object[]{"GOOGLE", 10});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -493,8 +493,8 @@ public class QueryableMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "select s.symbol as streamSymbol, t.symbol as tblSymbol, t.price * s.volume as totalCost, " +
-                "t.price * 10 / 100 as discount "+
-                "limit 2 "+
+                "t.price * 10 / 100 as discount " +
+                "limit 2 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -506,10 +506,10 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2","WSO2",65.0,0.65}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", "WSO2", 65.0, 0.65}, event.getData());
                                 break;
                             case 2:
-                                Assert.assertEquals(new Object[]{"WSO2","IBM",95.0,0.95}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", "IBM", 95.0, 0.95}, event.getData());
                                 break;
                             default:
                                 break;
@@ -527,7 +527,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 6.5f});
         stockStream.send(new Object[]{"IBM", 9.5f});
         stockStream.send(new Object[]{"GOOGLE", 10.5f});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
@@ -554,9 +554,9 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol != t.symbol "+
+                "on s.symbol != t.symbol " +
                 "select t.symbol as tblSymbol, (t.isFraud or s.isChecked and s.isOlderStock) as isCheckedData " +
-                "having isCheckedData == true and tblSymbol != 'GOOGLE' "+
+                "having isCheckedData == true and tblSymbol != 'GOOGLE' " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -612,11 +612,11 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol == t.symbol "+
+                "on s.symbol == t.symbol " +
                 "select t.symbol as tblSymbol, t.price, t.amount as tblAmount " +
                 "having t.price > 1 and tblAmount > 5 " +
-                "order by tblAmount DESC "+
-                "limit 1 "+
+                "order by tblAmount DESC " +
+                "limit 1 " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -628,7 +628,7 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2",6.5,150}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 6.5, 150}, event.getData());
                                 break;
                             default:
                                 break;
@@ -647,7 +647,7 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 12.5f, 120});
         stockStream.send(new Object[]{"WSO2", 6.5f, 150});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
-        fooStream.send(new Object[]{"WSO2",10,"siddhi"});
+        fooStream.send(new Object[]{"WSO2", 10, "siddhi"});
         SiddhiTestHelper.waitForEvents(waitTime, 1, eventCount, timeout);
 
         siddhiAppRuntime.shutdown();
