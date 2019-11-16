@@ -668,5 +668,11 @@ public class MongoTableUtils {
         }
         return filePath.replaceAll("\\$\\{carbon.home}", carbonHome);
     }
+
+    public static void printDebugLogs(String logDescription, String queryLog){
+        if (log.isDebugEnabled()) {
+            log.debug(logDescription + queryLog);
+        }
+    }
 }
 
