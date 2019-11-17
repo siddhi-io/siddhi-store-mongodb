@@ -58,7 +58,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery1() throws InterruptedException {
-        log.info("testMongoTableQuery1 : Test selection of store attributes, stream attributes and constants");
+        log.info("testMongoTableQuery1 : Test selection of store attributes, stream attributes and constants.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -119,7 +119,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery2() throws InterruptedException {
-        log.info("testMongoTableQuery2 : Test inline math operators in select attributes");
+        log.info("testMongoTableQuery2 : Test inline math operators in select attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -178,7 +178,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery3() throws InterruptedException {
-        log.info("testMongoTableQuery3 : Test logical operators in select attributes");
+        log.info("testMongoTableQuery3 : Test logical operators in select attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -238,7 +238,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery4() throws InterruptedException {
-        log.info("testMongoTableQuery4 : Test having condition for store attributes");
+        log.info("testMongoTableQuery4 : Test having condition for store attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -299,7 +299,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery5() throws InterruptedException {
-        log.info("testMongoTableQuery5 : Test having condition with logical operators in between");
+        log.info("testMongoTableQuery5 : Test having condition with logical operators in between.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -361,7 +361,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery6() throws InterruptedException {
-        log.info("testMongoTableQuery6 : Test limit condition");
+        log.info("testMongoTableQuery6 : Test limit condition.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -427,7 +427,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery7() throws InterruptedException {
-        log.info("testMongoTableQuery7 : Test offset condition");
+        log.info("testMongoTableQuery7 : Test offset condition.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -490,7 +490,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery8() throws InterruptedException {
-        log.info("testMongoTableQuery8 : Test orderBy condition using single attribute");
+        log.info("testMongoTableQuery8 : Test orderBy condition using single attribute.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -507,7 +507,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol != t.symbol "+
+                "on s.symbol != t.symbol " +
                 "select t.symbol, t.price, t.amount " +
                 "order by t.amount DESC " +
                 "insert into OutputStream ;";
@@ -552,7 +552,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery9() throws InterruptedException {
-        log.info("testMongoTableQuery9 : Test orderBy condition using multiple attributes");
+        log.info("testMongoTableQuery9 : Test orderBy condition using multiple attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -569,7 +569,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "on s.symbol != t.symbol "+
+                "on s.symbol != t.symbol " +
                 "select t.symbol, t.price, t.amount " +
                 "order by t.symbol, t.amount DESC " +
                 "insert into OutputStream ;";
@@ -615,5 +615,262 @@ public class QueryableMongoTableTest {
         siddhiAppRuntime.shutdown();
 
         Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery10() throws InterruptedException {
+        log.info("testMongoTableQuery10 : Test groupBy with sum function.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, weight int); " +
+                "define stream FooStream (symbol string, volume int); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price float, weight int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "select t.symbol, t.price, sum(t.price) as sumPrice " +
+                "group by t.price " +
+                "order by t.symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"APPLE", 10.5, 10.5}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"IBM", 12.5, 25.0}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 10});
+        stockStream.send(new Object[]{"APPLE", 10.5f, 12});
+        stockStream.send(new Object[]{"IBM", 12.5f, 16});
+        fooStream.send(new Object[]{"GOOGLE", 10});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery11() throws InterruptedException {
+        log.info("testMongoTableQuery11 : Test groupBy with count function.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, weight int); " +
+                "define stream FooStream (symbol string, volume int); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price float, weight int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "select t.symbol, count() as countRecords " +
+                "group by t.price " +
+                "order by t.symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"APPLE", 1}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"IBM", 2}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 10});
+        stockStream.send(new Object[]{"APPLE", 10.5f, 12});
+        stockStream.send(new Object[]{"IBM", 12.5f, 16});
+        fooStream.send(new Object[]{"GOOGLE", 10});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery12() throws InterruptedException {
+        log.info("testMongoTableQuery12 : Test groupBy using multiple attributes.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, weight int); " +
+                "define stream FooStream (symbol string, volume int); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price float, weight int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "select t.symbol, avg(t.weight) as avgWeight, count() as countRecords " +
+                "group by t.symbol, t.price " +
+                "order by t.symbol " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"APPLE", 12.0, 1}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"GOOGLE", 11.0, 2}, event.getData());
+                                break;
+                            case 3:
+                                Assert.assertEquals(new Object[]{"IBM", 16.0, 1}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 10});
+        stockStream.send(new Object[]{"APPLE", 10.5f, 12});
+        stockStream.send(new Object[]{"IBM", 12.5f, 16});
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 12});
+        fooStream.send(new Object[]{"GOOGLE", 10});
+        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery13() throws InterruptedException {
+        log.info("testMongoTableQuery13 : Test isNull for store attributes.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, isChecked bool); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, isChecked bool);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "select t.symbol as tblSymbol, t.isChecked is null as nullCheck " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2", true}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"GOOGLE", false}, event.getData());
+                                break;
+                            case 3:
+                                Assert.assertEquals(new Object[]{"IBM", false}, event.getData());
+                                break;
+                            case 4:
+                                Assert.assertEquals(new Object[]{"LINUX", true}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", null});
+        stockStream.send(new Object[]{"GOOGLE", true});
+        stockStream.send(new Object[]{"IBM", false});
+        stockStream.send(new Object[]{"LINUX", null});
+        fooStream.send(new Object[]{"WSO2"});
+        SiddhiTestHelper.waitForEvents(waitTime, 4, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 4, "Read events failed");
     }
 }

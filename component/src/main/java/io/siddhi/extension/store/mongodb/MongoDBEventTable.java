@@ -722,11 +722,11 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             orderBy = getOrderByString(orderByAttributeBuilders);
         }
         String limitValue = null;
-        if(limit != null){
+        if (limit != null) {
             limitValue = getLimitString(limit);
         }
         String offsetValue = null;
-        if(offset != null){
+        if (offset != null) {
             offsetValue = getOffsetString(offset);
         }
 
@@ -798,7 +798,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     if (Arrays.stream(supportedFunctions).parallel().anyMatch(value.getCompiledCondition()::contains)) {
                         compiledGroupByJSON.append(rename).append(value.getCompiledCondition()).append('}');
                     } else {
-                        compiledGroupByJSON.append(rename).append(":{$push").append(value.getCompiledCondition())
+                        compiledGroupByJSON.append(rename).append(":{$last").append(value.getCompiledCondition())
                                 .append('}');
                     }
                     compiledGroupByJSON.append(',');
@@ -813,7 +813,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private String getGroupByProjectionString(List<SelectAttributeBuilder> selectAttributeBuilders,
-                                              List<ExpressionBuilder> groupByExpressionBuilders){
+                                              List<ExpressionBuilder> groupByExpressionBuilders) {
         List<String> groupByAttributesList = new ArrayList<>();
         StringBuilder compiledProjectionJSON = new StringBuilder();
         List<MongoSelectExpressionVisitor> getSelectExpressionVisitorList =
@@ -876,11 +876,11 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         return compiledOrderByJSON.toString();
     }
 
-    private String getLimitString(Long limit){
+    private String getLimitString(Long limit) {
         return "{ \'$limit\' :" + limit + "}";
     }
 
-    private String getOffsetString(Long offset){
+    private String getOffsetString(Long offset) {
         return "{ \'$skip\' :" + offset + "}";
     }
 
@@ -895,7 +895,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private List<MongoExpressionVisitor> getGroupByExpressionVisitorList(List<ExpressionBuilder>
-                                                                                 groupByExpressionBuilders){
+                                                                                 groupByExpressionBuilders) {
         return groupByExpressionBuilders.stream().map((groupByExpressionBuilder -> {
             MongoExpressionVisitor visitor = new MongoExpressionVisitor();
             groupByExpressionBuilder.build(visitor);

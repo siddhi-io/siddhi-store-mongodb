@@ -32,9 +32,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     private int streamVarCount;
     private int constantCount;
     private StringBuilder compileString;
-    private String[] supportedFunctions = {"sum", "avg", "min", "max"};
+    private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
     private int mathOperandCount;
     private int logicalOperatorCount;
+    private boolean isCountFunction;
+    private boolean isNullCheck;
 
     public MongoSelectExpressionVisitor() {
         this.streamVarCount = 0;
@@ -42,6 +44,8 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         this.compileString = new StringBuilder();
         this.mathOperandCount = 0;
         this.logicalOperatorCount = 0;
+        this.isCountFunction = false;
+        this.isNullCheck = false;
     }
 
     public String getCompiledCondition() {
@@ -78,10 +82,14 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        if (mathOperandCount == 0 && logicalOperatorCount == 0) {
-            compileString.append(':');
+        if (!isCountFunction && !isNullCheck) {
+            if (mathOperandCount == 0 && logicalOperatorCount == 0) {
+                compileString.append(':');
+            }
+            compileString.append("\'$").append(attributeName).append("\'");
+        } else if (isNullCheck) {
+            compileString.append("\'$").append(attributeName).append("\'");
         }
-        compileString.append("\'$").append(attributeName).append("\'");
     }
 
     @Override
@@ -93,13 +101,15 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if (logicalOperatorCount > 0 || mathOperandCount > 0) {
-            compileString.append("{\'$literal\':\'").append(id).append("\'}");
-        } else {
-            if (type.toString().equalsIgnoreCase("STRING")) {
-                compileString.append(":{\'$literal\':\'\'").append(id).append("\'\'}");
+        if (!isCountFunction) {
+            if (logicalOperatorCount > 0 || mathOperandCount > 0) {
+                compileString.append("{\'$literal\':\'").append(id).append("\'}");
             } else {
-                compileString.append(":{\'$literal\':\'").append(id).append("\'}");
+                if (type.toString().equalsIgnoreCase("STRING")) {
+                    compileString.append(":{\'$literal\':\'\'").append(id).append("\'\'}");
+                } else {
+                    compileString.append(":{\'$literal\':\'").append(id).append("\'}");
+                }
             }
         }
     }
@@ -115,15 +125,24 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void beginVisitAttributeFunction(String namespace, String functionName) {
         if (MongoTableUtils.isEmpty(namespace) &&
                 (Arrays.asList(supportedFunctions).contains(functionName))) {
-            compileString.append(":{$").append(functionName);
+            if (functionName.equalsIgnoreCase("count")) {
+                this.isCountFunction = true;
+                compileString.append(":{$sum:1");
+            } else {
+                compileString.append(":{$").append(functionName);
+            }
+
         } else {
             throw new MongoTableException("The RDBMS Event table does not support functions other than \" +\n" +
-                    " \"sum(), avg(), min(), max().");
+                    " \"sum(), avg(), min(), max() and count().");
         }
     }
 
     @Override
     public void endVisitAttributeFunction(String namespace, String functionName) {
+        if (isCountFunction) {
+            this.isCountFunction = false;
+        }
     }
 
     @Override
@@ -186,6 +205,18 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         }
         compileString.append((logicalOperatorCount == 1) ? "]}" : "]},");
         this.logicalOperatorCount--;
+    }
+
+    @Override
+    public void beginVisitIsNull(String streamId) {
+        this.isNullCheck = true;
+        compileString.append(": { $cond: { if: { $eq: [");
+    }
+
+    @Override
+    public void endVisitIsNull(String streamId) {
+        this.isNullCheck = false;
+        compileString.append(", null ] }, then: true, else: false } }");
     }
 
 }
