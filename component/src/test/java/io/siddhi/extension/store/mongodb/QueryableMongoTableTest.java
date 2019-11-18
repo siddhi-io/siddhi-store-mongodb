@@ -136,7 +136,7 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "select t.symbol as tblSymbol, t.price * s.volume as totalCost, t.price * 10 / 100 as discount " +
+                "select t.symbol as tblSymbol, t.price * s.volume as totalCost, t.price - (10 / 100) as discountedPrice " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
@@ -148,10 +148,10 @@ public class QueryableMongoTableTest {
                         eventCount.incrementAndGet();
                         switch (eventCount.intValue()) {
                             case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 65.0, 0.65}, event.getData());
+                                Assert.assertEquals(new Object[]{"WSO2", 65.0, 6.4}, event.getData());
                                 break;
                             case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 95.0, 0.95}, event.getData());
+                                Assert.assertEquals(new Object[]{"IBM", 95.0, 9.4}, event.getData());
                                 break;
                             default:
                                 break;
@@ -178,7 +178,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery3() throws InterruptedException {
-        log.info("testMongoTableQuery3 : Test logical operators in select attributes.");
+        log.info("testMongoTableQuery3 : Test logical operators in select attributes-1.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -238,7 +238,68 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery4() throws InterruptedException {
-        log.info("testMongoTableQuery4 : Test having condition for store attributes.");
+        log.info("testMongoTableQuery4 : Test logical operators in select attributes-2.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price int, isFraud bool, isNewStock bool); " +
+                "define stream FooStream (symbol string, isChecked bool, isOlderStock bool); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price int, isFraud bool, isNewStock bool);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol != t.symbol " +
+                "select t.symbol as tblSymbol, (t.isFraud or s.isChecked) and (s.isOlderStock and t.isNewStock) as " +
+                "isCheckedData " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"LINUX", false}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"GOOGLE", false}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"LINUX", 10, true, false});
+        stockStream.send(new Object[]{"GOOGLE", 12, false, true});
+        fooStream.send(new Object[]{"WSO2", true, false});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery5() throws InterruptedException {
+        log.info("testMongoTableQuery5 : Test having condition for store attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -298,8 +359,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery5() throws InterruptedException {
-        log.info("testMongoTableQuery5 : Test having condition with logical operators in between.");
+    public void testMongoTableQuery6() throws InterruptedException {
+        log.info("testMongoTableQuery6 : Test having condition with logical operators in between.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -360,8 +421,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery6() throws InterruptedException {
-        log.info("testMongoTableQuery6 : Test limit condition.");
+    public void testMongoTableQuery7() throws InterruptedException {
+        log.info("testMongoTableQuery7 : Test limit condition.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -426,8 +487,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery7() throws InterruptedException {
-        log.info("testMongoTableQuery7 : Test offset condition.");
+    public void testMongoTableQuery8() throws InterruptedException {
+        log.info("testMongoTableQuery8 : Test offset condition.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -489,8 +550,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery8() throws InterruptedException {
-        log.info("testMongoTableQuery8 : Test orderBy condition using single attribute.");
+    public void testMongoTableQuery9() throws InterruptedException {
+        log.info("testMongoTableQuery9 : Test orderBy condition using single attribute.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -551,8 +612,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery9() throws InterruptedException {
-        log.info("testMongoTableQuery9 : Test orderBy condition using multiple attributes.");
+    public void testMongoTableQuery10() throws InterruptedException {
+        log.info("testMongoTableQuery10 : Test orderBy condition using multiple attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -618,8 +679,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery10() throws InterruptedException {
-        log.info("testMongoTableQuery10 : Test groupBy with sum function.");
+    public void testMongoTableQuery11() throws InterruptedException {
+        log.info("testMongoTableQuery11 : Test groupBy with sum function.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -680,8 +741,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery11() throws InterruptedException {
-        log.info("testMongoTableQuery11 : Test groupBy with count function.");
+    public void testMongoTableQuery12() throws InterruptedException {
+        log.info("testMongoTableQuery12 : Test groupBy with count function.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -742,8 +803,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery12() throws InterruptedException {
-        log.info("testMongoTableQuery12 : Test groupBy using multiple attributes.");
+    public void testMongoTableQuery13() throws InterruptedException {
+        log.info("testMongoTableQuery13 : Test groupBy using multiple attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -808,8 +869,8 @@ public class QueryableMongoTableTest {
     }
 
     @Test
-    public void testMongoTableQuery13() throws InterruptedException {
-        log.info("testMongoTableQuery13 : Test isNull for store attributes.");
+    public void testMongoTableQuery14() throws InterruptedException {
+        log.info("testMongoTableQuery14 : Test isNull for store attributes.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 

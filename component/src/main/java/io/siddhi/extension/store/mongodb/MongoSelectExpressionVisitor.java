@@ -90,6 +90,10 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         } else if (isNullCheck) {
             compileString.append("\'$").append(attributeName).append("\'");
         }
+        if (isCountFunction) {
+            throw new MongoTableException("The MongoDB Event table does not support arguments \n" +
+                    "for count function.");
+        }
     }
 
     @Override
@@ -111,6 +115,9 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
                     compileString.append(":{\'$literal\':\'").append(id).append("\'}");
                 }
             }
+        } else {
+            throw new MongoTableException("The MongoDB Event table does not support functions arguments \" +\n" +
+                    " \"for count function.");
         }
     }
 
@@ -133,7 +140,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
             }
 
         } else {
-            throw new MongoTableException("The RDBMS Event table does not support functions other than \" +\n" +
+            throw new MongoTableException("The MongoDB Event table does not support functions other than \" +\n" +
                     " \"sum(), avg(), min(), max() and count().");
         }
     }
@@ -218,5 +225,4 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         this.isNullCheck = false;
         compileString.append(", null ] }, then: true, else: false } }");
     }
-
 }

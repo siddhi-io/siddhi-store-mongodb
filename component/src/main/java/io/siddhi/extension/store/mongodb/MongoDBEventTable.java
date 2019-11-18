@@ -767,10 +767,10 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         List<MongoExpressionVisitor> groupByExpressionVisitorList =
                 getGroupByExpressionVisitorList(groupByExpressionBuilders);
         compiledGroupByJSON.append((groupByExpressionVisitorList.size() == 1) ? "{$group:{_id:" : "{$group:{_id:{");
-        for (MongoExpressionVisitor value : groupByExpressionVisitorList) {
-            String groupByAttribute = value.getConditionOperands().get(0);
+        for (MongoExpressionVisitor visitor : groupByExpressionVisitorList) {
+            String groupByAttribute = visitor.getConditionOperands().get(0);
             groupByAttributesList.add(groupByAttribute);
-            if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
+            if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
                 if (groupByExpressionVisitorList.size() == 1) {
                     compiledGroupByJSON.append("\'$").append(groupByAttribute).append('\'');
                     groupBySelectString.append(groupByAttribute).append(":{$first:\'$").
@@ -779,7 +779,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     compiledGroupByJSON.append(groupByAttribute).append(":").append("\'$").append(groupByAttribute).append("\'");
                     groupBySelectString.append(groupByAttribute).append(":{$first:\'$")
                             .append(groupByAttribute).append("\'}");
-                    if (groupByExpressionVisitorList.indexOf(value) != (groupByExpressionVisitorList.size() - 1)) {
+                    if (groupByExpressionVisitorList.indexOf(visitor) != (groupByExpressionVisitorList.size() - 1)) {
                         groupBySelectString.append(",");
                         compiledGroupByJSON.append(",");
                     }
@@ -790,19 +790,19 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         List<MongoSelectExpressionVisitor> getSelectExpressionVisitorList =
                 getSelectAttributesList(selectAttributeBuilders);
         for (int i = 0; i < getSelectExpressionVisitorList.size(); i++) {
-            MongoSelectExpressionVisitor value = getSelectExpressionVisitorList.get(i);
+            MongoSelectExpressionVisitor visitor = getSelectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             if (!groupByAttributesList.contains(rename)) {
-                if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
-                    String[] supportedFunctions = value.getSupportedFunctions();
-                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(value.getCompiledCondition()::contains)) {
-                        compiledGroupByJSON.append(rename).append(value.getCompiledCondition()).append('}');
+                if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
+                    String[] supportedFunctions = visitor.getSupportedFunctions();
+                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(visitor.getCompiledCondition()::contains)) {
+                        compiledGroupByJSON.append(rename).append(visitor.getCompiledCondition()).append('}');
                     } else {
-                        compiledGroupByJSON.append(rename).append(":{$last").append(value.getCompiledCondition())
+                        compiledGroupByJSON.append(rename).append(":{$last").append(visitor.getCompiledCondition())
                                 .append('}');
                     }
                     compiledGroupByJSON.append(',');
-                    if (getSelectExpressionVisitorList.indexOf(value) == (getSelectExpressionVisitorList.size() - 1)) {
+                    if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
                         compiledGroupByJSON.append(groupBySelectString).append("}");
                     }
                 }
@@ -820,18 +820,18 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 getSelectAttributesList(selectAttributeBuilders);
         List<MongoExpressionVisitor> groupByExpressionVisitorList =
                 getGroupByExpressionVisitorList(groupByExpressionBuilders);
-        for (MongoExpressionVisitor value : groupByExpressionVisitorList) {
-            String groupByAttribute = value.getConditionOperands().get(0);
+        for (MongoExpressionVisitor visitor : groupByExpressionVisitorList) {
+            String groupByAttribute = visitor.getConditionOperands().get(0);
             groupByAttributesList.add(groupByAttribute);
         }
         compiledProjectionJSON.append("{$project:{_id:0,");
         for (int i = 0; i < getSelectExpressionVisitorList.size(); i++) {
-            MongoSelectExpressionVisitor value = getSelectExpressionVisitorList.get(i);
+            MongoSelectExpressionVisitor visitor = getSelectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             compiledProjectionJSON.append(rename).append(":1");
             if (!groupByAttributesList.contains(rename)) {
-                if (value.getStreamVarCount() == 0 && value.getConstantCount() == 0) {
-                    if (getSelectExpressionVisitorList.indexOf(value) == (getSelectExpressionVisitorList.size() - 1)) {
+                if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
+                    if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
                         compiledProjectionJSON.append("}");
                     } else {
                         compiledProjectionJSON.append(",");
