@@ -776,7 +776,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     groupBySelectString.append(groupByAttribute).append(":{$first:\'$").
                             append(groupByAttribute).append("\'}");
                 } else {
-                    compiledGroupByJSON.append(groupByAttribute).append(":").append("\'$").append(groupByAttribute).append("\'");
+                    compiledGroupByJSON.append(groupByAttribute).append(":").append("\'$")
+                            .append(groupByAttribute).append("\'");
                     groupBySelectString.append(groupByAttribute).append(":{$first:\'$")
                             .append(groupByAttribute).append("\'}");
                     if (groupByExpressionVisitorList.indexOf(visitor) != (groupByExpressionVisitorList.size() - 1)) {
@@ -784,6 +785,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                         compiledGroupByJSON.append(",");
                     }
                 }
+            } else {
+                throw new MongoTableException("The MongoDB Event table does not support group by using stream " +
+                        "attributes.");
             }
         }
         compiledGroupByJSON.append((groupByAttributesList.size() == 1) ? ',' : "},");
@@ -805,6 +809,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
                         compiledGroupByJSON.append(groupBySelectString).append("}");
                     }
+                } else {
+                    throw new MongoTableException("The MongoDB Event table does not support group by using " +
+                            "stream attributes.");
                 }
             }
         }
@@ -870,6 +877,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                         .append((order.equalsIgnoreCase("ASC")) ? ":1" : ":-1")
                         .append((orderByExpressionVisitorList.indexOf(visitor) ==
                                 (orderByExpressionVisitorList.size() - 1)) ? '}' : ',');
+            } else {
+                throw new MongoTableException("The MongoDB Event table does not support order by using " +
+                        "stream attributes.");
             }
         }
         compiledOrderByJSON.append('}');

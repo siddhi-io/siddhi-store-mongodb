@@ -105,7 +105,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if (!isCountFunction) {
+        if (!isCountFunction && !isNullCheck) {
             if (logicalOperatorCount > 0 || mathOperandCount > 0) {
                 compileString.append("{\'$literal\':\'").append(id).append("\'}");
             } else {
@@ -115,9 +115,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
                     compileString.append(":{\'$literal\':\'").append(id).append("\'}");
                 }
             }
-        } else {
-            throw new MongoTableException("The MongoDB Event table does not support functions arguments \" +\n" +
-                    " \"for count function.");
+        } else if (isCountFunction) {
+            throw new MongoTableException("The MongoDB Event table does not support functions arguments for count " +
+                    "function.");
+        }else if(isNullCheck){
+            throw new MongoTableException("The MongoDB Event table does not support null check for stream variables.");
         }
     }
 

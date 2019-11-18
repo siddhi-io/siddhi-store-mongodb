@@ -43,12 +43,12 @@ public class QueryableMongoTableTest {
 
     @BeforeClass
     public void init() {
-        log.info("== Mongo Table JOIN tests started ==");
+        log.info("== Mongo Table query tests started ==");
     }
 
     @AfterClass
     public void shutdown() {
-        log.info("== Mongo Table JOIN tests completed ==");
+        log.info("== Mongo Table query tests completed ==");
     }
 
     @BeforeMethod
