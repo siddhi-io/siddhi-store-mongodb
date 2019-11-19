@@ -23,33 +23,32 @@ import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import io.siddhi.query.api.definition.Attribute;
 
 import java.util.Arrays;
+import java.util.Stack;
 
 /**
  * Class representing MongoDB select attribute condition implementation.
  */
 public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
+    private Stack<String> conditionOperands;
     private int streamVarCount;
     private int constantCount;
     private StringBuilder compileString;
     private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
-    private int mathOperandCount;
-    private int logicalOperatorCount;
     private boolean isCountFunction;
     private boolean isNullCheck;
 
     public MongoSelectExpressionVisitor() {
+        this.conditionOperands = new Stack<>();
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.compileString = new StringBuilder();
-        this.mathOperandCount = 0;
-        this.logicalOperatorCount = 0;
         this.isCountFunction = false;
         this.isNullCheck = false;
     }
 
     public String getCompiledCondition() {
-        return compileString.toString();
+        return conditionOperands.pop();
     }
 
     public int getStreamVarCount() {
@@ -64,107 +63,91 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         return this.supportedFunctions;
     }
 
-
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
-        if (mathOperandCount == 0 && logicalOperatorCount == 0) {
-            compileString.append(":");
-        }
-        compileString.append("{\'$literal\':").append(value).append("}");
+        conditionOperands.push("{\'$literal\':" + value + "}");
     }
 
     @Override
     public void endVisitConstant(Object value, Attribute.Type type) {
-        if (logicalOperatorCount > 0) {
-            compileString.append(",");
-        }
     }
 
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        if (!isCountFunction && !isNullCheck) {
-            if (mathOperandCount == 0 && logicalOperatorCount == 0) {
-                compileString.append(':');
-            }
-            compileString.append("\'$").append(attributeName).append("\'");
-        } else if (isNullCheck) {
-            compileString.append("\'$").append(attributeName).append("\'");
-        }
         if (isCountFunction) {
-            throw new MongoTableException("The MongoDB Event table does not support arguments \n" +
-                    "for count function.");
+            throw new MongoTableException("The MongoDB Event table does not support arguments for count function.");
         }
+        conditionOperands.push("\'$" + attributeName + "\'");
     }
 
     @Override
     public void endVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
-        if (logicalOperatorCount > 0) {
-            compileString.append(",");
-        }
     }
 
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if (!isCountFunction && !isNullCheck) {
-            if (logicalOperatorCount > 0 || mathOperandCount > 0) {
-                compileString.append("{\'$literal\':\'").append(id).append("\'}");
-            } else {
-                if (type.toString().equalsIgnoreCase("STRING")) {
-                    compileString.append(":{\'$literal\':\'\'").append(id).append("\'\'}");
-                } else {
-                    compileString.append(":{\'$literal\':\'").append(id).append("\'}");
-                }
-            }
-        } else if (isCountFunction) {
+        if (isCountFunction) {
             throw new MongoTableException("The MongoDB Event table does not support functions arguments for count " +
                     "function.");
-        }else if(isNullCheck){
+        }
+        if (isNullCheck) {
             throw new MongoTableException("The MongoDB Event table does not support null check for stream variables.");
+        }
+        if (type.toString().equalsIgnoreCase("STRING")) {
+            conditionOperands.push("{\'$literal\':\'\'" + id + "\'\'}");
+        } else {
+            conditionOperands.push("{\'$literal\':\'" + id + "\'}");
         }
     }
 
     @Override
     public void endVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
-        if (logicalOperatorCount > 0) {
-            compileString.append(",");
-        }
     }
 
     @Override
     public void beginVisitAttributeFunction(String namespace, String functionName) {
-        if (MongoTableUtils.isEmpty(namespace) &&
-                (Arrays.asList(supportedFunctions).contains(functionName))) {
-            if (functionName.equalsIgnoreCase("count")) {
-                this.isCountFunction = true;
-                compileString.append(":{$sum:1");
-            } else {
-                compileString.append(":{$").append(functionName);
-            }
-
-        } else {
-            throw new MongoTableException("The MongoDB Event table does not support functions other than \" +\n" +
-                    " \"sum(), avg(), min(), max() and count().");
+        if (!MongoTableUtils.isEmpty(namespace) ||
+                (!Arrays.asList(supportedFunctions).contains(functionName))) {
+            throw new MongoTableException("The MongoDB Event table does not support functions other than sum(), " +
+                    "avg(), min(), max() and count().");
+        }
+        if (functionName.equalsIgnoreCase("count")) {
+            this.isCountFunction = true;
         }
     }
 
     @Override
     public void endVisitAttributeFunction(String namespace, String functionName) {
-        if (isCountFunction) {
-            this.isCountFunction = false;
+        if (MongoTableUtils.isEmpty(namespace) &&
+                (Arrays.asList(supportedFunctions).contains(functionName))) {
+            if (functionName.equalsIgnoreCase("count")) {
+                this.isCountFunction = false;
+                conditionOperands.push("{$sum:1}");
+            } else {
+                String functionArgument = conditionOperands.pop();
+                conditionOperands.push("{$" + functionName + ":" + functionArgument + "}");
+            }
         }
     }
 
     @Override
+    public void beginVisitParameterAttributeFunction(int index) {
+    }
+
+    @Override
+    public void endVisitParameterAttributeFunction(int index) {
+    }
+
+    @Override
     public void beginVisitMath(MathOperator mathOperator) {
-        this.mathOperandCount++;
-        String operatorName = mathOperator.name().toLowerCase();
-        compileString.append((mathOperandCount == 1) ? ":{$" + operatorName + ":[" : "{$" + operatorName + ":[");
     }
 
     @Override
     public void endVisitMath(MathOperator mathOperator) {
-        compileString.append("]}");
-        this.mathOperandCount--;
+        String rightOperand = this.conditionOperands.pop();
+        String leftOperand = this.conditionOperands.pop();
+        conditionOperands.push("{$" + mathOperator.name().toLowerCase() + ":" + "[" + leftOperand + "," +
+                rightOperand + "]}");
     }
 
     @Override
@@ -173,9 +156,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitMathLeftOperand(MathOperator mathOperator) {
-        if (mathOperandCount > 0) {
-            compileString.append(",");
-        }
     }
 
     @Override
@@ -188,43 +168,53 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitAnd() {
-        this.logicalOperatorCount++;
-        compileString.append((logicalOperatorCount == 1) ? ":{$and:[" : "{$and:[");
     }
 
     @Override
     public void endVisitAnd() {
-        if (compileString.charAt(compileString.length() - 1) == ',') {
-            compileString.setLength(compileString.length() - 1);
-        }
-        compileString.append((logicalOperatorCount == 1) ? "]}" : "]},");
-        this.logicalOperatorCount--;
+        String rightOperand = this.conditionOperands.pop();
+        String leftOperand = this.conditionOperands.pop();
+        conditionOperands.push("{$and:" + "[" + leftOperand + "," + rightOperand + "]}");
     }
 
     @Override
     public void beginVisitOr() {
-        this.logicalOperatorCount++;
-        compileString.append((logicalOperatorCount == 1) ? ":{$or:[" : "{$or:[");
     }
 
     @Override
     public void endVisitOr() {
-        if (compileString.charAt(compileString.length() - 1) == ',') {
-            compileString.setLength(compileString.length() - 1);
-        }
-        compileString.append((logicalOperatorCount == 1) ? "]}" : "]},");
-        this.logicalOperatorCount--;
+        String rightOperand = this.conditionOperands.pop();
+        String leftOperand = this.conditionOperands.pop();
+        conditionOperands.push("{$or:" + "[" + leftOperand + "," + rightOperand + "]}");
+
+    }
+
+    @Override
+    public void beginVisitAndLeftOperand() {
+    }
+
+    @Override
+    public void endVisitAndLeftOperand() {
+    }
+
+    @Override
+    public void beginVisitAndRightOperand() {
+    }
+
+    @Override
+    public void endVisitAndRightOperand() {
     }
 
     @Override
     public void beginVisitIsNull(String streamId) {
         this.isNullCheck = true;
-        compileString.append(": { $cond: { if: { $eq: [");
     }
 
     @Override
     public void endVisitIsNull(String streamId) {
         this.isNullCheck = false;
-        compileString.append(", null ] }, then: true, else: false } }");
+        String nullCheckAttribute = conditionOperands.pop();
+        conditionOperands.push("{ $cond: { if: { $eq: [" + nullCheckAttribute + ", null ] }, then: true, " +
+                "else: false } }");
     }
 }

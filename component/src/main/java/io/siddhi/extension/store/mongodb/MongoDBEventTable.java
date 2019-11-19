@@ -639,12 +639,16 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         String groupByQuery = ((MongoDBCompileSelection) compiledSelection).getGroupBy();
         String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
         String orderByQuery = ((MongoDBCompileSelection) compiledSelection).getOrderBy();
-        String limitQuery = ((MongoDBCompileSelection) compiledSelection).getLimit();
-        String offsetQuery = ((MongoDBCompileSelection) compiledSelection).getOffset();
+        Long limitValue = ((MongoDBCompileSelection) compiledSelection).getLimit();
+        Long offsetValue = ((MongoDBCompileSelection) compiledSelection).getOffset();
         if (parameterMap.values().size() > 0) {
             for (int i = 0; i < parameterMap.values().size(); i++) {
                 if (selectQuery != null) {
                     selectQuery = selectQuery.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
+                            "" + parameterMap.values().toArray()[i]);
+                }
+                if (groupByQuery != null) {
+                    groupByQuery = groupByQuery.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
                             "" + parameterMap.values().toArray()[i]);
                 }
             }
@@ -674,13 +678,13 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             aggregateList.add(orderBy);
             MongoTableUtils.printDebugLogs("OrderBy query : ", orderBy.toJson());
         }
-        if (offsetQuery != null) {
-            Document offsetFilter = Document.parse(offsetQuery);
+        if (offsetValue != null) {
+            Document offsetFilter = Document.parse("{ \'$skip\' :" + offsetValue + "}");
             aggregateList.add(offsetFilter);
             MongoTableUtils.printDebugLogs("Offset query : ", offsetFilter.toJson());
         }
-        if (limitQuery != null) {
-            Document limitFilter = Document.parse(limitQuery);
+        if (limitValue != null) {
+            Document limitFilter = Document.parse("{ \'$limit\' :" + limitValue + "}");
             aggregateList.add(limitFilter);
             MongoTableUtils.printDebugLogs("Limit query : ", limitFilter.toJson());
         }
@@ -721,16 +725,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         if (orderByAttributeBuilders != null) {
             orderBy = getOrderByString(orderByAttributeBuilders);
         }
-        String limitValue = null;
-        if (limit != null) {
-            limitValue = getLimitString(limit);
-        }
-        String offsetValue = null;
-        if (offset != null) {
-            offsetValue = getOffsetString(offset);
-        }
-
-        return new MongoDBCompileSelection(project, groupBy, having, orderBy, limitValue, offsetValue);
+        return new MongoDBCompileSelection(project, groupBy, having, orderBy, limit, offset);
     }
 
     private String getProjectionString(List<SelectAttributeBuilder> selectAttributeBuilders) {
@@ -742,15 +737,15 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoSelectExpressionVisitor selectExpressionVisitor = selectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             if (selectExpressionVisitor.getStreamVarCount() == 0 && selectExpressionVisitor.getConstantCount() == 0) {
-                compiledProjectionJSON.append(rename).append(selectExpressionVisitor.getCompiledCondition())
+                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
                         .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
                                 (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
             } else if (selectExpressionVisitor.getStreamVarCount() == 1) {
-                compiledProjectionJSON.append(rename).append(selectExpressionVisitor.getCompiledCondition())
+                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
                         .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
                                 (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
             } else if (selectExpressionVisitor.getConstantCount() == 1) {
-                compiledProjectionJSON.append(rename).append(selectExpressionVisitor.getCompiledCondition())
+                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
                         .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
                                 (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
             }
@@ -799,19 +794,17 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             if (!groupByAttributesList.contains(rename)) {
                 if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
                     String[] supportedFunctions = visitor.getSupportedFunctions();
-                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(visitor.getCompiledCondition()::contains)) {
-                        compiledGroupByJSON.append(rename).append(visitor.getCompiledCondition()).append('}');
+                    String compiledCondition = visitor.getCompiledCondition();
+                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(compiledCondition::contains)) {
+                        compiledGroupByJSON.append(rename).append(":").append(compiledCondition);
                     } else {
-                        compiledGroupByJSON.append(rename).append(":{$last").append(visitor.getCompiledCondition())
+                        compiledGroupByJSON.append(rename).append(":{$last:").append(compiledCondition)
                                 .append('}');
                     }
                     compiledGroupByJSON.append(',');
                     if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
                         compiledGroupByJSON.append(groupBySelectString).append("}");
                     }
-                } else {
-                    throw new MongoTableException("The MongoDB Event table does not support group by using " +
-                            "stream attributes.");
                 }
             }
         }
@@ -884,14 +877,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         }
         compiledOrderByJSON.append('}');
         return compiledOrderByJSON.toString();
-    }
-
-    private String getLimitString(Long limit) {
-        return "{ \'$limit\' :" + limit + "}";
-    }
-
-    private String getOffsetString(Long offset) {
-        return "{ \'$skip\' :" + offset + "}";
     }
 
     private List<MongoSelectExpressionVisitor> getSelectAttributesList(List<SelectAttributeBuilder>

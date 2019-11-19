@@ -196,7 +196,7 @@ public class QueryableMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "on s.symbol != t.symbol " +
-                "select t.symbol as tblSymbol, (t.isFraud or s.isChecked and s.isOlderStock) as isCheckedData " +
+                "select t.symbol as tblSymbol, (t.isFraud and s.isChecked) as isCheckedData " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
