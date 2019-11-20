@@ -35,6 +35,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     private int streamVarCount;
     private int constantCount;
     private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
+    private boolean isAttributeFunctionUsed;
     private boolean isCountFunction;
     private boolean isNullCheck;
 
@@ -44,6 +45,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         this.constantCount = 0;
         this.isCountFunction = false;
         this.isNullCheck = false;
+        this.isAttributeFunctionUsed = false;
     }
 
     public String getCompiledCondition() {
@@ -58,8 +60,8 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         return this.constantCount;
     }
 
-    public String[] getSupportedFunctions() {
-        return this.supportedFunctions;
+    public boolean checkFunctionsUsed() {
+        return this.isAttributeFunctionUsed;
     }
 
     @Override
@@ -119,6 +121,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitAttributeFunction(String namespace, String functionName) {
         if (MongoTableUtils.isEmpty(namespace) &&
                 (Arrays.asList(supportedFunctions).contains(functionName))) {
+            this.isAttributeFunctionUsed = true;
             if (functionName.equalsIgnoreCase("count")) {
                 this.isCountFunction = false;
                 conditionOperands.push("{$sum:1}");

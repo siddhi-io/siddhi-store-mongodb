@@ -793,19 +793,19 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             String rename = selectAttributeBuilders.get(i).getRename();
             if (!groupByAttributesList.contains(rename)) {
                 if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
-                    String[] supportedFunctions = visitor.getSupportedFunctions();
                     String compiledCondition = visitor.getCompiledCondition();
-                    if (Arrays.stream(supportedFunctions).parallel().anyMatch(compiledCondition::contains)) {
+                    boolean isFunctionUsed = visitor.checkFunctionsUsed();
+                    if (isFunctionUsed) {
                         compiledGroupByJSON.append(rename).append(":").append(compiledCondition);
                     } else {
                         compiledGroupByJSON.append(rename).append(":{$last:").append(compiledCondition)
                                 .append('}');
                     }
                     compiledGroupByJSON.append(',');
-                    if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
-                        compiledGroupByJSON.append(groupBySelectString).append("}");
-                    }
                 }
+            }
+            if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
+                compiledGroupByJSON.append(groupBySelectString).append("}");
             }
         }
         compiledGroupByJSON.append("}");
@@ -814,29 +814,16 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
 
     private String getGroupByProjectionString(List<SelectAttributeBuilder> selectAttributeBuilders,
                                               List<ExpressionBuilder> groupByExpressionBuilders) {
-        List<String> groupByAttributesList = new ArrayList<>();
         StringBuilder compiledProjectionJSON = new StringBuilder();
         List<MongoSelectExpressionVisitor> getSelectExpressionVisitorList =
                 getSelectAttributesList(selectAttributeBuilders);
-        List<MongoExpressionVisitor> groupByExpressionVisitorList =
-                getGroupByExpressionVisitorList(groupByExpressionBuilders);
-        for (MongoExpressionVisitor visitor : groupByExpressionVisitorList) {
-            String groupByAttribute = visitor.getConditionOperands().get(0);
-            groupByAttributesList.add(groupByAttribute);
-        }
         compiledProjectionJSON.append("{$project:{_id:0,");
         for (int i = 0; i < getSelectExpressionVisitorList.size(); i++) {
             MongoSelectExpressionVisitor visitor = getSelectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             compiledProjectionJSON.append(rename).append(":1");
-            if (!groupByAttributesList.contains(rename)) {
-                if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
-                    if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
-                        compiledProjectionJSON.append("}");
-                    } else {
-                        compiledProjectionJSON.append(",");
-                    }
-                }
+            if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
+                compiledProjectionJSON.append("}");
             } else {
                 compiledProjectionJSON.append(",");
             }
