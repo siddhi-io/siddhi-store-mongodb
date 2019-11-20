@@ -678,12 +678,12 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoTableUtils.printDebugLogs("OrderBy query : ", orderBy.toJson());
         }
         if (offsetValue != null) {
-            Document offsetFilter = Document.parse("{ \'$skip\' :" + offsetValue + "}");
+            Document offsetFilter = Document.parse("{ $skip :" + offsetValue + "}");
             aggregateList.add(offsetFilter);
             MongoTableUtils.printDebugLogs("Offset query : ", offsetFilter.toJson());
         }
         if (limitValue != null) {
-            Document limitFilter = Document.parse("{ \'$limit\' :" + limitValue + "}");
+            Document limitFilter = Document.parse("{ $limit :" + limitValue + "}");
             aggregateList.add(limitFilter);
             MongoTableUtils.printDebugLogs("Limit query : ", limitFilter.toJson());
         }
@@ -793,7 +793,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             if (!groupByAttributesList.contains(rename)) {
                 if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
                     String compiledCondition = visitor.getCompiledCondition();
-                    boolean isFunctionUsed = visitor.checkFunctionsUsed();
+                    boolean isFunctionUsed = visitor.isFunctionsPresent();
                     if (isFunctionUsed) {
                         compiledGroupByJSON.append(rename).append(":").append(compiledCondition);
                     } else {
@@ -833,8 +833,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private String getHavingString(ExpressionBuilder havingExpressionBuilder) {
         MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         havingExpressionBuilder.build(visitor);
-        String having = visitor.getHavingCompiledCondition();
-        return "{$match:" + having + "}";
+        return "{$match:" + visitor.getHavingCompiledCondition() + "}";
     }
 
     private String getOrderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders) {

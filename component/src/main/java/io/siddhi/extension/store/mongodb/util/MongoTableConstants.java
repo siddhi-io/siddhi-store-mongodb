@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2019, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -54,12 +54,32 @@ public class MongoTableConstants {
     public static final String MONGO_COMPARE_FILTER = "{{{LEFT_OPERAND}}:{{{COMPARE_OPERATOR}}:{{RIGHT_OPERAND}}}}";
     public static final String MONGO_IS_NULL_FILTER = "{{{OPERAND}}:{$eq:null}}";
 
+    //Mongo filters for math operators
+    public static final String MONGO_MATH_FILTER = "{${{MATH_OPERATOR}}:[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]}";
+    public static final String MATH_OPERATOR = "{{MATH_OPERATOR}}";
+
+    //Mongo filters for functions
+    public static final String MONGO_FUNCTION_FILTER = "{${{FUNCTION_NAME}}:{{FUNCTION_ARGUMENT}}}";
+    public static final String MONGO_GROUPBY_COUNT_RECORDS = "{$sum:1}";
+
+    //If else conditions
+    public static final String MONGO_IF_ELSE_CONDITION = "{$cond:{if:{{{COMPARE_OPERATOR}}:" +
+            "[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]},then:true,else:false}}";
+
+    //Attribute filters
+    public static final String MONGO_LITERAL_ATTRIBUTE = "{\'$literal\':{{FIELD_NAME}}}";
+    public static final String MONGO_STORE_ATTRIBUTE = "\'${{FIELD_NAME}}\'";
+    public static final String MONGO_STREAM_ATTRIBUTE = "{\'$literal\':\'{{FIELD_NAME}}\'}";
+    public static final String MONGO_STREAM_STRING_ATTRIBUTE = "{\'$literal\':\'\'{{FIELD_NAME}}\'\'}";
+
     //Placeholders for condition replacements
     public static final String PLACEHOLDER_LEFT_OPERAND = "{{LEFT_OPERAND}}";
     public static final String PLACEHOLDER_RIGHT_OPERAND = "{{RIGHT_OPERAND}}";
     public static final String PLACEHOLDER_OPERAND = "{{OPERAND}}";
     public static final String PLACEHOLDER_FIELD_NAME = "{{FIELD_NAME}}";
     public static final String PLACEHOLDER_COMPARE_OPERATOR = "{{COMPARE_OPERATOR}}";
+    public static final String PLACEHOLDER_FUNCTION = "{{FUNCTION_NAME}}";
+    public static final String PLACEHOLDER_FUNCTION_ARGUMENT = "{{FUNCTION_ARGUMENT}}";
 
     public static final String CONNECTIONS_PER_HOST = "connectionsPerHost";
     public static final String HEARTBEAT_SOCKET_TIMEOUT = "heartbeatSocketTimeout";

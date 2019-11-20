@@ -19,6 +19,7 @@ package io.siddhi.extension.store.mongodb;
 
 import io.siddhi.core.table.record.BaseExpressionVisitor;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
+import io.siddhi.extension.store.mongodb.util.MongoTableConstants;
 import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.condition.Compare;
@@ -41,7 +42,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     private boolean isNullCheck;
 
     public MongoSelectExpressionVisitor() {
-        this.conditionOperands = new Stack<>();
+        this.conditionOperands = new Stack<String>();
         this.streamVarCount = 0;
         this.constantCount = 0;
         this.isCountFunction = false;
@@ -61,13 +62,15 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         return this.constantCount;
     }
 
-    public boolean checkFunctionsUsed() {
+    public boolean isFunctionsPresent() {
         return this.isAttributeFunctionUsed;
     }
 
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
-        conditionOperands.push("{\'$literal\':" + value + "}");
+        String constantAttribute = MongoTableConstants.MONGO_LITERAL_ATTRIBUTE
+                .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, value.toString());
+        conditionOperands.push(constantAttribute);
     }
 
     @Override
@@ -79,7 +82,9 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         if (isCountFunction) {
             throw new MongoTableException("The MongoDB Event table does not support arguments for count function.");
         }
-        conditionOperands.push("\'$" + attributeName + "\'");
+        String storeAttribute = MongoTableConstants.MONGO_STORE_ATTRIBUTE
+                .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, attributeName);
+        conditionOperands.push(storeAttribute);
     }
 
     @Override
@@ -96,9 +101,13 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
             throw new MongoTableException("The MongoDB Event table does not support null check for stream variables.");
         }
         if (type.toString().equalsIgnoreCase("STRING")) {
-            conditionOperands.push("{\'$literal\':\'\'" + id + "\'\'}");
+            String streamAttribute = MongoTableConstants.MONGO_STREAM_STRING_ATTRIBUTE
+                    .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, id);
+            conditionOperands.push(streamAttribute);
         } else {
-            conditionOperands.push("{\'$literal\':\'" + id + "\'}");
+            String streamAttribute = MongoTableConstants.MONGO_STREAM_ATTRIBUTE
+                    .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, id);
+            conditionOperands.push(streamAttribute);
         }
     }
 
@@ -125,10 +134,13 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
             this.isAttributeFunctionUsed = true;
             if (functionName.equalsIgnoreCase("count")) {
                 this.isCountFunction = false;
-                conditionOperands.push("{$sum:1}");
+                conditionOperands.push(MongoTableConstants.MONGO_GROUPBY_COUNT_RECORDS);
             } else {
                 String functionArgument = conditionOperands.pop();
-                conditionOperands.push("{$" + functionName + ":" + functionArgument + "}");
+                String functionFilter = MongoTableConstants.MONGO_FUNCTION_FILTER
+                        .replace(MongoTableConstants.PLACEHOLDER_FUNCTION, functionName)
+                        .replace(MongoTableConstants.PLACEHOLDER_FUNCTION_ARGUMENT, functionArgument);
+                conditionOperands.push(functionFilter);
             }
         }
     }
@@ -149,8 +161,12 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitMath(MathOperator mathOperator) {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{$" + mathOperator.name().toLowerCase(Locale.ENGLISH) + ":" + "[" + leftOperand + "," +
-                rightOperand + "]}");
+        String mathOperatorName = mathOperator.name().toLowerCase(Locale.ENGLISH);
+        String mathFilter = MongoTableConstants.MONGO_MATH_FILTER
+                .replace(MongoTableConstants.MATH_OPERATOR, mathOperatorName)
+                .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        conditionOperands.push(mathFilter);
     }
 
     @Override
@@ -177,7 +193,10 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitOr() {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{$or:" + "[" + leftOperand + "," + rightOperand + "]}");
+        String orFilter = MongoTableConstants.MONGO_OR_FILTER
+                .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        this.conditionOperands.push(orFilter);
     }
 
     @Override
@@ -204,7 +223,10 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitAnd() {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{$and:" + "[" + leftOperand + "," + rightOperand + "]}");
+        String andFilter = MongoTableConstants.MONGO_AND_FILTER
+                .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        conditionOperands.push(andFilter);
     }
 
     @Override
@@ -232,8 +254,12 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitIsNull(String streamId) {
         this.isNullCheck = false;
         String nullCheckAttribute = conditionOperands.pop();
-        conditionOperands.push("{ $cond: { if: { $eq: [" + nullCheckAttribute + ", null ] }, then: true, " +
-                "else: false } }");
+        String compareOperator = MongoTableConstants.MONGO_COMPARE_EQUAL;
+        String compareFilter = MongoTableConstants.MONGO_IF_ELSE_CONDITION
+                .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR, compareOperator)
+                .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, nullCheckAttribute)
+                .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, "null");
+        conditionOperands.push(compareFilter);
     }
 
     @Override
@@ -242,25 +268,25 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitCompare(Compare.Operator operator) {
-        String compareFilter;
+        String compareOperator;
         switch (operator) {
             case EQUAL:
-                compareFilter = "$eq";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_EQUAL;
                 break;
             case GREATER_THAN:
-                compareFilter = "$gt";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN;
                 break;
             case GREATER_THAN_EQUAL:
-                compareFilter = "$gte";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL;
                 break;
             case LESS_THAN:
-                compareFilter = "$lt";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN;
                 break;
             case LESS_THAN_EQUAL:
-                compareFilter = "$lte";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL;
                 break;
             case NOT_EQUAL:
-                compareFilter = "$ne";
+                compareOperator = MongoTableConstants.MONGO_COMPARE_NOT_EQUAL;
                 break;
             default:
                 throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
@@ -268,8 +294,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         }
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{ $cond: { if: { " + compareFilter + ": [" + leftOperand + "," + rightOperand +
-                " ] }, then: true, else: false } }");
+        String compareFilter = MongoTableConstants.MONGO_IF_ELSE_CONDITION
+                .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR, compareOperator)
+                .replace(MongoTableConstants.PLACEHOLDER_LEFT_OPERAND, leftOperand)
+                .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
+        conditionOperands.push(compareFilter);
     }
 
     @Override
