@@ -21,6 +21,7 @@ import io.siddhi.core.table.record.BaseExpressionVisitor;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Arrays;
 import java.util.Stack;
@@ -33,7 +34,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     private Stack<String> conditionOperands;
     private int streamVarCount;
     private int constantCount;
-    private StringBuilder compileString;
     private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
     private boolean isCountFunction;
     private boolean isNullCheck;
@@ -42,7 +42,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         this.conditionOperands = new Stack<>();
         this.streamVarCount = 0;
         this.constantCount = 0;
-        this.compileString = new StringBuilder();
         this.isCountFunction = false;
         this.isNullCheck = false;
     }
@@ -167,17 +166,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     }
 
     @Override
-    public void beginVisitAnd() {
-    }
-
-    @Override
-    public void endVisitAnd() {
-        String rightOperand = this.conditionOperands.pop();
-        String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{$and:" + "[" + leftOperand + "," + rightOperand + "]}");
-    }
-
-    @Override
     public void beginVisitOr() {
     }
 
@@ -186,7 +174,33 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
         conditionOperands.push("{$or:" + "[" + leftOperand + "," + rightOperand + "]}");
+    }
 
+    @Override
+    public void beginVisitOrLeftOperand() {
+    }
+
+    @Override
+    public void endVisitOrLeftOperand() {
+    }
+
+    @Override
+    public void beginVisitOrRightOperand() {
+    }
+
+    @Override
+    public void endVisitOrRightOperand() {
+    }
+
+    @Override
+    public void beginVisitAnd() {
+    }
+
+    @Override
+    public void endVisitAnd() {
+        String rightOperand = this.conditionOperands.pop();
+        String leftOperand = this.conditionOperands.pop();
+        conditionOperands.push("{$and:" + "[" + leftOperand + "," + rightOperand + "]}");
     }
 
     @Override
@@ -216,5 +230,75 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         String nullCheckAttribute = conditionOperands.pop();
         conditionOperands.push("{ $cond: { if: { $eq: [" + nullCheckAttribute + ", null ] }, then: true, " +
                 "else: false } }");
+    }
+
+    @Override
+    public void beginVisitCompare(Compare.Operator operator) {
+    }
+
+    @Override
+    public void endVisitCompare(Compare.Operator operator) {
+        String compareFilter;
+        switch (operator) {
+            case EQUAL:
+                compareFilter = "$eq";
+                break;
+            case GREATER_THAN:
+                compareFilter = "$gt";
+                break;
+            case GREATER_THAN_EQUAL:
+                compareFilter = "$gte";
+                break;
+            case LESS_THAN:
+                compareFilter = "$lt";
+                break;
+            case LESS_THAN_EQUAL:
+                compareFilter = "$lte";
+                break;
+            case NOT_EQUAL:
+                compareFilter = "$ne";
+                break;
+            default:
+                throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
+                        "COMPARE operation.");
+        }
+        String rightOperand = this.conditionOperands.pop();
+        String leftOperand = this.conditionOperands.pop();
+        conditionOperands.push("{ $cond: { if: { " + compareFilter + ": [" + leftOperand + "," + rightOperand + " ] }, then: true," +
+                "else: false } }");
+    }
+
+    @Override
+    public void beginVisitCompareLeftOperand(Compare.Operator operator) {
+    }
+
+    @Override
+    public void endVisitCompareLeftOperand(Compare.Operator operator) {
+    }
+
+    @Override
+    public void beginVisitCompareRightOperand(Compare.Operator operator) {
+    }
+
+    @Override
+    public void endVisitCompareRightOperand(Compare.Operator operator) {
+    }
+
+    @Override
+    public void beginVisitNot() {
+        throw new MongoTableException("MongoDB Event Table does not support NOT function.");
+    }
+
+    @Override
+    public void endVisitNot() {
+    }
+
+    @Override
+    public void beginVisitIn(String storeId) {
+        throw new MongoTableException("MongoDB Event Table does not support IN function.");
+    }
+
+    @Override
+    public void endVisitIn(String storeId) {
     }
 }
