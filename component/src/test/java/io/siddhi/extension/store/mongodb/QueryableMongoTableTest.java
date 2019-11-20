@@ -136,7 +136,8 @@ public class QueryableMongoTableTest {
                 "" +
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
-                "select t.symbol as tblSymbol, t.price * s.volume as totalCost, t.price - (10 / 100) as discountedPrice " +
+                "select t.symbol as tblSymbol, t.price * s.volume as totalCost, " +
+                "t.price - (10 / 100) as discountedPrice " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);

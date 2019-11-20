@@ -24,6 +24,7 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Stack;
 
 /**
@@ -148,7 +149,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     public void endVisitMath(MathOperator mathOperator) {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{$" + mathOperator.name().toLowerCase() + ":" + "[" + leftOperand + "," +
+        conditionOperands.push("{$" + mathOperator.name().toLowerCase(Locale.ENGLISH) + ":" + "[" + leftOperand + "," +
                 rightOperand + "]}");
     }
 
@@ -267,8 +268,8 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         }
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
-        conditionOperands.push("{ $cond: { if: { " + compareFilter + ": [" + leftOperand + "," + rightOperand + " ] }, then: true," +
-                "else: false } }");
+        conditionOperands.push("{ $cond: { if: { " + compareFilter + ": [" + leftOperand + "," + rightOperand +
+                " ] }, then: true, else: false } }");
     }
 
     @Override

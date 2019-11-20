@@ -59,7 +59,6 @@ import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -715,7 +714,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             project = getProjectionString(selectAttributeBuilders);
         } else {
             groupBy = getGroupByString(selectAttributeBuilders, groupByExpressionBuilders);
-            project = getGroupByProjectionString(selectAttributeBuilders, groupByExpressionBuilders);
+            project = getGroupByProjectionString(selectAttributeBuilders);
         }
         String having = null;
         if (havingExpressionBuilder != null) {
@@ -812,8 +811,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         return compiledGroupByJSON.toString();
     }
 
-    private String getGroupByProjectionString(List<SelectAttributeBuilder> selectAttributeBuilders,
-                                              List<ExpressionBuilder> groupByExpressionBuilders) {
+    private String getGroupByProjectionString(List<SelectAttributeBuilder> selectAttributeBuilders) {
         StringBuilder compiledProjectionJSON = new StringBuilder();
         List<MongoSelectExpressionVisitor> getSelectExpressionVisitorList =
                 getSelectAttributesList(selectAttributeBuilders);

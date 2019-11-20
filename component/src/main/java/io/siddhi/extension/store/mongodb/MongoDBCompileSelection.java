@@ -31,7 +31,8 @@ public class MongoDBCompileSelection implements CompiledSelection {
     private Long limit;
     private Long offset;
 
-    public MongoDBCompileSelection(String project, String groupBy, String having, String orderBy, Long limit, Long offset) {
+    public MongoDBCompileSelection(String project, String groupBy, String having, String orderBy,
+                                   Long limit, Long offset) {
         this.compileSelectQuery = project;
         this.groupBy = groupBy;
         this.having = having;
