@@ -750,7 +750,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         StringBuilder compiledGroupByJSON = new StringBuilder();
         StringBuilder groupBySelectString = new StringBuilder();
         List<MongoExpressionVisitor> groupByExpressionVisitorList =
-                getGroupByExpressionVisitorList(groupByExpressionBuilders);
+                getExpressionVisitorList(groupByExpressionBuilders);
         compiledGroupByJSON.append((groupByExpressionVisitorList.size() == 1) ? "{$group:{_id:" : "{$group:{_id:{");
         for (MongoExpressionVisitor visitor : groupByExpressionVisitorList) {
             String groupByAttribute = visitor.getConditionOperands().get(0);
@@ -826,14 +826,13 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     }
 
     private String getOrderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders) {
-        StringBuilder compiledOrderByJSON = new StringBuilder();
+        List<ExpressionBuilder> orderByExpressionBuilders = new ArrayList<>();
+        for (OrderByAttributeBuilder builder : orderByAttributeBuilders) {
+            orderByExpressionBuilders.add(builder.getExpressionBuilder());
+        }
         List<MongoExpressionVisitor> orderByExpressionVisitorList =
-                orderByAttributeBuilders.stream().map((orderByAttributeBuilder -> {
-                    ExpressionBuilder expressionBuilder = orderByAttributeBuilder.getExpressionBuilder();
-                    MongoExpressionVisitor orderByVisitor = new MongoExpressionVisitor();
-                    expressionBuilder.build(orderByVisitor);
-                    return orderByVisitor;
-                })).collect(Collectors.toList());
+                getExpressionVisitorList(orderByExpressionBuilders);
+        StringBuilder compiledOrderByJSON = new StringBuilder();
         compiledOrderByJSON.append("{$sort:{");
         for (int i = 0; i < orderByExpressionVisitorList.size(); i++) {
             MongoExpressionVisitor visitor = orderByExpressionVisitorList.get(i);
@@ -862,11 +861,11 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         })).collect(Collectors.toList());
     }
 
-    private List<MongoExpressionVisitor> getGroupByExpressionVisitorList(List<ExpressionBuilder>
-                                                                                 groupByExpressionBuilders) {
-        return groupByExpressionBuilders.stream().map((groupByExpressionBuilder -> {
+    private List<MongoExpressionVisitor> getExpressionVisitorList(List<ExpressionBuilder>
+                                                                          expressionBuilders) {
+        return expressionBuilders.stream().map((expressionBuilder -> {
             MongoExpressionVisitor visitor = new MongoExpressionVisitor();
-            groupByExpressionBuilder.build(visitor);
+            expressionBuilder.build(visitor);
             return visitor;
         })).collect(Collectors.toList());
     }
