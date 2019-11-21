@@ -21,6 +21,7 @@ import io.siddhi.core.table.record.BaseExpressionVisitor;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.extension.store.mongodb.util.Constant;
 import io.siddhi.extension.store.mongodb.util.MongoTableConstants;
+import io.siddhi.extension.store.mongodb.util.MongoTableUtils;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.condition.Compare;
 
@@ -208,42 +209,8 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
     @Override
     public void endVisitCompare(Compare.Operator operator) {
         String compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER;
-        switch (operator) {
-            case EQUAL:
-                compareFilter = compareFilter.replace(
-                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                        MongoTableConstants.MONGO_COMPARE_EQUAL);
-                break;
-            case GREATER_THAN:
-                compareFilter = compareFilter.replace(
-                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                        MongoTableConstants.MONGO_COMPARE_GREATER_THAN);
-                break;
-            case GREATER_THAN_EQUAL:
-                compareFilter = compareFilter.replace(
-                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                        MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL);
-                break;
-            case LESS_THAN:
-                compareFilter = compareFilter.replace(
-                        MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                        MongoTableConstants.MONGO_COMPARE_LESS_THAN);
-                break;
-            case LESS_THAN_EQUAL:
-                compareFilter = compareFilter
-                        .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                                MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL);
-                break;
-            case NOT_EQUAL:
-                compareFilter = compareFilter
-                        .replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR,
-                                MongoTableConstants.MONGO_COMPARE_NOT_EQUAL);
-                break;
-            default:
-                throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
-                        "COMPARE operation. Please check your query and try again.");
-        }
-
+        String compareOperator = MongoTableUtils.getCompareOperator(operator);
+        compareFilter = compareFilter.replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR, compareOperator);
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
         if (!rightOperand.matches(MongoTableConstants.REG_EXPRESSION) &&

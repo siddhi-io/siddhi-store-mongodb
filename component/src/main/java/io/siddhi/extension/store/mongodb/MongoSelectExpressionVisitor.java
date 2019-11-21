@@ -34,8 +34,6 @@ import java.util.Stack;
 public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     private Stack<String> conditionOperands;
-    private int streamVarCount;
-    private int constantCount;
     private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
     private boolean isAttributeFunctionUsed;
     private boolean isCountFunction;
@@ -43,8 +41,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     public MongoSelectExpressionVisitor() {
         this.conditionOperands = new Stack<String>();
-        this.streamVarCount = 0;
-        this.constantCount = 0;
         this.isCountFunction = false;
         this.isNullCheck = false;
         this.isAttributeFunctionUsed = false;
@@ -52,14 +48,6 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     public String getCompiledCondition() {
         return conditionOperands.pop();
-    }
-
-    public int getStreamVarCount() {
-        return this.streamVarCount;
-    }
-
-    public int getConstantCount() {
-        return this.constantCount;
     }
 
     public boolean isFunctionsPresent() {
@@ -268,30 +256,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitCompare(Compare.Operator operator) {
-        String compareOperator;
-        switch (operator) {
-            case EQUAL:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_EQUAL;
-                break;
-            case GREATER_THAN:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN;
-                break;
-            case GREATER_THAN_EQUAL:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL;
-                break;
-            case LESS_THAN:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN;
-                break;
-            case LESS_THAN_EQUAL:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL;
-                break;
-            case NOT_EQUAL:
-                compareOperator = MongoTableConstants.MONGO_COMPARE_NOT_EQUAL;
-                break;
-            default:
-                throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
-                        "COMPARE operation.");
-        }
+        String compareOperator = MongoTableUtils.getCompareOperator(operator);
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
         String compareFilter = MongoTableConstants.MONGO_IF_ELSE_CONDITION
@@ -319,11 +284,15 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitNot() {
-        throw new MongoTableException("MongoDB Event Table does not support 'NOT' function.");
     }
 
     @Override
     public void endVisitNot() {
+        String conditionalFilter = this.conditionOperands.pop();
+        String notFilter = MongoTableConstants.MONGO_NOT_FILTER
+                .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, MongoTableConstants.MONGO_NOT)
+                .replace(MongoTableConstants.PLACEHOLDER_OPERAND, conditionalFilter);
+        conditionOperands.push(notFilter);
     }
 
     @Override

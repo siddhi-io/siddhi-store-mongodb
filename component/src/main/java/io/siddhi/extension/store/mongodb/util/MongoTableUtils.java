@@ -37,6 +37,7 @@ import io.siddhi.extension.store.mongodb.MongoCompiledCondition;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.condition.Compare;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
@@ -673,6 +674,34 @@ public class MongoTableUtils {
         if (log.isDebugEnabled()) {
             log.debug(logDescription + queryLog);
         }
+    }
+
+    public static String getCompareOperator(Compare.Operator operator) {
+        String compareOperator;
+        switch (operator) {
+            case EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_EQUAL;
+                break;
+            case GREATER_THAN:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN;
+                break;
+            case GREATER_THAN_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL;
+                break;
+            case LESS_THAN:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN;
+                break;
+            case LESS_THAN_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL;
+                break;
+            case NOT_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_NOT_EQUAL;
+                break;
+            default:
+                throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
+                        "COMPARE operation.");
+        }
+        return compareOperator;
     }
 }
 
