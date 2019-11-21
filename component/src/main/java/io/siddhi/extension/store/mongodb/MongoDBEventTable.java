@@ -736,19 +736,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         for (int i = 0; i < selectExpressionVisitorList.size(); i++) {
             MongoSelectExpressionVisitor selectExpressionVisitor = selectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
-            if (selectExpressionVisitor.getStreamVarCount() == 0 && selectExpressionVisitor.getConstantCount() == 0) {
-                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
-                        .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
-                                (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
-            } else if (selectExpressionVisitor.getStreamVarCount() == 1) {
-                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
-                        .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
-                                (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
-            } else if (selectExpressionVisitor.getConstantCount() == 1) {
-                compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
-                        .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
-                                (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
-            }
+            compiledProjectionJSON.append(rename).append(":").append(selectExpressionVisitor.getCompiledCondition())
+                    .append((selectExpressionVisitorList.indexOf(selectExpressionVisitor) ==
+                            (selectExpressionVisitorList.size() - 1)) ? '}' : ',');
         }
         compiledProjectionJSON.append('}');
         return compiledProjectionJSON.toString();
