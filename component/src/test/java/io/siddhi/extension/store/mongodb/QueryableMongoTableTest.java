@@ -38,7 +38,7 @@ public class QueryableMongoTableTest {
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);
-    private int waitTime = 50;
+    private int waitTime = 100;
     private int timeout = 30000;
 
     @BeforeClass
@@ -1123,5 +1123,66 @@ public class QueryableMongoTableTest {
         siddhiAppRuntime.shutdown();
 
         Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+    }
+
+    @Test
+    public void testMongoTableQuery18() throws InterruptedException {
+        log.info("testMongoTableQuery18 : Test selection attribute renamed as 'null'.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, amount int); " +
+                "define stream FooStream (symbol string, volume int); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, amount int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol == t.symbol " +
+                "select t.symbol as null, t.amount as tblAmount, s.volume as streamVolume " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    for (Event event : inEvents) {
+                        eventCount.incrementAndGet();
+                        switch (eventCount.intValue()) {
+                            case 1:
+                                Assert.assertEquals(new Object[]{"WSO2", 100, 10}, event.getData());
+                                break;
+                            case 2:
+                                Assert.assertEquals(new Object[]{"WSO2", 120, 10}, event.getData());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+            }
+
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"WSO2", 100});
+        stockStream.send(new Object[]{"WSO2", 120});
+        stockStream.send(new Object[]{"IBM", 160});
+        fooStream.send(new Object[]{"WSO2", 10});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
     }
 }

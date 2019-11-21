@@ -80,7 +80,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitStoreVariable(String storeId, String attributeName, Attribute.Type type) {
         if (isCountFunction) {
-            throw new MongoTableException("The MongoDB Event table does not support arguments for count function.");
+            throw new MongoTableException("The MongoDB Event table does not support arguments in count function.");
         }
         String storeAttribute = MongoTableConstants.MONGO_STORE_ATTRIBUTE
                 .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, attributeName);
@@ -94,11 +94,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
     @Override
     public void beginVisitStreamVariable(String id, String streamId, String attributeName, Attribute.Type type) {
         if (isCountFunction) {
-            throw new MongoTableException("The MongoDB Event table does not support functions arguments for count " +
-                    "function.");
+            throw new MongoTableException("The MongoDB Event table does not support arguments in count function.");
         }
         if (isNullCheck) {
-            throw new MongoTableException("The MongoDB Event table does not support null check for stream variables.");
+            throw new MongoTableException("The MongoDB Event table does not support 'is null' condition with " +
+                    "stream variables.");
         }
         if (type.toString().equalsIgnoreCase("STRING")) {
             String streamAttribute = MongoTableConstants.MONGO_STREAM_STRING_ATTRIBUTE
@@ -319,7 +319,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitNot() {
-        throw new MongoTableException("MongoDB Event Table does not support NOT function.");
+        throw new MongoTableException("MongoDB Event Table does not support 'NOT' function.");
     }
 
     @Override
@@ -328,7 +328,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitIn(String storeId) {
-        throw new MongoTableException("MongoDB Event Table does not support IN function.");
+        throw new MongoTableException("MongoDB Event Table does not support 'IN' function.");
     }
 
     @Override

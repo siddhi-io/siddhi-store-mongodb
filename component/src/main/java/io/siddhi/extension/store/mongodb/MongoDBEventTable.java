@@ -632,14 +632,9 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             throws ConnectionUnavailableException {
         List<Document> aggregateList = new ArrayList<>();
         List<String> attributeList = new ArrayList<>();
-        Document findFilter = MongoTableUtils
-                .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
-        String selectQuery = ((MongoDBCompileSelection) compiledSelection).getCompileSelectQuery();
-        String groupByQuery = ((MongoDBCompileSelection) compiledSelection).getGroupBy();
-        String havingQuery = ((MongoDBCompileSelection) compiledSelection).getHaving();
-        String orderByQuery = ((MongoDBCompileSelection) compiledSelection).getOrderBy();
-        Long limitValue = ((MongoDBCompileSelection) compiledSelection).getLimit();
-        Long offsetValue = ((MongoDBCompileSelection) compiledSelection).getOffset();
+        MongoDBCompileSelection compileSelection = (MongoDBCompileSelection) compiledSelection;
+        String selectQuery = compileSelection.getCompileSelectQuery();
+        String groupByQuery = compileSelection.getGroupBy();
         if (parameterMap.values().size() > 0) {
             for (int i = 0; i < parameterMap.values().size(); i++) {
                 if (selectQuery != null) {
@@ -652,40 +647,46 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 }
             }
         }
+        Document findFilter = MongoTableUtils
+                .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
         if (!findFilter.isEmpty()) {
             Document matchFilter = new Document("$match", findFilter);
             aggregateList.add(matchFilter);
-            MongoTableUtils.printDebugLogs("On condition query : ", matchFilter.toJson());
+            MongoTableUtils.logQuery("On condition query : ", matchFilter.toJson());
         }
         if (groupByQuery != null) {
             Document groupBy = Document.parse(groupByQuery);
             aggregateList.add(groupBy);
-            MongoTableUtils.printDebugLogs("GroupBy query : ", groupBy.toJson());
+            MongoTableUtils.logQuery("GroupBy query : ", groupBy.toJson());
         }
         if (selectQuery != null) {
             Document project = Document.parse(selectQuery);
             aggregateList.add(project);
-            MongoTableUtils.printDebugLogs("Select query : ", project.toJson());
+            MongoTableUtils.logQuery("Select query : ", project.toJson());
         }
+        String havingQuery = compileSelection.getHaving();
         if (havingQuery != null) {
             Document having = Document.parse(havingQuery);
             aggregateList.add(having);
-            MongoTableUtils.printDebugLogs("Having query : ", having.toJson());
+            MongoTableUtils.logQuery("Having query : ", having.toJson());
         }
+        String orderByQuery = compileSelection.getOrderBy();
         if (orderByQuery != null) {
             Document orderBy = Document.parse(orderByQuery);
             aggregateList.add(orderBy);
-            MongoTableUtils.printDebugLogs("OrderBy query : ", orderBy.toJson());
+            MongoTableUtils.logQuery("OrderBy query : ", orderBy.toJson());
         }
+        Long offsetValue = compileSelection.getOffset();
         if (offsetValue != null) {
             Document offsetFilter = Document.parse("{ $skip :" + offsetValue + "}");
             aggregateList.add(offsetFilter);
-            MongoTableUtils.printDebugLogs("Offset query : ", offsetFilter.toJson());
+            MongoTableUtils.logQuery("Offset query : ", offsetFilter.toJson());
         }
+        Long limitValue = compileSelection.getLimit();
         if (limitValue != null) {
             Document limitFilter = Document.parse("{ $limit :" + limitValue + "}");
             aggregateList.add(limitFilter);
-            MongoTableUtils.printDebugLogs("Limit query : ", limitFilter.toJson());
+            MongoTableUtils.logQuery("Limit query : ", limitFilter.toJson());
         }
         for (Attribute outputAttribute : outputAttributes) {
             attributeList.add(outputAttribute.getName());
@@ -780,8 +781,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     }
                 }
             } else {
-                throw new MongoTableException("The MongoDB Event table does not support group by using stream " +
-                        "attributes.");
+                throw new MongoTableException("The MongoDB Event table does not support 'group by' clause with " +
+                        "stream attributes.");
             }
         }
         compiledGroupByJSON.append((groupByAttributesList.size() == 1) ? ',' : "},");
@@ -791,17 +792,15 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoSelectExpressionVisitor visitor = getSelectExpressionVisitorList.get(i);
             String rename = selectAttributeBuilders.get(i).getRename();
             if (!groupByAttributesList.contains(rename)) {
-                if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
-                    String compiledCondition = visitor.getCompiledCondition();
-                    boolean isFunctionUsed = visitor.isFunctionsPresent();
-                    if (isFunctionUsed) {
-                        compiledGroupByJSON.append(rename).append(":").append(compiledCondition);
-                    } else {
-                        compiledGroupByJSON.append(rename).append(":{$last:").append(compiledCondition)
-                                .append('}');
-                    }
-                    compiledGroupByJSON.append(',');
+                String compiledCondition = visitor.getCompiledCondition();
+                boolean isFunctionUsed = visitor.isFunctionsPresent();
+                if (isFunctionUsed) {
+                    compiledGroupByJSON.append(rename).append(":").append(compiledCondition);
+                } else {
+                    compiledGroupByJSON.append(rename).append(":{$last:").append(compiledCondition)
+                            .append('}');
                 }
+                compiledGroupByJSON.append(',');
             }
             if (getSelectExpressionVisitorList.indexOf(visitor) == (getSelectExpressionVisitorList.size() - 1)) {
                 compiledGroupByJSON.append(groupBySelectString).append("}");
@@ -855,7 +854,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                         .append((orderByExpressionVisitorList.indexOf(visitor) ==
                                 (orderByExpressionVisitorList.size() - 1)) ? '}' : ',');
             } else {
-                throw new MongoTableException("The MongoDB Event table does not support order by using " +
+                throw new MongoTableException("The MongoDB Event table does not support 'order by' clause with " +
                         "stream attributes.");
             }
         }
