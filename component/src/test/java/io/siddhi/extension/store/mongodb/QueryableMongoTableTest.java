@@ -1127,7 +1127,7 @@ public class QueryableMongoTableTest {
 
     @Test
     public void testMongoTableQuery18() throws InterruptedException {
-        log.info("testMongoTableQuery18 : Test selection attribute renamed as 'null'.");
+        log.info("testMongoTableQuery18 : Test selection attribute when rename is not used.");
 
         MongoTableTestUtils.dropCollection(uri, "FooTable");
 
@@ -1145,7 +1145,7 @@ public class QueryableMongoTableTest {
                 "@info(name = 'query2') " +
                 "from FooStream as s join FooTable as t " +
                 "on s.symbol == t.symbol " +
-                "select t.symbol as null, t.amount as tblAmount, s.volume as streamVolume " +
+                "select t.symbol, t.amount, s.volume " +
                 "insert into OutputStream ;";
 
         SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
