@@ -22,28 +22,37 @@ import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.event.Event;
 import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
+import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
 import org.apache.log4j.Logger;
-import org.testng.Assert;
+import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryableMongoTableTest {
 
     private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
-
+    private AtomicInteger inEventCount;
+    private boolean eventArrived;
+    private List<Object[]> inEventsList;
     private static String uri = MongoTableTestUtils.resolveBaseUri();
-    private AtomicInteger eventCount = new AtomicInteger(0);
-    private int waitTime = 100;
+    private int waitTime = 2000;
     private int timeout = 30000;
 
     @BeforeClass
     public void init() {
         log.info("== Mongo Table query tests started ==");
+        inEventCount = new AtomicInteger();
+        eventArrived = false;
+        inEventsList = new ArrayList<>();
     }
 
     @AfterClass
@@ -53,7 +62,12 @@ public class QueryableMongoTableTest {
 
     @BeforeMethod
     public void testInit() {
-        eventCount.set(0);
+        inEventCount.set(0);
+    }
+
+    @AfterMethod
+    public void testEnd() {
+        inEventsList.clear();
     }
 
     @Test
@@ -84,22 +98,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 100, 10, 100}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"WSO2", 120, 10, 100}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -110,11 +117,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 120});
         stockStream.send(new Object[]{"IBM", 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 100, 10, 100},
+                new Object[]{"WSO2", 120, 10, 100}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -145,22 +159,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 65.0, 6.4}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 95.0, 9.4}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -170,11 +177,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 6.5f});
         stockStream.send(new Object[]{"IBM", 9.5f});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 65.0, 6.4},
+                new Object[]{"IBM", 95.0, 9.4}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -205,22 +219,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"LINUX", true}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", false}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -230,11 +237,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"LINUX", true});
         stockStream.send(new Object[]{"GOOGLE", false});
         fooStream.send(new Object[]{"WSO2", true, false});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"LINUX", true},
+                new Object[]{"GOOGLE", false}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -266,22 +280,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"LINUX", false}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", false}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -291,11 +298,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"LINUX", 10, true, false});
         stockStream.send(new Object[]{"GOOGLE", 12, false, true});
         fooStream.send(new Object[]{"WSO2", true, false});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"LINUX", false},
+                new Object[]{"GOOGLE", false}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -326,22 +340,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 120, 10}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 160, 10}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -352,11 +359,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 120});
         stockStream.send(new Object[]{"IBM", 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 120, 10},
+                new Object[]{"IBM", 160, 10}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -387,22 +401,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 120, 10}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 150, 10}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -414,11 +421,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 170});
         stockStream.send(new Object[]{"IBM", 150});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 120, 10},
+                new Object[]{"IBM", 150, 10}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -449,25 +463,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 100, 10}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", 120, 10}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", 160, 10}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -480,11 +484,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WINDOWS", 120});
         stockStream.send(new Object[]{"LINUX", 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 100, 10},
+                new Object[]{"GOOGLE", 120, 10},
+                new Object[]{"IBM", 160, 10}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -515,22 +527,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WINDOWS", 120, 10}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"LINUX", 160, 10}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -543,11 +548,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WINDOWS", 120});
         stockStream.send(new Object[]{"LINUX", 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WINDOWS", 120, 10},
+                new Object[]{"LINUX", 160, 10}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -579,22 +591,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"IBM", 8.5, 160}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", 12.5, 120}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -605,11 +610,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"GOOGLE", 12.5f, 120});
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
         fooStream.send(new Object[]{"WSO2"});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"IBM", 8.5, 160},
+                new Object[]{"GOOGLE", 12.5, 120}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -641,26 +653,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"GOOGLE", 12.5, 130}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", 10.5, 120}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", 8.5, 160}, event.getData());
-                                break;
-
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -672,11 +673,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"IBM", 8.5f, 160});
         stockStream.send(new Object[]{"GOOGLE", 12.5f, 130});
         fooStream.send(new Object[]{"WSO2"});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"GOOGLE", 12.5, 130},
+                new Object[]{"GOOGLE", 10.5, 120},
+                new Object[]{"IBM", 8.5, 160}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -708,22 +717,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"APPLE", 10.5, 10.5}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 12.5, 25.0}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -734,11 +736,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"APPLE", 10.5f, 12});
         stockStream.send(new Object[]{"IBM", 12.5f, 16});
         fooStream.send(new Object[]{"GOOGLE", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"APPLE", 10.5, 10.5},
+                new Object[]{"IBM", 12.5, 25.0}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -770,22 +779,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"APPLE", 1}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"IBM", 2}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -796,11 +798,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"APPLE", 10.5f, 12});
         stockStream.send(new Object[]{"IBM", 12.5f, 16});
         fooStream.send(new Object[]{"GOOGLE", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"APPLE", 1},
+                new Object[]{"IBM", 2}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -832,25 +841,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"APPLE", 12.0, 1}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", 11.0, 2}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", 16.0, 1}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -862,11 +861,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"IBM", 12.5f, 16});
         stockStream.send(new Object[]{"GOOGLE", 12.5f, 12});
         fooStream.send(new Object[]{"GOOGLE", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"APPLE", 12.0, 1},
+                new Object[]{"GOOGLE", 11.0, 2},
+                new Object[]{"IBM", 16.0, 1}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -896,28 +903,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", true}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", false}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", false}, event.getData());
-                                break;
-                            case 4:
-                                Assert.assertEquals(new Object[]{"LINUX", true}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -929,11 +923,20 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"IBM", false});
         stockStream.send(new Object[]{"LINUX", null});
         fooStream.send(new Object[]{"WSO2"});
-        SiddhiTestHelper.waitForEvents(waitTime, 4, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 4, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 4, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", true},
+                new Object[]{"GOOGLE", false},
+                new Object[]{"IBM", false},
+                new Object[]{"LINUX", true}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 4, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -963,25 +966,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", false}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", true}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", false}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -992,11 +985,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"GOOGLE", 10, 20});
         stockStream.send(new Object[]{"IBM", 10, 5});
         fooStream.send(new Object[]{"WSO2", 20});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", false},
+                new Object[]{"GOOGLE", true},
+                new Object[]{"IBM", false}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -1026,25 +1027,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", false}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", true}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", true}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -1055,11 +1046,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"GOOGLE", 20});
         stockStream.send(new Object[]{"IBM", 30});
         fooStream.send(new Object[]{"WSO2", 20});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", false},
+                new Object[]{"GOOGLE", true},
+                new Object[]{"IBM", true}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -1089,25 +1088,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", true}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"GOOGLE", true}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", false}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -1118,11 +1107,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"GOOGLE", 20});
         stockStream.send(new Object[]{"IBM", 30});
         fooStream.send(new Object[]{"WSO2"});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", true},
+                new Object[]{"GOOGLE", true},
+                new Object[]{"IBM", false}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -1153,22 +1150,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", 100, 10}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"WSO2", 120, 10}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -1179,11 +1169,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 120});
         stockStream.send(new Object[]{"IBM", 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 2, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 2, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", 100, 10},
+                new Object[]{"WSO2", 120, 10}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -1213,25 +1210,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", false}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"WSO2", true}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", true}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -1242,11 +1229,19 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 120, 100});
         stockStream.send(new Object[]{"IBM", 160, 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", false},
+                new Object[]{"WSO2", true},
+                new Object[]{"IBM", true}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 
     @Test
@@ -1277,25 +1272,15 @@ public class QueryableMongoTableTest {
             @Override
             public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
                 if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
                     for (Event event : inEvents) {
-                        eventCount.incrementAndGet();
-                        switch (eventCount.intValue()) {
-                            case 1:
-                                Assert.assertEquals(new Object[]{"WSO2", false}, event.getData());
-                                break;
-                            case 2:
-                                Assert.assertEquals(new Object[]{"WSO2", true}, event.getData());
-                                break;
-                            case 3:
-                                Assert.assertEquals(new Object[]{"IBM", true}, event.getData());
-                                break;
-                            default:
-                                break;
-                        }
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
                     }
+                    eventArrived = true;
                 }
+                eventArrived = true;
             }
-
         });
 
         InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
@@ -1306,10 +1291,18 @@ public class QueryableMongoTableTest {
         stockStream.send(new Object[]{"WSO2", 120, 100});
         stockStream.send(new Object[]{"IBM", 160, 160});
         fooStream.send(new Object[]{"WSO2", 10});
-        SiddhiTestHelper.waitForEvents(waitTime, 3, eventCount, timeout);
+        SiddhiTestHelper.waitForEvents(waitTime, 3, inEventCount, timeout);
 
         siddhiAppRuntime.shutdown();
 
-        Assert.assertEquals(eventCount.intValue(), 3, "Read events failed");
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"WSO2", false},
+                new Object[]{"WSO2", true},
+                new Object[]{"IBM", true}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
 }
