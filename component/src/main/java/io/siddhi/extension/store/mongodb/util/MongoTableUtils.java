@@ -703,5 +703,17 @@ public class MongoTableUtils {
         }
         return compareOperator;
     }
+
+    public static Document resolveQuery(String query, Map<String, Object> parameterMap) {
+        if (parameterMap.values().size() > 0) {
+            for (int i = 0; i < parameterMap.values().size(); i++) {
+                if (query != null) {
+                    query = query.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
+                            "" + parameterMap.values().toArray()[i]);
+                }
+            }
+        }
+        return Document.parse(query);
+    }
 }
 

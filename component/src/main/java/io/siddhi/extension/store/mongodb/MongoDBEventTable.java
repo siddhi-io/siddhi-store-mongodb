@@ -635,18 +635,6 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         MongoDBCompileSelection compileSelection = (MongoDBCompileSelection) compiledSelection;
         String selectQuery = compileSelection.getCompileSelectQuery();
         String groupByQuery = compileSelection.getGroupBy();
-        if (parameterMap.values().size() > 0) {
-            for (int i = 0; i < parameterMap.values().size(); i++) {
-                if (selectQuery != null) {
-                    selectQuery = selectQuery.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
-                            "" + parameterMap.values().toArray()[i]);
-                }
-                if (groupByQuery != null) {
-                    groupByQuery = groupByQuery.replaceAll("\'" + parameterMap.keySet().toArray()[i] + "\'",
-                            "" + parameterMap.values().toArray()[i]);
-                }
-            }
-        }
         Document findFilter = MongoTableUtils
                 .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
         if (!findFilter.isEmpty()) {
@@ -655,12 +643,12 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoTableUtils.logQuery("On condition query : ", matchFilter.toJson());
         }
         if (groupByQuery != null) {
-            Document groupBy = Document.parse(groupByQuery);
+            Document groupBy = MongoTableUtils.resolveQuery(groupByQuery, parameterMap);
             aggregateList.add(groupBy);
             MongoTableUtils.logQuery("GroupBy query : ", groupBy.toJson());
         }
         if (selectQuery != null) {
-            Document project = Document.parse(selectQuery);
+            Document project = MongoTableUtils.resolveQuery(selectQuery, parameterMap);
             aggregateList.add(project);
             MongoTableUtils.logQuery("Select query : ", project.toJson());
         }
