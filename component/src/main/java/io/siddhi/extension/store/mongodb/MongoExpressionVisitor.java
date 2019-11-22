@@ -51,7 +51,10 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
         this.isNullCheck = false;
     }
 
-    public String getCompiledCondition() {
+    public String getCompiledCondition(boolean isHavingCondition) {
+        if (isNullCheck && isHavingCondition) {
+            throw new MongoTableException("MongoDB Event Table does not support IS NULL in having clause.");
+        }
         String compiledCondition = this.conditionOperands.pop();
         for (Map.Entry<String, Object> entry : this.placeholders.entrySet()) {
             if (entry.getValue() instanceof Constant) {
@@ -63,30 +66,12 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                     compiledCondition = compiledCondition.replaceAll(entry.getKey(),
                             constant.getValue().toString());
                 }
-                this.placeholders.remove(entry.getKey());
-            }
-        }
-        return compiledCondition;
-    }
-
-    public String getHavingCompiledCondition() {
-        if (isNullCheck) {
-            throw new MongoTableException("MongoDB Event Table does not support IS NULL in having clause.");
-        }
-        String havingCompiledCondition = this.conditionOperands.pop();
-        for (Map.Entry<String, Object> entry : this.placeholders.entrySet()) {
-            if (entry.getValue() instanceof Constant) {
-                Constant constant = (Constant) entry.getValue();
-                if (constant.getType().equals(Attribute.Type.STRING)) {
-                    havingCompiledCondition = havingCompiledCondition.replaceAll(entry.getKey(),
-                            "'" + constant.getValue().toString() + "'");
-                } else {
-                    havingCompiledCondition = havingCompiledCondition.replaceAll(entry.getKey(),
-                            constant.getValue().toString());
+                if (!isHavingCondition) {
+                    this.placeholders.remove(entry.getKey());
                 }
             }
         }
-        return havingCompiledCondition;
+        return compiledCondition;
     }
 
     public Map<String, Object> getPlaceholders() {

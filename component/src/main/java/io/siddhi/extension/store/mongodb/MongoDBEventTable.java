@@ -568,7 +568,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     protected CompiledCondition compileCondition(ExpressionBuilder expressionBuilder) {
         MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         expressionBuilder.build(visitor);
-        return new MongoCompiledCondition(visitor.getCompiledCondition(), visitor.getPlaceholders());
+        return new MongoCompiledCondition(visitor.getCompiledCondition(false), visitor.getPlaceholders());
     }
 
     @Override
@@ -822,7 +822,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private String getHavingString(ExpressionBuilder havingExpressionBuilder) {
         MongoExpressionVisitor visitor = new MongoExpressionVisitor();
         havingExpressionBuilder.build(visitor);
-        return "{$match:" + visitor.getHavingCompiledCondition() + "}";
+        return "{$match:" + visitor.getCompiledCondition(true) + "}";
     }
 
     private String getOrderByString(List<OrderByAttributeBuilder> orderByAttributeBuilders) {
@@ -838,7 +838,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             MongoExpressionVisitor visitor = orderByExpressionVisitorList.get(i);
             String order = orderByAttributeBuilders.get(i).getOrder().name();
             if (visitor.getStreamVarCount() == 0) {
-                compiledOrderByJSON.append(visitor.getCompiledCondition())
+                compiledOrderByJSON.append(visitor.getCompiledCondition(false))
                         .append((order.equalsIgnoreCase("ASC")) ? ":1" : ":-1")
                         .append((orderByExpressionVisitorList.indexOf(visitor) ==
                                 (orderByExpressionVisitorList.size() - 1)) ? '}' : ',');
