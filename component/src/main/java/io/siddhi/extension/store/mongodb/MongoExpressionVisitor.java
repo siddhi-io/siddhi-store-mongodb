@@ -224,10 +224,9 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                 }
                 this.conditionOperands.push(compareFilter);
             } else if (isHavingClause) {
-                throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
-                        rightOperand + "' for COMPARE operation. The Mongo Event table only supports COMPARE " +
-                        "operation between Table/ Stream attribute and Constant. Please check your query " +
-                        "and try again.");
+                throw new MongoTableException("The Mongo Event table only supports COMPARE " +
+                        "operation between Table/ Stream attribute and Constant in HAVING clause. " +
+                        "Please check your query and try again.");
             } else {
                 throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
                         rightOperand + "' for COMPARE operation. The Mongo Event table only supports COMPARE " +
