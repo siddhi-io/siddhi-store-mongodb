@@ -42,6 +42,7 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
     private int streamVarCount;
     private int constantCount;
     private boolean isNullCheck;
+    private boolean isHavingClause;
 
     public MongoExpressionVisitor() {
         this.streamVarCount = 0;
@@ -49,10 +50,20 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
         this.conditionOperands = new Stack<>();
         this.placeholders = new HashMap<>();
         this.isNullCheck = false;
+        this.isHavingClause = false;
     }
 
-    public String getCompiledCondition(boolean isHavingCondition) {
-        if (isNullCheck && isHavingCondition) {
+    public MongoExpressionVisitor(boolean isHavingClause) {
+        this.streamVarCount = 0;
+        this.constantCount = 0;
+        this.conditionOperands = new Stack<>();
+        this.placeholders = new HashMap<>();
+        this.isNullCheck = false;
+        this.isHavingClause = isHavingClause;
+    }
+
+    public String getCompiledCondition() {
+        if (isNullCheck && isHavingClause) {
             throw new MongoTableException("MongoDB Event Table does not support IS NULL in having clause.");
         }
         String compiledCondition = this.conditionOperands.pop();
@@ -66,7 +77,7 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                     compiledCondition = compiledCondition.replaceAll(entry.getKey(),
                             constant.getValue().toString());
                 }
-                if (!isHavingCondition) {
+                if (!isHavingClause) {
                     this.placeholders.remove(entry.getKey());
                 }
             }
@@ -212,6 +223,11 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                             .replace(MongoTableConstants.PLACEHOLDER_RIGHT_OPERAND, rightOperand);
                 }
                 this.conditionOperands.push(compareFilter);
+            } else if (isHavingClause) {
+                throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
+                        rightOperand + "' for COMPARE operation. The Mongo Event table only supports COMPARE " +
+                        "operation between Table/ Stream attribute and Constant. Please check your query " +
+                        "and try again.");
             } else {
                 throw new MongoTableException("MongoDB Event Table found operands '" + leftOperand + "' and '" +
                         rightOperand + "' for COMPARE operation. The Mongo Event table only supports COMPARE " +
