@@ -25,7 +25,9 @@ import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.condition.Compare;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -33,7 +35,9 @@ import java.util.Stack;
  */
 public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
+    private static int streamVarCount = 0;
     private Stack<String> conditionOperands;
+    private Map<String, Object> placeholders;
     private String[] supportedFunctions = {"sum", "avg", "min", "max", "count"};
     private boolean isAttributeFunctionUsed;
     private boolean isCountFunction;
@@ -41,6 +45,7 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     public MongoSelectExpressionVisitor() {
         this.conditionOperands = new Stack<String>();
+        this.placeholders = new HashMap<>();
         this.isCountFunction = false;
         this.isNullCheck = false;
         this.isAttributeFunctionUsed = false;
@@ -54,9 +59,13 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
         return this.isAttributeFunctionUsed;
     }
 
+    public Map<String, Object> getPlaceholders() {
+        return placeholders;
+    }
+
     @Override
     public void beginVisitConstant(Object value, Attribute.Type type) {
-        String constantAttribute = MongoTableConstants.MONGO_LITERAL_ATTRIBUTE
+        String constantAttribute = MongoTableConstants.MONGO_STREAM_OR_LITERAL_ATTRIBUTE
                 .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, value.toString());
         conditionOperands.push(constantAttribute);
     }
@@ -88,15 +97,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
             throw new MongoTableException("The MongoDB Event table does not support 'is null' condition with " +
                     "stream variables.");
         }
-        if (type.toString().equalsIgnoreCase("STRING")) {
-            String streamAttribute = MongoTableConstants.MONGO_STREAM_STRING_ATTRIBUTE
-                    .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, id);
-            conditionOperands.push(streamAttribute);
-        } else {
-            String streamAttribute = MongoTableConstants.MONGO_STREAM_ATTRIBUTE
-                    .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, id);
-            conditionOperands.push(streamAttribute);
-        }
+        String name = this.generateStreamVarName();
+        this.placeholders.put(name, new Attribute(id, type));
+        String streamAttribute = MongoTableConstants.MONGO_STREAM_OR_LITERAL_ATTRIBUTE
+                .replace(MongoTableConstants.PLACEHOLDER_FIELD_NAME, name);
+        conditionOperands.push(streamAttribute);
     }
 
     @Override
@@ -302,5 +307,11 @@ public class MongoSelectExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitIn(String storeId) {
+    }
+
+    private String generateStreamVarName() {
+        String name = "strVar" + streamVarCount;
+        streamVarCount++;
+        return name;
     }
 }

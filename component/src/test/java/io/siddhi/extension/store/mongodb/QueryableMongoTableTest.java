@@ -1305,4 +1305,190 @@ public class QueryableMongoTableTest {
         AssertJUnit.assertEquals("Number of success events", 3, inEventCount.get());
         AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
     }
+
+    @Test
+    public void testMongoTableQuery21() throws InterruptedException {
+        log.info("testMongoTableQuery21 : Test selection of stream attributes.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, amount int); " +
+                "define stream FooStream (symbol string, name string, price int, stockAvailable bool); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, amount int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol == t.symbol " +
+                "select s.symbol, s.name, s.price as streamPrice, s.stockAvailable " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    for (Event event : inEvents) {
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
+                    }
+                    eventArrived = true;
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"Services", 100});
+        stockStream.send(new Object[]{"Services", 120});
+        stockStream.send(new Object[]{"Products", 160});
+        fooStream.send(new Object[]{"Services", "API", 300, true});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"Services", "API", 300, true},
+                new Object[]{"Services", "API", 300, true}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+    }
+
+    @Test
+    public void testMongoTableQuery22() throws InterruptedException {
+        log.info("testMongoTableQuery22 : Test selection of store attributes.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, name string, price int, stockAvailable bool); " +
+                "define stream FooStream (symbol string); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, name string, price int, stockAvailable bool);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol == t.symbol " +
+                "select s.symbol, t.name, t.price, t.stockAvailable " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    for (Event event : inEvents) {
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
+                    }
+                    eventArrived = true;
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"Services", "API", 300, true});
+        stockStream.send(new Object[]{"Services", "CLOUD", 200, false});
+        stockStream.send(new Object[]{"Products", 160});
+        fooStream.send(new Object[]{"Services"});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"Services", "API", 300, true},
+                new Object[]{"Services", "CLOUD", 200, false}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+    }
+
+    @Test
+    public void testMongoTableQuery23() throws InterruptedException {
+        log.info("testMongoTableQuery23 : Test selection of stream attributes with groupBy clause.");
+
+        MongoTableTestUtils.dropCollection(uri, "FooTable");
+
+        SiddhiManager siddhiManager = new SiddhiManager();
+        String streams = "" +
+                "define stream StockStream (symbol string, price float, weight int); " +
+                "define stream FooStream (symbol string, volume int, isAvailable bool); " +
+                "@store(type = 'mongodb' , mongodb.uri='" + uri + "')" +
+                "define table FooTable (symbol string, price float, weight int);";
+        String query = "" +
+                "@info(name = 'query1') " +
+                "from StockStream " +
+                "insert into FooTable ;" +
+                "" +
+                "@info(name = 'query2') " +
+                "from FooStream as s join FooTable as t " +
+                "on s.symbol == t.symbol " +
+                "select s.symbol, s.volume, s.isAvailable, t.price, sum(t.price) as sumPrice " +
+                "group by t.price " +
+                "order by t.price " +
+                "insert into OutputStream ;";
+
+        SiddhiAppRuntime siddhiAppRuntime = siddhiManager.createSiddhiAppRuntime(streams + query);
+        siddhiAppRuntime.addCallback("query2", new QueryCallback() {
+            @Override
+            public void receive(long timeStamp, Event[] inEvents, Event[] removeEvents) {
+                if (inEvents != null) {
+                    EventPrinter.print(timeStamp, inEvents, removeEvents);
+                    for (Event event : inEvents) {
+                        inEventsList.add(event.getData());
+                        inEventCount.incrementAndGet();
+                    }
+                    eventArrived = true;
+                }
+                eventArrived = true;
+            }
+        });
+
+        InputHandler stockStream = siddhiAppRuntime.getInputHandler("StockStream");
+        InputHandler fooStream = siddhiAppRuntime.getInputHandler("FooStream");
+        siddhiAppRuntime.start();
+
+        stockStream.send(new Object[]{"GOOGLE", 10.5f, 10});
+        stockStream.send(new Object[]{"GOOGLE", 10.5f, 20});
+        stockStream.send(new Object[]{"APPLE", 10.5f, 12});
+        stockStream.send(new Object[]{"GOOGLE", 12.5f, 16});
+        fooStream.send(new Object[]{"GOOGLE", 10, true});
+        SiddhiTestHelper.waitForEvents(waitTime, 2, inEventCount, timeout);
+
+        siddhiAppRuntime.shutdown();
+
+        List<Object[]> expected = Arrays.asList(
+                new Object[]{"GOOGLE", 10, true, 10.5, 21.0},
+                new Object[]{"GOOGLE", 10, true, 12.5, 12.5}
+        );
+
+        AssertJUnit.assertTrue("Event arrived", eventArrived);
+        AssertJUnit.assertEquals("Number of success events", 2, inEventCount.get());
+        AssertJUnit.assertTrue("In events matched", SiddhiTestHelper.isUnsortedEventsMatch(inEventsList, expected));
+    }
 }

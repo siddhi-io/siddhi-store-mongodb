@@ -67,10 +67,8 @@ public class MongoTableConstants {
             "[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]},then:true,else:false}}";
 
     //Attribute filters
-    public static final String MONGO_LITERAL_ATTRIBUTE = "{\'$literal\':{{FIELD_NAME}}}";
     public static final String MONGO_STORE_ATTRIBUTE = "\'${{FIELD_NAME}}\'";
-    public static final String MONGO_STREAM_ATTRIBUTE = "{\'$literal\':\'{{FIELD_NAME}}\'}";
-    public static final String MONGO_STREAM_STRING_ATTRIBUTE = "{\'$literal\':\'\'{{FIELD_NAME}}\'\'}";
+    public static final String MONGO_STREAM_OR_LITERAL_ATTRIBUTE = "{\'$literal\':{{FIELD_NAME}}}";
 
     //Placeholders for condition replacements
     public static final String PLACEHOLDER_LEFT_OPERAND = "{{LEFT_OPERAND}}";

@@ -41,7 +41,6 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
 
     private int streamVarCount;
     private int constantCount;
-    private boolean isNullCheck;
     private boolean isHavingClause;
 
     public MongoExpressionVisitor() {
@@ -49,7 +48,6 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
         this.constantCount = 0;
         this.conditionOperands = new Stack<>();
         this.placeholders = new HashMap<>();
-        this.isNullCheck = false;
         this.isHavingClause = false;
     }
 
@@ -58,14 +56,10 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
         this.constantCount = 0;
         this.conditionOperands = new Stack<>();
         this.placeholders = new HashMap<>();
-        this.isNullCheck = false;
         this.isHavingClause = isHavingClause;
     }
 
     public String getCompiledCondition() {
-        if (isNullCheck && isHavingClause) {
-            throw new MongoTableException("MongoDB Event Table does not support IS NULL in having clause.");
-        }
         String compiledCondition = this.conditionOperands.pop();
         for (Map.Entry<String, Object> entry : this.placeholders.entrySet()) {
             if (entry.getValue() instanceof Constant) {
@@ -259,11 +253,13 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void beginVisitIsNull(String streamId) {
+        if (isHavingClause) {
+            throw new MongoTableException("MongoDB Event Table does not support IS NULL in having clause.");
+        }
     }
 
     @Override
     public void endVisitIsNull(String streamId) {
-        this.isNullCheck = true;
         String operand = this.conditionOperands.pop();
         if (!operand.matches(MongoTableConstants.REG_EXPRESSION) &&
                 !operand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST)) {

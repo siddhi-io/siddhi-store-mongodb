@@ -24,16 +24,16 @@ import io.siddhi.core.util.collection.operator.CompiledSelection;
  */
 public class MongoDBCompileSelection implements CompiledSelection {
 
-    private String compileSelectQuery;
-    private String groupBy;
+    private MongoCompiledCondition selection;
+    private MongoCompiledCondition groupBy;
     private String having;
     private String orderBy;
     private Long limit;
     private Long offset;
 
-    public MongoDBCompileSelection(String project, String groupBy, String having, String orderBy,
-                                   Long limit, Long offset) {
-        this.compileSelectQuery = project;
+    public MongoDBCompileSelection(MongoCompiledCondition project, MongoCompiledCondition groupBy, String having,
+                                   String orderBy, Long limit, Long offset) {
+        this.selection = project;
         this.groupBy = groupBy;
         this.having = having;
         this.orderBy = orderBy;
@@ -41,11 +41,11 @@ public class MongoDBCompileSelection implements CompiledSelection {
         this.offset = offset;
     }
 
-    public String getCompileSelectQuery() {
-        return compileSelectQuery;
+    public MongoCompiledCondition getSelection() {
+        return selection;
     }
 
-    public String getGroupBy() {
+    public MongoCompiledCondition getGroupBy() {
         return groupBy;
     }
 
