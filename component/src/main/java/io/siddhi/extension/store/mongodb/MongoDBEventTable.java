@@ -493,8 +493,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                                             CompiledCondition compiledCondition)
             throws ConnectionUnavailableException {
         try {
-            Document findFilter = MongoTableUtils
-                    .resolveCondition((MongoCompiledCondition) compiledCondition, findConditionParameterMap);
+            Document findFilter = MongoTableUtils.resolveCondition(
+                    (MongoCompiledCondition) compiledCondition, findConditionParameterMap, "on condition");
             MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
             return new MongoIterator(mongoCollection.find(findFilter), this.attributeNames);
         } catch (MongoException e) {
@@ -508,8 +508,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     protected boolean contains(Map<String, Object> containsConditionParameterMap, CompiledCondition
             compiledCondition) throws ConnectionUnavailableException {
         try {
-            Document containsFilter = MongoTableUtils
-                    .resolveCondition((MongoCompiledCondition) compiledCondition, containsConditionParameterMap);
+            Document containsFilter = MongoTableUtils.resolveCondition(
+                    (MongoCompiledCondition) compiledCondition, containsConditionParameterMap, "contains");
             return this.getCollectionObject().count(containsFilter) > 0;
         } catch (MongoException e) {
             this.destroy();
@@ -523,8 +523,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             throws ConnectionUnavailableException {
         List<DeleteManyModel<Document>> parsedRecords = deleteConditionParameterMaps.stream().map(
                 (Map<String, Object> conditionParameterMap) -> {
-                    Document deleteFilter = MongoTableUtils
-                            .resolveCondition((MongoCompiledCondition) compiledCondition, conditionParameterMap);
+                    Document deleteFilter = MongoTableUtils.resolveCondition(
+                            (MongoCompiledCondition) compiledCondition, conditionParameterMap, "delete");
                     return new DeleteManyModel<Document>(deleteFilter);
                 }).collect(Collectors.toList());
         this.bulkWrite(parsedRecords);
@@ -538,8 +538,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
                     int ordinal = list.indexOf(conditionParameterMap);
-                    Document updateFilter = MongoTableUtils
-                            .resolveCondition((MongoCompiledCondition) compiledCondition, conditionParameterMap);
+                    Document updateFilter = MongoTableUtils.resolveCondition(
+                            (MongoCompiledCondition) compiledCondition, conditionParameterMap, "update set");
                     Document updateDocument = new Document()
                             .append("$set", list1.get(ordinal));
                     return new UpdateManyModel<Document>(updateFilter, updateDocument);
@@ -556,8 +556,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         List<UpdateManyModel<Document>> parsedRecords = list.stream().map(
                 conditionParameterMap -> {
                     int ordinal = list.indexOf(conditionParameterMap);
-                    Document updateFilter = MongoTableUtils
-                            .resolveCondition((MongoCompiledCondition) compiledCondition, conditionParameterMap);
+                    Document updateFilter = MongoTableUtils.resolveCondition(
+                            (MongoCompiledCondition) compiledCondition, conditionParameterMap, "insert or update set");
                     Document updateDocument = new Document()
                             .append("$set", list1.get(ordinal));
                     UpdateOptions updateOptions = new UpdateOptions().upsert(true);
@@ -635,47 +635,44 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         List<Document> aggregateList = new ArrayList<>();
         MongoDBCompileSelection compileSelection = (MongoDBCompileSelection) compiledSelection;
         Document findFilter = MongoTableUtils
-                .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap);
+                .resolveCondition((MongoCompiledCondition) compiledCondition, parameterMap, "on condition");
         if (!findFilter.isEmpty()) {
             Document matchFilter = new Document("$match", findFilter);
             aggregateList.add(matchFilter);
-            MongoTableUtils.logQuery("On condition query : ", matchFilter.toJson());
         }
         MongoCompiledCondition groupByQuery = compileSelection.getGroupBy();
         if (groupByQuery != null) {
-            Document groupBy = MongoTableUtils.resolveCondition(groupByQuery, parameterMap);
+            Document groupBy = MongoTableUtils.resolveCondition(groupByQuery, parameterMap, "group by");
             aggregateList.add(groupBy);
-            MongoTableUtils.logQuery("GroupBy query : ", groupBy.toJson());
         }
         MongoCompiledCondition selectQuery = compileSelection.getSelection();
         if (selectQuery != null) {
-            Document project = MongoTableUtils.resolveCondition(selectQuery, parameterMap);
+            Document project = MongoTableUtils.resolveCondition(selectQuery, parameterMap, "select");
             aggregateList.add(project);
-            MongoTableUtils.logQuery("Select query : ", project.toJson());
         }
         String havingQuery = compileSelection.getHaving();
         if (havingQuery != null) {
             Document having = Document.parse(havingQuery);
             aggregateList.add(having);
-            MongoTableUtils.logQuery("Having query : ", having.toJson());
+            MongoTableUtils.logQuery("Having", having.toJson());
         }
         String orderByQuery = compileSelection.getOrderBy();
         if (orderByQuery != null) {
             Document orderBy = Document.parse(orderByQuery);
             aggregateList.add(orderBy);
-            MongoTableUtils.logQuery("OrderBy query : ", orderBy.toJson());
+            MongoTableUtils.logQuery("OrderBy", orderBy.toJson());
         }
         Long offsetValue = compileSelection.getOffset();
         if (offsetValue != null) {
             Document offsetFilter = Document.parse("{ $skip :" + offsetValue + "}");
             aggregateList.add(offsetFilter);
-            MongoTableUtils.logQuery("Offset query : ", offsetFilter.toJson());
+            MongoTableUtils.logQuery("Offset", offsetFilter.toJson());
         }
         Long limitValue = compileSelection.getLimit();
         if (limitValue != null) {
             Document limitFilter = Document.parse("{ $limit :" + limitValue + "}");
             aggregateList.add(limitFilter);
-            MongoTableUtils.logQuery("Limit query : ", limitFilter.toJson());
+            MongoTableUtils.logQuery("Limit", limitFilter.toJson());
         }
         List<String> attributeList = new ArrayList<>();
         for (Attribute outputAttribute : outputAttributes) {
@@ -749,14 +746,14 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             groupByAttributesList.add(groupByAttribute);
             if (visitor.getStreamVarCount() == 0 && visitor.getConstantCount() == 0) {
                 if (groupByExpressionVisitorList.size() == 1) {
-                    compiledGroupByJSON.append("\'$").append(groupByAttribute).append('\'');
-                    groupBySelectString.append(groupByAttribute).append(":{$first:\'$").
-                            append(groupByAttribute).append("\'}");
+                    compiledGroupByJSON.append("'$").append(groupByAttribute).append("'");
+                    groupBySelectString.append(groupByAttribute).append(":{$first:'$").
+                            append(groupByAttribute).append("'}");
                 } else {
-                    compiledGroupByJSON.append(groupByAttribute).append(":").append("\'$")
-                            .append(groupByAttribute).append("\'");
-                    groupBySelectString.append(groupByAttribute).append(":{$first:\'$")
-                            .append(groupByAttribute).append("\'}");
+                    compiledGroupByJSON.append(groupByAttribute).append(":").append("'$")
+                            .append(groupByAttribute).append("'");
+                    groupBySelectString.append(groupByAttribute).append(":{$first:'$")
+                            .append(groupByAttribute).append("'}");
                     if (groupByExpressionVisitorList.indexOf(visitor) != (groupByExpressionVisitorList.size() - 1)) {
                         groupBySelectString.append(",");
                         compiledGroupByJSON.append(",");

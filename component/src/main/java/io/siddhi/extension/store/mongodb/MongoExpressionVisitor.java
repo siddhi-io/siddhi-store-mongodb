@@ -71,11 +71,10 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
                     compiledCondition = compiledCondition.replaceAll(entry.getKey(),
                             constant.getValue().toString());
                 }
-                if (!isHavingClause) {
-                    this.placeholders.remove(entry.getKey());
-                }
             }
         }
+        // Remove constants after resolving
+        this.placeholders.values().removeIf((value) -> value instanceof Constant);
         return compiledCondition;
     }
 
