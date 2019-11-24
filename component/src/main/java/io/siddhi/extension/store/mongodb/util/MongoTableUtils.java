@@ -37,6 +37,7 @@ import io.siddhi.extension.store.mongodb.MongoCompiledCondition;
 import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
+import io.siddhi.query.api.expression.condition.Compare;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
@@ -357,7 +358,8 @@ public class MongoTableUtils {
      * @return Document.
      */
     public static Document resolveCondition(MongoCompiledCondition compiledCondition,
-                                            Map<String, Object> conditionParameterMap) {
+                                            Map<String, Object> conditionParameterMap,
+                                            String queryType) {
         Map<String, Object> parameters = compiledCondition.getPlaceholders();
         String compiledQuery = compiledCondition.getCompiledQuery();
         if (compiledQuery.equalsIgnoreCase("true")) {
@@ -375,7 +377,7 @@ public class MongoTableUtils {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("The final compiled query : '" + compiledQuery + "'");
+            log.debug("The final compiled query for '" + queryType + "' clause : '" + compiledQuery + "'");
         }
         return Document.parse(compiledQuery);
     }
@@ -667,6 +669,40 @@ public class MongoTableUtils {
             carbonHome = System.getenv(VARIABLE_CARBON_HOME);
         }
         return filePath.replaceAll("\\$\\{carbon.home}", carbonHome);
+    }
+
+    public static void logQuery(String queryType, String queryLog) {
+        if (log.isDebugEnabled()) {
+            log.debug("The final compiled query for '" + queryType + "' clause : '" + queryLog + "'");
+        }
+    }
+
+    public static String getCompareOperator(Compare.Operator operator) {
+        String compareOperator;
+        switch (operator) {
+            case EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_EQUAL;
+                break;
+            case GREATER_THAN:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN;
+                break;
+            case GREATER_THAN_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_GREATER_THAN_EQUAL;
+                break;
+            case LESS_THAN:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN;
+                break;
+            case LESS_THAN_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_LESS_THAN_EQUAL;
+                break;
+            case NOT_EQUAL:
+                compareOperator = MongoTableConstants.MONGO_COMPARE_NOT_EQUAL;
+                break;
+            default:
+                throw new MongoTableException("MongoDB Event Table found unknown operator '" + operator + "' for " +
+                        "COMPARE operation.");
+        }
+        return compareOperator;
     }
 }
 

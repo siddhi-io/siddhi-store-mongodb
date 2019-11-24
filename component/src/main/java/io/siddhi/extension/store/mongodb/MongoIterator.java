@@ -17,12 +17,12 @@
  */
 package io.siddhi.extension.store.mongodb;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import io.siddhi.core.table.record.RecordIterator;
 import org.bson.Document;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,36 +35,24 @@ public class MongoIterator implements RecordIterator<Object[]> {
     private MongoCursor documents;
     private List<String> attributeNames;
 
-    private boolean preFetched;
-    private Object[] nextDocument;
-
     public MongoIterator(FindIterable documents, List<String> attributeNames) {
+        this.documents = documents.iterator();
+        this.attributeNames = attributeNames;
+    }
+
+    public MongoIterator(AggregateIterable documents, List<String> attributeNames) {
         this.documents = documents.iterator();
         this.attributeNames = attributeNames;
     }
 
     @Override
     public boolean hasNext() {
-        if (!this.preFetched) {
-            this.nextDocument = this.next();
-            this.preFetched = true;
-        }
-        return this.nextDocument.length != 0;
+        return this.documents.hasNext();
     }
 
     @Override
     public Object[] next() {
-        if (this.preFetched) {
-            this.preFetched = false;
-            Object[] result = this.nextDocument;
-            this.nextDocument = null;
-            return result;
-        }
-        if (this.documents.hasNext()) {
-            return this.extractRecord((Document) this.documents.next());
-        } else {
-            return new Object[0];
-        }
+        return this.extractRecord((Document) this.documents.next());
     }
 
     /**
@@ -90,7 +78,7 @@ public class MongoIterator implements RecordIterator<Object[]> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 }
