@@ -497,6 +497,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                     (MongoCompiledCondition) compiledCondition, findConditionParameterMap, "on condition");
             MongoCollection<? extends Document> mongoCollection = this.getCollectionObject();
             return new MongoIterator(mongoCollection.find(findFilter), this.attributeNames);
+        } catch (MongoSocketOpenException e) {
+            throw new ConnectionUnavailableException(e);
         } catch (MongoException e) {
             this.destroy();
             throw new MongoTableException("Error in retrieving documents from the collection '"
@@ -511,6 +513,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             Document containsFilter = MongoTableUtils.resolveCondition(
                     (MongoCompiledCondition) compiledCondition, containsConditionParameterMap, "contains");
             return this.getCollectionObject().count(containsFilter) > 0;
+        } catch (MongoSocketOpenException e) {
+            throw new ConnectionUnavailableException(e);
         } catch (MongoException e) {
             this.destroy();
             throw new MongoTableException("Error in retrieving count of documents from the collection '"
