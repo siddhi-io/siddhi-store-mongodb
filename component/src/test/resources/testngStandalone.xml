@@ -10,6 +10,7 @@
             <class name="io.siddhi.extension.store.mongodb.InsertIntoMongoTableTest"/>
             <class name="io.siddhi.extension.store.mongodb.JoinMongoTableTest"/>
             <class name="io.siddhi.extension.store.mongodb.UpdateOrInsertMongoTableTest"/>
+            <class name="io.siddhi.extension.store.mongodb.QueryableMongoTableTest"/>
             <!-- Skipping update test till set is implemented-->
             <!--
                         <class name="io.siddhi.extension.store.mongodb.UpdateMongoTableTest" />
