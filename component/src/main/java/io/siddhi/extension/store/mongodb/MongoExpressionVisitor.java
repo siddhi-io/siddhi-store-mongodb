@@ -197,11 +197,17 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
 
     @Override
     public void endVisitCompare(Compare.Operator operator) {
-        String compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER;
-        String compareOperator = MongoTableUtils.getCompareOperator(operator);
-        compareFilter = compareFilter.replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR, compareOperator);
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
+        String compareFilter;
+        if (rightOperand.equals(MongoTableConstants.MONGO_OBJECT_ID)) {
+            compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER_FOR_OBJECT_ID;
+        } else {
+            compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER;
+        }
+        String compareOperator = MongoTableUtils.getCompareOperator(operator);
+        compareFilter = compareFilter.replace(MongoTableConstants.PLACEHOLDER_COMPARE_OPERATOR, compareOperator);
+
         if (!rightOperand.matches(MongoTableConstants.REG_EXPRESSION) &&
                 !leftOperand.matches(MongoTableConstants.REG_EXPRESSION)) {
             if (leftOperand.matches(MongoTableConstants.REG_STREAMVAR_OR_CONST) !=
