@@ -200,7 +200,8 @@ public class MongoExpressionVisitor extends BaseExpressionVisitor {
         String rightOperand = this.conditionOperands.pop();
         String leftOperand = this.conditionOperands.pop();
         String compareFilter;
-        if (rightOperand.equals(MongoTableConstants.MONGO_OBJECT_ID)) {
+        if (rightOperand.equals(MongoTableConstants.MONGO_OBJECT_ID) ||
+                leftOperand.equals((MongoTableConstants.MONGO_OBJECT_ID))) {
             compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER_FOR_OBJECT_ID;
         } else {
             compareFilter = MongoTableConstants.MONGO_COMPARE_FILTER;
