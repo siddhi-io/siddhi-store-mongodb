@@ -40,6 +40,8 @@ public class MongoTableConstants {
     public static final String MONGO_COMPARE_NOT_EQUAL = "$ne";
     public static final String MONGO_NOT = "$not";
 
+    public static final String MONGO_OBJECT_ID = "_id";
+
     //Regex for comparing operands
     public static final String REG_EXPRESSION = "\\{.*}$";
     public static final String REG_SIMPLE_EXPRESSION = "^\\{(\\S*):\\{.*}}$";
@@ -52,6 +54,8 @@ public class MongoTableConstants {
     public static final String MONGO_OR_FILTER = "{$or:[{{LEFT_OPERAND}},{{RIGHT_OPERAND}}]}";
     public static final String MONGO_NOT_FILTER = "{{{FIELD_NAME}}:{{OPERAND}}}";
     public static final String MONGO_COMPARE_FILTER = "{{{LEFT_OPERAND}}:{{{COMPARE_OPERATOR}}:{{RIGHT_OPERAND}}}}";
+    public static final String MONGO_COMPARE_FILTER_FOR_OBJECT_ID = "{{{LEFT_OPERAND}}:{{{COMPARE_OPERATOR}}:" +
+            "{$oid:{{RIGHT_OPERAND}}}}}";
     public static final String MONGO_IS_NULL_FILTER = "{{{OPERAND}}:{$eq:null}}";
 
     //Mongo filters for math operators
