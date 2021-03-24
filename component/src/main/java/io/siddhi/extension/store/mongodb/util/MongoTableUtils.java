@@ -648,7 +648,7 @@ public class MongoTableUtils {
 
         try {
             SSLContext sslContext =
-                    SSLContext.getInstance(configReader.readConfig(MongoTableConstants.ENCRYPTION_PROTOCOL, "SSL"));
+                    SSLContext.getInstance(configReader.readConfig(MongoTableConstants.ENCRYPTION_PROTOCOL, "TLSv1.2"));
             sslContext.init(keyManagers, trustManagers, null);
             SSLContext.setDefault(sslContext);
             return sslContext.getSocketFactory();
