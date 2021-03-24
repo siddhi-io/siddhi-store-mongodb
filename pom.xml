@@ -48,7 +48,7 @@
         <siddhi.version>5.1.13</siddhi.version>
         <siddhi.version.range>[5.0.0,6.0.0)</siddhi.version.range>
         <junit.version>4.12</junit.version>
-        <commons.logging.version>1.1.1</commons.logging.version>
+        <commons.logging.version>1.2</commons.logging.version>
         <commons.logging.version.range>[1.1.1,2.0)</commons.logging.version.range>
         <testng.version>6.11</testng.version>
         <mongodb.driver.version>3.4.2</mongodb.driver.version>
