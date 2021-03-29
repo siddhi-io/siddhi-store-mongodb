@@ -23,7 +23,8 @@ import com.mongodb.MongoClientURI;
 import com.mongodb.MongoException;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -48,8 +49,7 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 
 public class MongoDBConnectionSSLTest {
-
-    private static final Logger log = Logger.getLogger(MongoDBConnectionSSLTest.class);
+    private static final Log log = LogFactory.getLog(MongoDBConnectionSSLTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
     private static MongoClientOptions.Builder mongoClientOptionsBuilder = getOptionsWithSSLEnabled();

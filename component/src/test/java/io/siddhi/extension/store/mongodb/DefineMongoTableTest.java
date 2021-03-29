@@ -20,7 +20,8 @@ package io.siddhi.extension.store.mongodb;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.exception.SiddhiAppCreationException;
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -29,8 +30,7 @@ import org.testng.annotations.Test;
 
 public class DefineMongoTableTest {
 
-    private static final Logger log = Logger.getLogger(DefineMongoTableTest.class);
-
+    private static final Log log = LogFactory.getLog(DefineMongoTableTest.class);
     private static String uri = MongoTableTestUtils.resolveBaseUri();
 
     @BeforeClass

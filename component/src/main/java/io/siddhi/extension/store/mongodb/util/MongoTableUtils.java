@@ -579,7 +579,7 @@ public class MongoTableUtils {
                         keyStorePassword;
 
                 mongoClientOptionsBuilder.socketFactory(MongoTableUtils
-                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword));
+                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword, configReader));
             }
             return mongoClientOptionsBuilder;
         } catch (IllegalArgumentException e) {
@@ -588,7 +588,8 @@ public class MongoTableUtils {
     }
 
     private static SocketFactory extractSocketFactory(
-            String trustStore, String trustStorePassword, String keyStore, String keyStorePassword) {
+            String trustStore, String trustStorePassword, String keyStore, String keyStorePassword,
+            ConfigReader configReader) {
         TrustManager[] trustManagers;
         KeyManager[] keyManagers;
 
@@ -646,7 +647,8 @@ public class MongoTableUtils {
         }
 
         try {
-            SSLContext sslContext = SSLContext.getInstance("SSL");
+            SSLContext sslContext =
+                    SSLContext.getInstance(configReader.readConfig(MongoTableConstants.ENCRYPTION_PROTOCOL, "TLSv1.3"));
             sslContext.init(keyManagers, trustManagers, null);
             SSLContext.setDefault(sslContext);
             return sslContext.getSocketFactory();

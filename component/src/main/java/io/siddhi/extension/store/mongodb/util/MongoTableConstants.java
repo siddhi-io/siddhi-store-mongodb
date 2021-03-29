@@ -101,6 +101,7 @@ public class MongoTableConstants {
     public static final String THREADS_ALLOWED_TO_BLOCK = "threadsAllowedToBlockForConnectionMultiplier";
     public static final String SOCKET_KEEP_ALIVE = "socketKeepAlive";
     public static final String SSL_ENABLED = "sslEnabled";
+    public static final String ENCRYPTION_PROTOCOL = "encryptionProtocol";
     public static final String CURSOR_FINALIZER_ENABLED = "cursorFinalizerEnabled";
     public static final String REQUIRED_REPLICA_SET_NAME = "requiredReplicaSetName";
     public static final String APPLICATION_NAME = "applicationName";
