@@ -579,7 +579,8 @@ public class MongoTableUtils {
                         keyStorePassword;
 
                 mongoClientOptionsBuilder.socketFactory(MongoTableUtils
-                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword, configReader));
+                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword,
+                                configReader));
             }
             return mongoClientOptionsBuilder;
         } catch (IllegalArgumentException e) {
