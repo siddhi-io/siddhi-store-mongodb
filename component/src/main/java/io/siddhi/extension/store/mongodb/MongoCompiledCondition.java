@@ -27,6 +27,8 @@ import java.util.Map;
  */
 public class MongoCompiledCondition implements CompiledCondition {
 
+    private static final long serialVersionUID = 881116281383931987L;
+
     private String compiledQuery;
     private Map<String, Object> placeholders;
 

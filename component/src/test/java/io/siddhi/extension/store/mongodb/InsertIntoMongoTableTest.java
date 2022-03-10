@@ -24,7 +24,9 @@ import io.siddhi.core.exception.SiddhiAppCreationException;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.exception.DuplicateDefinitionException;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Logger;
 import org.testng.Assert;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
@@ -35,7 +37,7 @@ import java.util.HashMap;
 
 public class InsertIntoMongoTableTest {
 
-    private static final Logger log = Logger.getLogger(InsertIntoMongoTableTest.class);
+    private static final Logger log = (Logger) LogManager.getLogger(InsertIntoMongoTableTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
 
@@ -296,8 +298,9 @@ public class InsertIntoMongoTableTest {
         log.info("insertIntoMongoTableTest10 - " +
                 "DASC5-967:Unprivileged user attempts to insert events to a MongoDB table successfully");
 
-        Logger siddhiAppLogger = Logger.getLogger(SiddhiAppRuntimeImpl.class);
-        UnitTestAppender appender = new UnitTestAppender();
+        Logger siddhiAppLogger = (Logger) LogManager.getLogger(SiddhiAppRuntimeImpl.class);
+        siddhiAppLogger.setLevel(Level.ALL);
+        UnitTestAppender appender = new UnitTestAppender("UnitTestAppender", null);
         siddhiAppLogger.addAppender(appender);
 
         String uri = MongoTableTestUtils

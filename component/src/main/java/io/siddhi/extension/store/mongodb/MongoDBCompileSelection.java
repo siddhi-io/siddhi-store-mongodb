@@ -24,6 +24,8 @@ import io.siddhi.core.util.collection.operator.CompiledSelection;
  */
 public class MongoDBCompileSelection implements CompiledSelection {
 
+    private static final long serialVersionUID = 9157816339757372848L;
+
     private MongoCompiledCondition selection;
     private MongoCompiledCondition groupBy;
     private String having;
