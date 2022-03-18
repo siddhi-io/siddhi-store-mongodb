@@ -24,7 +24,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.EventPrinter;
 import io.siddhi.core.util.SiddhiTestHelper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.AssertJUnit;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
@@ -39,7 +40,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryableMongoTableTest {
 
-    private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
+    private static final Logger log = LogManager.getLogger(JoinMongoTableTest.class);
     private AtomicInteger inEventCount;
     private boolean eventArrived;
     private List<Object[]> inEventsList;

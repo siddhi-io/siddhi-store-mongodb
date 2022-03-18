@@ -25,7 +25,8 @@ import io.siddhi.core.query.output.callback.QueryCallback;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.core.util.SiddhiTestHelper;
 import io.siddhi.query.compiler.exception.SiddhiParserException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -37,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class JoinMongoTableTest {
 
-    private static final Logger log = Logger.getLogger(JoinMongoTableTest.class);
+    private static final Logger log = LogManager.getLogger(JoinMongoTableTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
     private AtomicInteger eventCount = new AtomicInteger(0);

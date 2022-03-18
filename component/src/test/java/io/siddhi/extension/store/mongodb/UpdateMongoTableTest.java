@@ -21,7 +21,8 @@ import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import io.siddhi.core.stream.input.InputHandler;
 import io.siddhi.query.api.exception.SiddhiAppValidationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -31,7 +32,7 @@ import org.testng.annotations.Test;
 
 public class UpdateMongoTableTest {
 
-    private static final Logger log = Logger.getLogger(UpdateMongoTableTest.class);
+    private static final Logger log = LogManager.getLogger(UpdateMongoTableTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
 
