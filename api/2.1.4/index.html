@@ -38,7 +38,7 @@
     
     
       
-        <title>1.0.12 - Siddhi Store MongoDB</title>
+        <title>2.1.4 - Siddhi Store MongoDB</title>
       
     
     
@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v1012" tabindex="1" class="md-skip">
+      <a href="#api-docs-v214" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -140,7 +140,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                1.0.12
+                2.1.4
               
             </span>
           
@@ -294,11 +294,62 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../2.1.4/" title="2.1.4" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        2.1.4
+      </label>
+    
+    <a href="./" title="2.1.4" class="md-nav__link md-nav__link--active">
       2.1.4
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#store" title="Store" class="md-nav__link">
+    Store
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mongodb-store" title="mongodb (Store)" class="md-nav__link">
+    mongodb (Store)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -510,62 +561,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        1.0.12
-      </label>
-    
-    <a href="./" title="1.0.12" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../1.0.12/" title="1.0.12" class="md-nav__link">
       1.0.12
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#store" title="Store" class="md-nav__link">
-    Store
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mongodb-store" title="mongodb (Store)" class="md-nav__link">
-    mongodb (Store)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -702,15 +702,20 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/siddhi-io/siddhi-store-mongodb/blob/master/api/1.0.12.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-store-mongodb/blob/master/api/2.1.4.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v1012">API Docs - v1.0.12</h1>
+                <h1 id="api-docs-v214">API Docs - v2.1.4</h1>
+<div class="admonition info">
+<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.23</a></em></p>
+<p>It could also support other Siddhi Core minor versions.</p>
+</div>
 <h2 id="store">Store</h2>
-<h3 id="mongodb-store">mongodb <em><a target="_blank" href="https://siddhi.io/en/v4.x/docs/query-guide/#store">(Store)</a></em></h3>
-<p style="word-wrap: break-word">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p>
-
-<p><span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
+<h3 id="mongodb-store">mongodb <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/#store">(Store)</a></em></h3>
+<p><p></p>
+<p style="word-wrap: break-word;margin: 0;">Using this extension a MongoDB Event Table can be configured to persist events in a MongoDB of user's choice.</p>
+<p></p>
+<span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span></p>
 <pre><code>@Store(type=&quot;mongodb&quot;, mongodb.uri=&quot;&lt;STRING&gt;&quot;, collection.name=&quot;&lt;STRING&gt;&quot;, secure.connection=&quot;&lt;STRING&gt;&quot;, trust.store=&quot;&lt;STRING&gt;&quot;, trust.store.password=&quot;&lt;STRING&gt;&quot;, key.store=&quot;&lt;STRING&gt;&quot;, key.store.password=&quot;&lt;STRING&gt;&quot;)
 @PrimaryKey(&quot;PRIMARY_KEY&quot;)
 @Index(&quot;INDEX&quot;)
@@ -728,7 +733,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">mongodb.uri</td>
-        <td style="vertical-align: top; word-wrap: break-word">The MongoDB URI for the MongoDB data store. The uri must be of the format <br>mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]<br>The options specified in the uri will override any connection options specified in the deployment yaml file.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The MongoDB URI for the MongoDB data store. The uri must be of the format <br>mongodb://[username:password@]host1[:port1][,hostN[:portN]][/[database][?options]]<br>The options specified in the uri will override any connection options specified in the deployment yaml file.<br>&nbsp;Note: The user should have read permissions to the admindb as well as read/write permissions to the database accessed.</p></td>
         <td style="vertical-align: top"></td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">No</td>
@@ -736,7 +741,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">collection.name</td>
-        <td style="vertical-align: top; word-wrap: break-word">The name of the collection in the store this Event Table should be persisted as.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">The name of the collection in the store this Event Table should be persisted as.</p></td>
         <td style="vertical-align: top">Name of the siddhi event table.</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -744,7 +749,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">secure.connection</td>
-        <td style="vertical-align: top; word-wrap: break-word">Describes enabling the SSL for the mongodb connection</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Describes enabling the SSL for the mongodb connection</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -752,7 +757,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">trust.store</td>
-        <td style="vertical-align: top; word-wrap: break-word">File path to the trust store.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">File path to the trust store.</p></td>
         <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -760,7 +765,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">trust.store.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">Password to access the trust store</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Password to access the trust store</p></td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -768,7 +773,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">key.store</td>
-        <td style="vertical-align: top; word-wrap: break-word">File path to the keystore.</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">File path to the keystore.</p></td>
         <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -776,7 +781,7 @@
     </tr>
     <tr>
         <td style="vertical-align: top">key.store.password</td>
-        <td style="vertical-align: top; word-wrap: break-word">Password to access the keystore</td>
+        <td style="vertical-align: top; word-wrap: break-word"><p style="word-wrap: break-word;margin: 0;">Password to access the keystore</p></td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">STRING</td>
         <td style="vertical-align: top">Yes</td>
@@ -793,157 +798,163 @@
     </tr>
     <tr>
         <td style="vertical-align: top">applicationName</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets the logical name of the application using this MongoClient. The application name may be used by the client to identify the application to the server, for use in server logs, slow query logs, and profile collection.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets the logical name of the application using this MongoClient. The application name may be used by the client to identify the application to the server, for use in server logs, slow query logs, and profile collection.</p></td>
         <td style="vertical-align: top">null</td>
         <td style="vertical-align: top">the logical name of the application using this MongoClient. The UTF-8 encoding may not exceed 128 bytes.</td>
     </tr>
     <tr>
         <td style="vertical-align: top">cursorFinalizerEnabled</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets whether cursor finalizers are enabled.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether cursor finalizers are enabled.</p></td>
         <td style="vertical-align: top">true</td>
         <td style="vertical-align: top">true<br>false</td>
     </tr>
     <tr>
         <td style="vertical-align: top">requiredReplicaSetName</td>
-        <td style="vertical-align: top; word-wrap: break-word">The name of the replica set</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The name of the replica set</p></td>
         <td style="vertical-align: top">null</td>
         <td style="vertical-align: top">the logical name of the replica set</td>
     </tr>
     <tr>
         <td style="vertical-align: top">sslEnabled</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets whether to initiate connection with TSL/SSL enabled. true: Initiate the connection with TLS/SSL. false: Initiate the connection without TLS/SSL.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether to initiate connection with TSL/SSL enabled. true: Initiate the connection with TLS/SSL. false: Initiate the connection without TLS/SSL.</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">true<br>false</td>
     </tr>
     <tr>
+        <td style="vertical-align: top">encryptionProtocol</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Encryption protocol.</p></td>
+        <td style="vertical-align: top">TLSv1.3</td>
+        <td style="vertical-align: top">SSL<br>TLSv1.2<br>TLSv1.3</td>
+    </tr>
+    <tr>
         <td style="vertical-align: top">trustStore</td>
-        <td style="vertical-align: top; word-wrap: break-word">File path to the trust store.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">File path to the trust store.</p></td>
         <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
         <td style="vertical-align: top">Any valid file path.</td>
     </tr>
     <tr>
         <td style="vertical-align: top">trustStorePassword</td>
-        <td style="vertical-align: top; word-wrap: break-word">Password to access the trust store</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Password to access the trust store</p></td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">Any valid password.</td>
     </tr>
     <tr>
         <td style="vertical-align: top">keyStore</td>
-        <td style="vertical-align: top; word-wrap: break-word">File path to the keystore.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">File path to the keystore.</p></td>
         <td style="vertical-align: top">${carbon.home}/resources/security/client-truststore.jks</td>
         <td style="vertical-align: top">Any valid file path.</td>
     </tr>
     <tr>
         <td style="vertical-align: top">keyStorePassword</td>
-        <td style="vertical-align: top; word-wrap: break-word">Password to access the keystore</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Password to access the keystore</p></td>
         <td style="vertical-align: top">wso2carbon</td>
         <td style="vertical-align: top">Any valid password.</td>
     </tr>
     <tr>
         <td style="vertical-align: top">connectTimeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">The time in milliseconds to attempt a connection before timing out.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The time in milliseconds to attempt a connection before timing out.</p></td>
         <td style="vertical-align: top">10000</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">connectionsPerHost</td>
-        <td style="vertical-align: top; word-wrap: break-word">The maximum number of connections in the connection pool.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum number of connections in the connection pool.</p></td>
         <td style="vertical-align: top">100</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">minConnectionsPerHost</td>
-        <td style="vertical-align: top; word-wrap: break-word">The minimum number of connections in the connection pool.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The minimum number of connections in the connection pool.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any natural number</td>
     </tr>
     <tr>
         <td style="vertical-align: top">maxConnectionIdleTime</td>
-        <td style="vertical-align: top; word-wrap: break-word">The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. A zero value indicates no limit to the idle time.  A pooled connection that has exceeded its idle time will be closed and replaced when necessary by a new connection.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum number of milliseconds that a connection can remain idle in the pool before being removed and closed. A zero value indicates no limit to the idle time.  A pooled connection that has exceeded its idle time will be closed and replaced when necessary by a new connection.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">maxWaitTime</td>
-        <td style="vertical-align: top; word-wrap: break-word">The maximum wait time in milliseconds that a thread may wait for a connection to become available. A value of 0 means that it will not wait.  A negative value means to wait indefinitely</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum wait time in milliseconds that a thread may wait for a connection to become available. A value of 0 means that it will not wait.  A negative value means to wait indefinitely</p></td>
         <td style="vertical-align: top">120000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">threadsAllowedToBlockForConnectionMultiplier</td>
-        <td style="vertical-align: top; word-wrap: break-word">The maximum number of connections allowed per host for this MongoClient instance. Those connections will be kept in a pool when idle. Once the pool is exhausted, any operation requiring a connection will block waiting for an available connection.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum number of connections allowed per host for this MongoClient instance. Those connections will be kept in a pool when idle. Once the pool is exhausted, any operation requiring a connection will block waiting for an available connection.</p></td>
         <td style="vertical-align: top">100</td>
         <td style="vertical-align: top">Any natural number</td>
     </tr>
     <tr>
         <td style="vertical-align: top">maxConnectionLifeTime</td>
-        <td style="vertical-align: top; word-wrap: break-word">The maximum life time of a pooled connection.  A zero value indicates no limit to the life time.  A pooled connection that has exceeded its life time will be closed and replaced when necessary by a new connection.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum life time of a pooled connection.  A zero value indicates no limit to the life time.  A pooled connection that has exceeded its life time will be closed and replaced when necessary by a new connection.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">socketKeepAlive</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets whether to keep a connection alive through firewalls</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether to keep a connection alive through firewalls</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">true<br>false</td>
     </tr>
     <tr>
         <td style="vertical-align: top">socketTimeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">The time in milliseconds to attempt a send or receive on a socket before the attempt times out. Default 0 means never to timeout.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The time in milliseconds to attempt a send or receive on a socket before the attempt times out. Default 0 means never to timeout.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any natural integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">writeConcern</td>
-        <td style="vertical-align: top; word-wrap: break-word">The write concern to use.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The write concern to use.</p></td>
         <td style="vertical-align: top">acknowledged</td>
         <td style="vertical-align: top">acknowledged<br>w1<br>w2<br>w3<br>unacknowledged<br>fsynced<br>journaled<br>replica_acknowledged<br>normal<br>safe<br>majority<br>fsync_safe<br>journal_safe<br>replicas_safe</td>
     </tr>
     <tr>
         <td style="vertical-align: top">readConcern</td>
-        <td style="vertical-align: top; word-wrap: break-word">The level of isolation for the reads from replica sets.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The level of isolation for the reads from replica sets.</p></td>
         <td style="vertical-align: top">default</td>
         <td style="vertical-align: top">local<br>majority<br>linearizable</td>
     </tr>
     <tr>
         <td style="vertical-align: top">readPreference</td>
-        <td style="vertical-align: top; word-wrap: break-word">Specifies the replica set read preference for the connection.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Specifies the replica set read preference for the connection.</p></td>
         <td style="vertical-align: top">primary</td>
         <td style="vertical-align: top">primary<br>secondary<br>secondarypreferred<br>primarypreferred<br>nearest</td>
     </tr>
     <tr>
         <td style="vertical-align: top">localThreshold</td>
-        <td style="vertical-align: top; word-wrap: break-word">The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The size (in milliseconds) of the latency window for selecting among multiple suitable MongoDB instances.</p></td>
         <td style="vertical-align: top">15</td>
         <td style="vertical-align: top">Any natural number</td>
     </tr>
     <tr>
         <td style="vertical-align: top">serverSelectionTimeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">Specifies how long (in milliseconds) to block for server selection before throwing an exception. A value of 0 means that it will timeout immediately if no server is available.  A negative value means to wait indefinitely.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Specifies how long (in milliseconds) to block for server selection before throwing an exception. A value of 0 means that it will timeout immediately if no server is available.  A negative value means to wait indefinitely.</p></td>
         <td style="vertical-align: top">30000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">heartbeatSocketTimeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">The socket timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The socket timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
         <td style="vertical-align: top">20000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">heartbeatConnectTimeout</td>
-        <td style="vertical-align: top; word-wrap: break-word">The connect timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The connect timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
         <td style="vertical-align: top">20000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">heartbeatFrequency</td>
-        <td style="vertical-align: top; word-wrap: break-word">Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Specify the interval (in milliseconds) between checks, counted from the end of the previous check until the beginning of the next one.</p></td>
         <td style="vertical-align: top">10000</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
     <tr>
         <td style="vertical-align: top">minHeartbeatFrequency</td>
-        <td style="vertical-align: top; word-wrap: break-word">Sets the minimum heartbeat frequency.  In the event that the driver has to frequently re-check a server's availability, it will wait at least this long since the previous check to avoid wasted effort.</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets the minimum heartbeat frequency.  In the event that the driver has to frequently re-check a server's availability, it will wait at least this long since the previous check to avoid wasted effort.</p></td>
         <td style="vertical-align: top">500</td>
         <td style="vertical-align: top">Any positive integer</td>
     </tr>
@@ -952,11 +963,15 @@
 <span id="example-1" class="md-typeset" style="display: block; color: rgba(0, 0, 0, 0.54); font-size: 12.8px; font-weight: bold;">EXAMPLE 1</span></p>
 <pre><code>@Store(type=&quot;mongodb&quot;,mongodb.uri=&quot;mongodb://admin:admin@localhost/Foo&quot;)
 @PrimaryKey(&quot;symbol&quot;)
-@IndexBy(&quot;volume 1 {background:true,unique:true}&quot;)
+@Index(&quot;volume:1&quot;, {background:true,unique:true}&quot;)
 define table FooTable (symbol string, price float, volume long);
 </code></pre>
 
-<p style="word-wrap: break-word">This will create a collection called FooTable for the events to be saved with symbol as Primary Key(unique index at mongod level) and index for the field volume will be created in ascending order with the index option to create the index in the background.<br><br>Note: <br>@PrimaryKey: This specifies a list of comma-separated values to be treated as unique fields in the table. Each record in the table must have a unique combination of values for the fields specified here.<br><br>@IndexBy: This specifies the fields that must be indexed at the database level. You can specify multiple values as a come-separated list. A single value to be in the format,<br>?&lt;FieldName&gt; &lt;SortOrder&gt; &lt;IndexOptions&gt;?<br>&lt;SortOrder&gt; - ( 1) for Ascending and (-1) for Descending<br>&lt;IndexOptions&gt; - Index Options must be defined inside curly brackets. {} to be used for default options. Options must follow the standard mongodb index options format. Reference : https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/<br>Example : ?symbol 1 {?unique?:true}?<br></p>
+<p></p>
+
+<p style="word-wrap: break-word;margin: 0;">This will create a collection called FooTable for the events to be saved with symbol as Primary Key(unique index at mongoDB level) and index for the field volume will be created in ascending order with the index option to create the index in the background.<br><br>Note: <br>@PrimaryKey: This specifies a list of comma-separated values to be treated as unique fields in the table. Each record in the table must have a unique combination of values for the fields specified here.<br><br>@Index: This specifies the fields that must be indexed at the database level. You can specify multiple values as a come-separated list. A single value to be in the format,<br><code>&lt;FieldName&gt;:&lt;SortOrder&gt;</code>. The last element is optional through which a valid index options can be passed.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;SortOrder&gt; : 1 for Ascending & -1 for Descending. Optional, with default value as 1.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;IndexOptions&gt; : Index Options must be defined inside curly brackets.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Options must follow the standard mongodb index options format.<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://docs.mongodb.com/manual/reference/method/db.collection.createIndex/<br><br>Example 1: @Index(<code>'symbol:1'</code>, <code>'{"unique":true}'</code>)<br>Example 2: @Index(<code>'symbol'</code>, <code>'{"unique":true}'</code>)<br>Example 3: @Index(<code>'symbol:1'</code>, <code>'volume:-1'</code>, <code>'{"unique":true}'</code>)<br></p>
+
+<p></p>
                 
                   
                 
@@ -977,7 +992,7 @@ define table FooTable (symbol string, price float, volume long);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../1.0.13/" title="1.0.13" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -986,19 +1001,19 @@ define table FooTable (symbol string, price float, volume long);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                1.0.13
+                latest
               </span>
             </div>
           </a>
         
         
-          <a href="../1.0.11/" title="1.0.11" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../2.1.2/" title="2.1.2" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                1.0.11
+                2.1.2
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
