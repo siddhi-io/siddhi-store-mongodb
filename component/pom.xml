@@ -53,7 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-driver</artifactId>
+            <artifactId>mongodb-driver-sync</artifactId>
         </dependency>
     </dependencies>
 
@@ -430,6 +430,8 @@
                             io.siddhi.annotation.*;version="${siddhi.version.range}",
                             io.siddhi.core.*;version="${siddhi.version.range}",
                             io.siddhi.query.api.*;version="${siddhi.version.range}",
+                            com.mongodb.*;version="${mongodb.driver.version.range}",
+                            org.bson.*;version="${bson.version.range}";
                             *;resolution:=optional
                         </Import-Package>
                         <Include-Resource>

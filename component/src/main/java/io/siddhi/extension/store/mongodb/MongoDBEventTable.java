@@ -17,13 +17,14 @@
  */
 package io.siddhi.extension.store.mongodb;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoBulkWriteException;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
 import com.mongodb.MongoSocketOpenException;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -292,7 +293,8 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private static final Logger log = LogManager.getLogger(MongoDBEventTable.class);
 
-    private MongoClientURI mongoClientURI;
+    private ConnectionString mongoConnectionString;
+    private MongoClientSettings mongoClientSettings;
     private MongoClient mongoClient;
     private String databaseName;
     private String collectionName;
@@ -348,11 +350,11 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private void initializeConnectionParameters(Annotation storeAnnotation, ConfigReader configReader) {
         String mongoClientURI = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_URI);
         if (mongoClientURI != null) {
-            MongoClientOptions.Builder mongoClientOptionsBuilder =
-                    MongoTableUtils.extractMongoClientOptionsBuilder(storeAnnotation, configReader);
+            this.mongoConnectionString = new ConnectionString(mongoClientURI);
+            this.mongoClientSettings =
+                    MongoTableUtils.extractMongoClientSettings(this.mongoConnectionString, storeAnnotation, configReader);
             try {
-                this.mongoClientURI = new MongoClientURI(mongoClientURI, mongoClientOptionsBuilder);
-                this.databaseName = this.mongoClientURI.getDatabase();
+                this.databaseName = this.mongoConnectionString.getDatabase();
             } catch (IllegalArgumentException e) {
                 throw new SiddhiAppCreationException("Annotation '" + storeAnnotation.getName() + "' contains " +
                         "illegal value for 'mongodb.uri' as '" + mongoClientURI + "'. Please check your query and " +
@@ -396,10 +398,10 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private MongoDatabase getDatabaseObject() {
         if (this.mongoClient == null) {
             try {
-                this.mongoClient = new MongoClient(this.mongoClientURI);
+                this.mongoClient = MongoClients.create(this.mongoClientSettings);
             } catch (MongoException e) {
                 throw new SiddhiAppCreationException("Annotation 'Store' contains illegal value for " +
-                        "element 'mongodb.uri' as '" + this.mongoClientURI + "'. Please check " +
+                        "element 'mongodb.uri' as '" + this.mongoConnectionString + "'. Please check " +
                         "your query and try again.", e);
             }
         }
@@ -515,7 +517,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         try {
             Document containsFilter = MongoTableUtils.resolveCondition(
                     (MongoCompiledCondition) compiledCondition, containsConditionParameterMap, "contains");
-            return this.getCollectionObject().count(containsFilter) > 0;
+            return this.getCollectionObject().countDocuments(containsFilter) > 0;
         } catch (MongoSocketOpenException e) {
             throw new ConnectionUnavailableException(e);
         } catch (MongoException e) {

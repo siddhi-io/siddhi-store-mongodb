@@ -17,10 +17,11 @@
  */
 package io.siddhi.extension.store.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import io.siddhi.core.SiddhiAppRuntime;
 import io.siddhi.core.SiddhiManager;
 import org.apache.commons.logging.Log;
@@ -52,7 +53,7 @@ public class MongoDBConnectionSSLTest {
     private static final Log log = LogFactory.getLog(MongoDBConnectionSSLTest.class);
 
     private static String uri = MongoTableTestUtils.resolveBaseUri();
-    private static MongoClientOptions.Builder mongoClientOptionsBuilder = getOptionsWithSSLEnabled();
+    private static MongoClientSettings.Builder mongoClientSettingsBuilder = getOptionsWithSSLEnabled();
     private static String keyStorePath;
 
     @BeforeClass
@@ -116,8 +117,9 @@ public class MongoDBConnectionSSLTest {
     }
 
     private void dropCollection() {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri + "?authMechanism=MONGODB-X509",
-                mongoClientOptionsBuilder))) {
+        MongoClientSettings mongoClientSettings = mongoClientSettingsBuilder.applyConnectionString(
+                new ConnectionString(uri + "?authMechanism=MONGODB-X509")).build();
+        try (MongoClient mongoClient = MongoClients.create(mongoClientSettings)) {
             mongoClient.getDatabase("admin").getCollection("FooTable").drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
@@ -126,8 +128,9 @@ public class MongoDBConnectionSSLTest {
     }
 
     private boolean doesCollectionExists() {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri + "?authMechanism=MONGODB-X509",
-                mongoClientOptionsBuilder))) {
+        MongoClientSettings mongoClientSettings = mongoClientSettingsBuilder.applyConnectionString(
+                new ConnectionString(uri + "?authMechanism=MONGODB-X509")).build();
+        try (MongoClient mongoClient = MongoClients.create(mongoClientSettings)) {
             for (String collectionName : mongoClient.getDatabase("admin").listCollectionNames()) {
                 if ("FooTable".equals(collectionName)) {
                     return true;
@@ -140,7 +143,7 @@ public class MongoDBConnectionSSLTest {
         }
     }
 
-    private static MongoClientOptions.Builder getOptionsWithSSLEnabled() {
+    private static MongoClientSettings.Builder getOptionsWithSSLEnabled() {
         URL trustStoreFile = MongoDBConnectionSSLTest.class.getResource("/mongodb-client.jks");
         keyStorePath = trustStoreFile.getPath();
         File keystoreFile = new File(trustStoreFile.getFile());
@@ -164,13 +167,13 @@ public class MongoDBConnectionSSLTest {
             SSLContext sslContext = SSLContext.getInstance("SSL");
             sslContext.init(keyManagers, trustManagers, null);
 
-            mongoClientOptionsBuilder = MongoClientOptions.builder();
-            mongoClientOptionsBuilder
-                    .sslEnabled(true)
-                    .sslInvalidHostNameAllowed(true)
-                    .socketFactory(sslContext.getSocketFactory());
-
-            return mongoClientOptionsBuilder;
+            MongoClientSettings.Builder mongoClientSettingsBuilder = MongoClientSettings.builder();
+            mongoClientSettingsBuilder.applyToSslSettings(builder -> {
+                builder.enabled(true);
+                builder.invalidHostNameAllowed(true);
+                builder.context(sslContext);
+            });
+            return mongoClientSettingsBuilder;
         } catch (FileNotFoundException e) {
             log.debug("Key store file not found for secure connections to mongodb.", e);
         } catch (IOException e) {

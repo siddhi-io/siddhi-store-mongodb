@@ -18,10 +18,11 @@
 
 package io.siddhi.extension.store.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoException;
 import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bson.Document;
@@ -86,7 +87,7 @@ public class MongoTableTestUtils {
     }
 
     public static void dropCollection(String uri, String collectionName) {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
             mongoClient.getDatabase(databaseName).getCollection(collectionName).drop();
         } catch (MongoException e) {
             log.debug("Clearing DB collection failed due to " + e.getMessage(), e);
@@ -95,8 +96,8 @@ public class MongoTableTestUtils {
     }
 
     public static long getDocumentsCount(String uri, String collectionName) {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
-            return mongoClient.getDatabase(databaseName).getCollection(collectionName).count();
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
+            return mongoClient.getDatabase(databaseName).getCollection(collectionName).countDocuments();
         } catch (MongoException e) {
             log.debug("Getting rows in DB table failed due to " + e.getMessage(), e);
             throw e;
@@ -104,7 +105,7 @@ public class MongoTableTestUtils {
     }
 
     public static boolean doesCollectionExists(String uri, String customCollectionName) {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
             for (String collectionName : mongoClient.getDatabase(databaseName).listCollectionNames()) {
                 if (customCollectionName.equals(collectionName)) {
                     return true;
@@ -118,7 +119,7 @@ public class MongoTableTestUtils {
     }
 
     private static List<Document> getIndexList(String uri, String collectionName) {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
             ListIndexesIterable<Document> existingIndexesIterable =
                     mongoClient.getDatabase(databaseName).getCollection(collectionName).listIndexes();
             List<Document> existingIndexDocuments = new ArrayList<>();
@@ -149,7 +150,7 @@ public class MongoTableTestUtils {
     }
 
     public static Document getDocument(String uri, String collectionName, String findFilter) {
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
             Document findFilterDocument = Document.parse(findFilter);
             Document firstFind = mongoClient.getDatabase(databaseName).getCollection(collectionName)
                     .find(findFilterDocument).first();
@@ -163,7 +164,7 @@ public class MongoTableTestUtils {
 
     public static void createCollection(String uri, String collectionName) {
         dropCollection(uri, collectionName);
-        try (MongoClient mongoClient = new MongoClient(new MongoClientURI(uri))) {
+        try (MongoClient mongoClient = MongoClients.create(new ConnectionString(uri))) {
             mongoClient.getDatabase(databaseName).createCollection(collectionName);
         } catch (MongoException e) {
             log.debug("Getting indexes in DB table failed due to " + e.getMessage(), e);
