@@ -128,10 +128,6 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         defaultValue = "null",
                         possibleParameters = "the logical name of the application using this MongoClient. The " +
                                 "UTF-8 encoding may not exceed 128 bytes."),
-                @SystemParameter(name = "cursorFinalizerEnabled",
-                        description = "Sets whether cursor finalizers are enabled.",
-                        defaultValue = "true",
-                        possibleParameters = {"true", "false"}),
                 @SystemParameter(name = "requiredReplicaSetName",
                         description = "The name of the replica set",
                         defaultValue = "null",
@@ -186,28 +182,12 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "means to wait indefinitely",
                         defaultValue = "120000",
                         possibleParameters = "Any integer"),
-                @SystemParameter(name = "threadsAllowedToBlockForConnectionMultiplier",
-                        description = "The maximum number of connections allowed per host for this MongoClient " +
-                                "instance. Those connections will be kept in a pool when idle. Once the pool " +
-                                "is exhausted, any operation requiring a connection will block waiting for an " +
-                                "available connection.",
-                        defaultValue = "100",
-                        possibleParameters = "Any natural number"),
                 @SystemParameter(name = "maxConnectionLifeTime",
                         description = "The maximum life time of a pooled connection.  A zero value indicates " +
                                 "no limit to the life time.  A pooled connection that has exceeded its life time " +
                                 "will be closed and replaced when necessary by a new connection.",
                         defaultValue = "0",
                         possibleParameters = "Any positive integer"),
-                @SystemParameter(name = "socketKeepAlive",
-                        description = "Sets whether to keep a connection alive through firewalls",
-                        defaultValue = "false",
-                        possibleParameters = {"true", "false"}),
-                @SystemParameter(name = "socketTimeout",
-                        description = "The time in milliseconds to attempt a send or receive on a socket " +
-                                "before the attempt times out. Default 0 means never to timeout.",
-                        defaultValue = "0",
-                        possibleParameters = "Any natural integer"),
                 @SystemParameter(name = "writeConcern",
                         description = "The write concern to use.",
                         defaultValue = "acknowledged",
@@ -233,18 +213,6 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "before throwing an exception. A value of 0 means that it will timeout immediately " +
                                 "if no server is available.  A negative value means to wait indefinitely.",
                         defaultValue = "30000",
-                        possibleParameters = "Any integer"),
-                @SystemParameter(name = "heartbeatSocketTimeout",
-                        description = "The socket timeout for connections used for the cluster heartbeat. A value of " +
-                                "0 means that it will timeout immediately if no cluster member is available.  " +
-                                "A negative value means to wait indefinitely.",
-                        defaultValue = "20000",
-                        possibleParameters = "Any integer"),
-                @SystemParameter(name = "heartbeatConnectTimeout",
-                        description = "The connect timeout for connections used for the cluster heartbeat. A value " +
-                                "of 0 means that it will timeout immediately if no cluster member is available.  " +
-                                "A negative value means to wait indefinitely.",
-                        defaultValue = "20000",
                         possibleParameters = "Any integer"),
                 @SystemParameter(name = "heartbeatFrequency",
                         description = "Specify the interval (in milliseconds) between checks, counted from " +
