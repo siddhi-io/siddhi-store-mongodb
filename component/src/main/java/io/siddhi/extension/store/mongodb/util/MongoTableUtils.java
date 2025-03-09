@@ -480,7 +480,8 @@ public class MongoTableUtils {
      * @param configReader    {@link ConfigReader} Configuration Reader
      * @return MongoClientSettings
      */
-    public static MongoClientSettings extractMongoClientSettings(ConnectionString connectionString, Annotation storeAnnotation,
+    public static MongoClientSettings extractMongoClientSettings(ConnectionString connectionString,
+                                                                 Annotation storeAnnotation,
                                                                  ConfigReader configReader) {
         try {
             MongoClientSettings.Builder mongoClientSettingsBuilder = MongoClientSettings.builder();

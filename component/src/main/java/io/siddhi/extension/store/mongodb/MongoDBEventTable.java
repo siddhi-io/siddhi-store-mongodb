@@ -320,7 +320,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         if (mongoClientURI != null) {
             this.mongoConnectionString = new ConnectionString(mongoClientURI);
             this.mongoClientSettings =
-                    MongoTableUtils.extractMongoClientSettings(this.mongoConnectionString, storeAnnotation, configReader);
+                    MongoTableUtils.extractMongoClientSettings(this.mongoConnectionString, storeAnnotation,
+                            configReader);
             try {
                 this.databaseName = this.mongoConnectionString.getDatabase();
             } catch (IllegalArgumentException e) {
