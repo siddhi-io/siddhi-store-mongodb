@@ -54,8 +54,8 @@ import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.definition.TableDefinition;
 import io.siddhi.query.api.util.AnnotationHelper;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -290,7 +290,7 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
         }
 )
 public class MongoDBEventTable extends AbstractQueryableRecordTable {
-    private static final Log log = LogFactory.getLog(MongoDBEventTable.class);
+    private static final Logger log = LogManager.getLogger(MongoDBEventTable.class);
 
     private MongoClientURI mongoClientURI;
     private MongoClient mongoClient;
@@ -453,18 +453,17 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
                 failedIndex = bulkWriteError.getIndex();
                 failedModel = parsedRecords.get(failedIndex);
                 if (failedModel instanceof UpdateManyModel) {
-                    log.error("The update filter '" + ((UpdateManyModel) failedModel).getFilter().toString() +
-                            "' failed to update with event '" + ((UpdateManyModel) failedModel).getUpdate().toString() +
-                            "' in the MongoDB Event Table due to " + bulkWriteError.getMessage());
+                    log.error("The update filter '{}' failed to update with event '{}' in the MongoDB Event" +
+                                    " Table due to {}", ((UpdateManyModel) failedModel).getFilter().toString(),
+                            ((UpdateManyModel) failedModel).getUpdate().toString(), bulkWriteError.getMessage());
                 } else {
                     if (failedModel instanceof InsertOneModel) {
-                        log.error("The event '" + ((InsertOneModel) failedModel).getDocument().toString() +
-                                "' failed to insert into the Mongo Event Table due to " + bulkWriteError.getMessage());
+                        log.error("The event '{}' failed to insert into the Mongo Event Table due to {}",
+                                ((InsertOneModel) failedModel).getDocument().toString(), bulkWriteError.getMessage());
                     } else {
-
-                        log.error("The delete filter '" + ((DeleteManyModel) failedModel).getFilter().toString() +
-                                "' failed to delete the events from the MongoDB Event Table due to "
-                                + bulkWriteError.getMessage());
+                        log.error("The delete filter '{}' failed to delete the events from the MongoDB Event" +
+                                        " Table due to {}", ((DeleteManyModel) failedModel).getFilter().toString(),
+                                bulkWriteError.getMessage());
                     }
                 }
                 if (failedIndex + 1 < parsedRecords.size()) {
@@ -484,8 +483,8 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
             Map<String, Object> insertMap = MongoTableUtils.mapValuesToAttributes(record, this.attributeNames);
             Document insertDocument = new Document(insertMap);
             if (log.isDebugEnabled()) {
-                log.debug("Event formatted as document '" + insertDocument.toJson() + "' is used for building " +
-                        "Mongo Insert Model");
+                log.debug("Event formatted as document '{}' is used for building Mongo Insert Model",
+                        insertDocument.toJson());
             }
             return new InsertOneModel<>(insertDocument);
         }).collect(Collectors.toList());
