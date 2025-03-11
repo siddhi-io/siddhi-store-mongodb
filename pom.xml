@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>5</version>
+        <version>5.3</version>
     </parent>
 
     <groupId>io.siddhi.extension.store.mongodb</groupId>
@@ -57,6 +57,7 @@
         <jacoco.ant.version>0.7.9</jacoco.ant.version>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.findbugsplugin.version.exclude>findbugs-exclude.xml</maven.findbugsplugin.version.exclude>
     </properties>
 
     <scm>
@@ -119,6 +120,13 @@
                 <configuration>
                     <preparationGoals>clean install -Pdocumentation-deploy</preparationGoals>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <configuration>
+                    <excludeFilterFile>${maven.findbugsplugin.version.exclude}</excludeFilterFile>
                 </configuration>
             </plugin>
         </plugins>

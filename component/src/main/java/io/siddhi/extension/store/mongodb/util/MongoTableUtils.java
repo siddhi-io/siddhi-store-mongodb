@@ -38,8 +38,8 @@ import io.siddhi.extension.store.mongodb.exception.MongoTableException;
 import io.siddhi.query.api.annotation.Annotation;
 import io.siddhi.query.api.definition.Attribute;
 import io.siddhi.query.api.expression.condition.Compare;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.bson.json.JsonParseException;
@@ -80,7 +80,7 @@ import static io.siddhi.extension.store.mongodb.util.MongoTableConstants.VARIABL
  * Class which holds the utility methods which are used by various units in the MongoDB Event Table implementation.
  */
 public class MongoTableUtils {
-    private static final Log log = LogFactory.getLog(MongoTableUtils.class);
+    private static final Logger log = LogManager.getLogger(MongoTableUtils.class);
 
     private MongoTableUtils() {
         //Prevent Initialization.
@@ -318,9 +318,9 @@ public class MongoTableUtils {
                                         builder.collationMaxVariable(CollationMaxVariable.fromString(collationObj));
                                         break;
                                     default:
-                                        log.warn("Annotation 'IndexBy' for the table '" + tableName + "' contains " +
-                                                "unknown 'Collation' Option key : '" + collationKey + "'. Please " +
-                                                "check your query and try again.");
+                                        log.warn("Annotation 'IndexBy' for the table '{}' contains unknown" +
+                                                        " 'Collation' Option key : '{}'. Please check your query and " +
+                                                        "try again.", tableName, collationKey);
                                         break;
                                 }
                             }
@@ -335,8 +335,8 @@ public class MongoTableUtils {
                             indexOptions.storageEngine((Bson) value);
                             break;
                         default:
-                            log.warn("Annotation 'IndexBy' for the table '" + tableName + "' contains unknown option " +
-                                    "key : '" + indexEntry.getKey() + "'. Please check your query and try again.");
+                            log.warn("Annotation 'IndexBy' for the table '{}' contains unknown option key : '{}'. " +
+                                    "Please check your query and try again.", tableName, indexEntry.getKey());
                             break;
                     }
                 }
@@ -377,7 +377,7 @@ public class MongoTableUtils {
             }
         }
         if (log.isDebugEnabled()) {
-            log.debug("The final compiled query for '" + queryType + "' clause : '" + compiledQuery + "'");
+            log.debug("The final compiled query for '{}' clause : '{}'", queryType, compiledQuery);
         }
         return Document.parse(compiledQuery);
     }
@@ -470,8 +470,8 @@ public class MongoTableUtils {
 
         if (!existingIndexDocuments.containsAll(expectedIndexDocuments)) {
             log.warn("Existing indices differs from the expected indices defined by the Annotations 'PrimaryKey' " +
-                    "and 'IndexBy'.\nExisting Indices '" + existingIndexDocuments.toString() + "'.\n" +
-                    "Expected Indices '" + expectedIndexDocuments.toString() + "'");
+                            "and 'IndexBy'.\nExisting Indices '{}'.\nExpected Indices '{}'",
+                    existingIndexDocuments.toString(), expectedIndexDocuments.toString());
         }
     }
 
@@ -676,7 +676,7 @@ public class MongoTableUtils {
 
     public static void logQuery(String queryType, String queryLog) {
         if (log.isDebugEnabled()) {
-            log.debug("The final compiled query for '" + queryType + "' clause : '" + queryLog + "'");
+            log.debug("The final compiled query for '{}' clause : '{}'", queryType, queryLog);
         }
     }
 
