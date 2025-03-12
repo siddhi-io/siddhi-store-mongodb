@@ -17,8 +17,9 @@
  */
 package io.siddhi.extension.store.mongodb.util;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadConcernLevel;
 import com.mongodb.ReadPreference;
@@ -63,7 +64,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import javax.net.SocketFactory;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -278,9 +278,6 @@ public class MongoTableUtils {
                         case "max":
                             indexOptions.max(Double.parseDouble(value.toString()));
                             break;
-                        case "bucketSize":
-                            indexOptions.bucketSize(Double.parseDouble(value.toString()));
-                            break;
                         case "partialFilterExpression":
                             indexOptions.partialFilterExpression((Bson) value);
                             break;
@@ -448,7 +445,6 @@ public class MongoTableUtils {
             indexOptionsMap.put("bits", expectedIndexOptions.getBits());
             indexOptionsMap.put("min", expectedIndexOptions.getMin());
             indexOptionsMap.put("max", expectedIndexOptions.getMax());
-            indexOptionsMap.put("bucketSize", expectedIndexOptions.getBucketSize());
             indexOptionsMap.put("partialFilterExpression", expectedIndexOptions.getPartialFilterExpression());
             indexOptionsMap.put("collation", expectedIndexOptions.getCollation());
             indexOptionsMap.put("storageEngine", expectedIndexOptions.getStorageEngine());
@@ -476,79 +472,101 @@ public class MongoTableUtils {
     }
 
     /**
-     * Utility method which can be used to create MongoClientOptionsBuilder from values defined in the
+     * Utility method which can be used to create MongoClientSettings from values defined in the
      * deployment yaml file.
      *
+     * @param connectionString the connectionString to with the uri.
      * @param storeAnnotation the source annotation which contains the needed parameters.
      * @param configReader    {@link ConfigReader} Configuration Reader
-     * @return MongoClientOptions.Builder
+     * @return MongoClientSettings
      */
-    public static MongoClientOptions.Builder extractMongoClientOptionsBuilder
-    (Annotation storeAnnotation, ConfigReader configReader) {
-
-        MongoClientOptions.Builder mongoClientOptionsBuilder = MongoClientOptions.builder();
+    public static MongoClientSettings extractMongoClientSettings(ConnectionString connectionString,
+                                                                 Annotation storeAnnotation,
+                                                                 ConfigReader configReader) {
         try {
-            mongoClientOptionsBuilder.connectionsPerHost(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECTIONS_PER_HOST, "100")));
-            mongoClientOptionsBuilder.connectTimeout(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")));
-            mongoClientOptionsBuilder.heartbeatConnectTimeout(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_CONNECT_TIMEOUT, "20000")));
-            mongoClientOptionsBuilder.heartbeatSocketTimeout(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_SOCKET_TIMEOUT, "20000")));
-            mongoClientOptionsBuilder.heartbeatFrequency(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_FREQUENCY, "10000")));
-            mongoClientOptionsBuilder.localThreshold(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.LOCAL_THRESHOLD, "15")));
-            mongoClientOptionsBuilder.maxWaitTime(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MAX_WAIT_TIME, "120000")));
-            mongoClientOptionsBuilder.minConnectionsPerHost(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_CONNECTIONS_PER_HOST, "0")));
-            mongoClientOptionsBuilder.minHeartbeatFrequency(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_HEARTBEAT_FREQUENCY, "500")));
-            mongoClientOptionsBuilder.serverSelectionTimeout(Integer.parseInt(
-                    configReader.readConfig(MongoTableConstants.SERVER_SELECTION_TIMEOUT, "30000")));
-            mongoClientOptionsBuilder.socketTimeout(
-                    Integer.parseInt(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")));
-            mongoClientOptionsBuilder.threadsAllowedToBlockForConnectionMultiplier(Integer.parseInt(
-                    configReader.readConfig(MongoTableConstants.THREADS_ALLOWED_TO_BLOCK, "5")));
-            mongoClientOptionsBuilder.socketKeepAlive(
-                    Boolean.parseBoolean(configReader.readConfig(MongoTableConstants.SOCKET_KEEP_ALIVE, "false")));
-            mongoClientOptionsBuilder.sslEnabled(
-                    Boolean.parseBoolean(configReader.readConfig(MongoTableConstants.SSL_ENABLED, "false")));
-            mongoClientOptionsBuilder.cursorFinalizerEnabled(Boolean.parseBoolean(
-                    configReader.readConfig(MongoTableConstants.CURSOR_FINALIZER_ENABLED, "true")));
-            mongoClientOptionsBuilder.readPreference(
+            MongoClientSettings.Builder mongoClientSettingsBuilder = MongoClientSettings.builder();
+            mongoClientSettingsBuilder.applyConnectionString(connectionString);
+
+            mongoClientSettingsBuilder.applyToClusterSettings(builder -> {
+                builder.serverSelectionTimeout(
+                        Integer.parseInt(
+                                configReader.readConfig(MongoTableConstants.SERVER_SELECTION_TIMEOUT, "30000")),
+                        TimeUnit.MILLISECONDS
+                );
+                builder.localThreshold(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.LOCAL_THRESHOLD, "15")),
+                        TimeUnit.MILLISECONDS);
+            });
+
+            mongoClientSettingsBuilder.applyToConnectionPoolSettings(builder -> {
+                builder.maxSize(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECTIONS_PER_HOST, "100")));
+                builder.maxWaitTime(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.MAX_WAIT_TIME, "120000")),
+                        TimeUnit.MILLISECONDS);
+                builder.minSize(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_CONNECTIONS_PER_HOST, "0")));
+            });
+
+            mongoClientSettingsBuilder.applyToServerSettings(builder -> {
+                builder.heartbeatFrequency(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_FREQUENCY, "10000")),
+                        TimeUnit.MILLISECONDS
+                );
+                builder.minHeartbeatFrequency(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_HEARTBEAT_FREQUENCY, "500")),
+                        TimeUnit.MILLISECONDS);
+            });
+
+            mongoClientSettingsBuilder.applyToSocketSettings(builder -> {
+                builder.connectTimeout(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")),
+                        TimeUnit.MILLISECONDS
+                );
+                builder.readTimeout(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")),
+                        TimeUnit.MILLISECONDS
+                );
+            });
+
+            mongoClientSettingsBuilder.applyToSslSettings(builder -> {
+                builder.enabled(
+                        Boolean.parseBoolean(configReader.readConfig(MongoTableConstants.SSL_ENABLED, "false")));
+            });
+
+            mongoClientSettingsBuilder.readPreference(
                     ReadPreference.valueOf(configReader.readConfig(MongoTableConstants.READ_PREFERENCE, "primary")));
-            mongoClientOptionsBuilder.writeConcern(
+            mongoClientSettingsBuilder.writeConcern(
                     WriteConcern.valueOf(configReader.readConfig(MongoTableConstants.WRITE_CONCERN, "acknowledged")));
 
             String readConcern = configReader.readConfig(MongoTableConstants.READ_CONCERN, "DEFAULT");
             if (!readConcern.matches("DEFAULT")) {
-                mongoClientOptionsBuilder.readConcern(new ReadConcern(
-                        ReadConcernLevel.fromString(readConcern)));
+                mongoClientSettingsBuilder.readConcern(new ReadConcern(ReadConcernLevel.fromString(readConcern)));
             }
 
             int maxConnectionIdleTime = Integer.parseInt(
                     configReader.readConfig(MongoTableConstants.MAX_CONNECTION_IDLE_TIME, "0"));
             if (maxConnectionIdleTime != 0) {
-                mongoClientOptionsBuilder.maxConnectionIdleTime(maxConnectionIdleTime);
+                mongoClientSettingsBuilder.applyToConnectionPoolSettings(
+                        builder -> builder.maxConnectionIdleTime(maxConnectionIdleTime, TimeUnit.MILLISECONDS));
             }
 
             int maxConnectionLifeTime = Integer.parseInt(
                     configReader.readConfig(MongoTableConstants.MAX_CONNECTION_LIFE_TIME, "0"));
-            if (maxConnectionIdleTime != 0) {
-                mongoClientOptionsBuilder.maxConnectionLifeTime(maxConnectionLifeTime);
+            if (maxConnectionLifeTime != 0) {
+                mongoClientSettingsBuilder.applyToConnectionPoolSettings(
+                        builder -> builder.maxConnectionLifeTime(maxConnectionLifeTime, TimeUnit.MILLISECONDS));
             }
 
             String requiredReplicaSetName = configReader.readConfig(MongoTableConstants.REQUIRED_REPLICA_SET_NAME, "");
             if (!requiredReplicaSetName.equals("")) {
-                mongoClientOptionsBuilder.requiredReplicaSetName(requiredReplicaSetName);
+                mongoClientSettingsBuilder.applyToClusterSettings(
+                        builder -> builder.requiredReplicaSetName(requiredReplicaSetName));
             }
 
             String applicationName = configReader.readConfig(MongoTableConstants.APPLICATION_NAME, "");
             if (!applicationName.equals("")) {
-                mongoClientOptionsBuilder.applicationName(applicationName);
+                mongoClientSettingsBuilder.applicationName(applicationName);
             }
 
             String secureConnectionEnabled = storeAnnotation.getElement(
@@ -556,7 +574,7 @@ public class MongoTableUtils {
             secureConnectionEnabled = secureConnectionEnabled == null ? "false" : secureConnectionEnabled;
 
             if (secureConnectionEnabled.equalsIgnoreCase("true")) {
-                mongoClientOptionsBuilder.sslEnabled(true);
+                mongoClientSettingsBuilder.applyToSslSettings(builder -> builder.enabled(true));
                 String trustStore = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_TRUSTSTORE);
                 trustStore = trustStore == null ?
                         configReader.readConfig("trustStore", DEFAULT_TRUST_STORE_FILE) : trustStore;
@@ -577,18 +595,18 @@ public class MongoTableUtils {
                 keyStorePassword = keyStorePassword == null ?
                         configReader.readConfig("keyStorePassword", DEFAULT_KEY_STORE_PASSWORD) :
                         keyStorePassword;
-
-                mongoClientOptionsBuilder.socketFactory(MongoTableUtils
-                        .extractSocketFactory(trustStore, trustStorePassword, keyStore, keyStorePassword,
-                                configReader));
+                SSLContext sslContext =
+                        MongoTableUtils.extractSSLContext(trustStore, trustStorePassword, keyStore, keyStorePassword,
+                                configReader);
+                mongoClientSettingsBuilder.applyToSslSettings(builder -> builder.context(sslContext));
             }
-            return mongoClientOptionsBuilder;
+            return mongoClientSettingsBuilder.build();
         } catch (IllegalArgumentException e) {
             throw new MongoTableException("Values Read from config readers have illegal values : ", e);
         }
     }
 
-    private static SocketFactory extractSocketFactory(
+    private static SSLContext extractSSLContext(
             String trustStore, String trustStorePassword, String keyStore, String keyStorePassword,
             ConfigReader configReader) {
         TrustManager[] trustManagers;
@@ -652,7 +670,7 @@ public class MongoTableUtils {
                     SSLContext.getInstance(configReader.readConfig(MongoTableConstants.ENCRYPTION_PROTOCOL, "TLSv1.3"));
             sslContext.init(keyManagers, trustManagers, null);
             SSLContext.setDefault(sslContext);
-            return sslContext.getSocketFactory();
+            return sslContext;
         } catch (KeyManagementException e) {
             throw new MongoTableException("Error in validating the key in the key store/ trust store. " +
                     "Trust Store file path : '" + trustStore + "'. " +

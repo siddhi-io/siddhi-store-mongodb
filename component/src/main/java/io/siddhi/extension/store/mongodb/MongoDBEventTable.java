@@ -17,13 +17,14 @@
  */
 package io.siddhi.extension.store.mongodb;
 
+import com.mongodb.ConnectionString;
 import com.mongodb.MongoBulkWriteException;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
-import com.mongodb.MongoClientURI;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
 import com.mongodb.MongoSocketOpenException;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -127,10 +128,6 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                         defaultValue = "null",
                         possibleParameters = "the logical name of the application using this MongoClient. The " +
                                 "UTF-8 encoding may not exceed 128 bytes."),
-                @SystemParameter(name = "cursorFinalizerEnabled",
-                        description = "Sets whether cursor finalizers are enabled.",
-                        defaultValue = "true",
-                        possibleParameters = {"true", "false"}),
                 @SystemParameter(name = "requiredReplicaSetName",
                         description = "The name of the replica set",
                         defaultValue = "null",
@@ -185,23 +182,12 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "means to wait indefinitely",
                         defaultValue = "120000",
                         possibleParameters = "Any integer"),
-                @SystemParameter(name = "threadsAllowedToBlockForConnectionMultiplier",
-                        description = "The maximum number of connections allowed per host for this MongoClient " +
-                                "instance. Those connections will be kept in a pool when idle. Once the pool " +
-                                "is exhausted, any operation requiring a connection will block waiting for an " +
-                                "available connection.",
-                        defaultValue = "100",
-                        possibleParameters = "Any natural number"),
                 @SystemParameter(name = "maxConnectionLifeTime",
                         description = "The maximum life time of a pooled connection.  A zero value indicates " +
                                 "no limit to the life time.  A pooled connection that has exceeded its life time " +
                                 "will be closed and replaced when necessary by a new connection.",
                         defaultValue = "0",
                         possibleParameters = "Any positive integer"),
-                @SystemParameter(name = "socketKeepAlive",
-                        description = "Sets whether to keep a connection alive through firewalls",
-                        defaultValue = "false",
-                        possibleParameters = {"true", "false"}),
                 @SystemParameter(name = "socketTimeout",
                         description = "The time in milliseconds to attempt a send or receive on a socket " +
                                 "before the attempt times out. Default 0 means never to timeout.",
@@ -232,18 +218,6 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "before throwing an exception. A value of 0 means that it will timeout immediately " +
                                 "if no server is available.  A negative value means to wait indefinitely.",
                         defaultValue = "30000",
-                        possibleParameters = "Any integer"),
-                @SystemParameter(name = "heartbeatSocketTimeout",
-                        description = "The socket timeout for connections used for the cluster heartbeat. A value of " +
-                                "0 means that it will timeout immediately if no cluster member is available.  " +
-                                "A negative value means to wait indefinitely.",
-                        defaultValue = "20000",
-                        possibleParameters = "Any integer"),
-                @SystemParameter(name = "heartbeatConnectTimeout",
-                        description = "The connect timeout for connections used for the cluster heartbeat. A value " +
-                                "of 0 means that it will timeout immediately if no cluster member is available.  " +
-                                "A negative value means to wait indefinitely.",
-                        defaultValue = "20000",
                         possibleParameters = "Any integer"),
                 @SystemParameter(name = "heartbeatFrequency",
                         description = "Specify the interval (in milliseconds) between checks, counted from " +
@@ -292,7 +266,8 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
 public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private static final Logger log = LogManager.getLogger(MongoDBEventTable.class);
 
-    private MongoClientURI mongoClientURI;
+    private ConnectionString mongoConnectionString;
+    private MongoClientSettings mongoClientSettings;
     private MongoClient mongoClient;
     private String databaseName;
     private String collectionName;
@@ -348,11 +323,12 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private void initializeConnectionParameters(Annotation storeAnnotation, ConfigReader configReader) {
         String mongoClientURI = storeAnnotation.getElement(MongoTableConstants.ANNOTATION_ELEMENT_URI);
         if (mongoClientURI != null) {
-            MongoClientOptions.Builder mongoClientOptionsBuilder =
-                    MongoTableUtils.extractMongoClientOptionsBuilder(storeAnnotation, configReader);
+            this.mongoConnectionString = new ConnectionString(mongoClientURI);
+            this.mongoClientSettings =
+                    MongoTableUtils.extractMongoClientSettings(this.mongoConnectionString, storeAnnotation,
+                            configReader);
             try {
-                this.mongoClientURI = new MongoClientURI(mongoClientURI, mongoClientOptionsBuilder);
-                this.databaseName = this.mongoClientURI.getDatabase();
+                this.databaseName = this.mongoConnectionString.getDatabase();
             } catch (IllegalArgumentException e) {
                 throw new SiddhiAppCreationException("Annotation '" + storeAnnotation.getName() + "' contains " +
                         "illegal value for 'mongodb.uri' as '" + mongoClientURI + "'. Please check your query and " +
@@ -396,10 +372,10 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
     private MongoDatabase getDatabaseObject() {
         if (this.mongoClient == null) {
             try {
-                this.mongoClient = new MongoClient(this.mongoClientURI);
+                this.mongoClient = MongoClients.create(this.mongoClientSettings);
             } catch (MongoException e) {
                 throw new SiddhiAppCreationException("Annotation 'Store' contains illegal value for " +
-                        "element 'mongodb.uri' as '" + this.mongoClientURI + "'. Please check " +
+                        "element 'mongodb.uri' as '" + this.mongoConnectionString + "'. Please check " +
                         "your query and try again.", e);
             }
         }
@@ -515,7 +491,7 @@ public class MongoDBEventTable extends AbstractQueryableRecordTable {
         try {
             Document containsFilter = MongoTableUtils.resolveCondition(
                     (MongoCompiledCondition) compiledCondition, containsConditionParameterMap, "contains");
-            return this.getCollectionObject().count(containsFilter) > 0;
+            return this.getCollectionObject().countDocuments(containsFilter) > 0;
         } catch (MongoSocketOpenException e) {
             throw new ConnectionUnavailableException(e);
         } catch (MongoException e) {

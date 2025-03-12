@@ -21,7 +21,7 @@
 <FindBugsFilter>
     <Match>
         <Class name="io.siddhi.extension.store.mongodb.MongoDBEventTable" />
-        <Bug pattern="IMPROPER_UNICODE" />
+        <Bug pattern="IMPROPER_UNICODE, NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
     </Match>
     <Match>
         <Class name="io.siddhi.extension.store.mongodb.MongoExpressionVisitor" />
