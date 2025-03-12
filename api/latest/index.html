@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v214" tabindex="1" class="md-skip">
+      <a href="#api-docs-v300" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -338,6 +338,18 @@
   
 </nav>
     
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../3.0.0/" title="3.0.0" class="md-nav__link">
+      3.0.0
+    </a>
   </li>
 
         
@@ -705,7 +717,7 @@
                   <a href="https://github.com/siddhi-io/siddhi-store-mongodb/blob/master/api/latest.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v214">API Docs - v2.1.4</h1>
+                <h1 id="api-docs-v300">API Docs - v3.0.0</h1>
 <div class="admonition info">
 <p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.23</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
@@ -803,12 +815,6 @@
         <td style="vertical-align: top">the logical name of the application using this MongoClient. The UTF-8 encoding may not exceed 128 bytes.</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">cursorFinalizerEnabled</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether cursor finalizers are enabled.</p></td>
-        <td style="vertical-align: top">true</td>
-        <td style="vertical-align: top">true<br>false</td>
-    </tr>
-    <tr>
         <td style="vertical-align: top">requiredReplicaSetName</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The name of the replica set</p></td>
         <td style="vertical-align: top">null</td>
@@ -881,22 +887,10 @@
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">threadsAllowedToBlockForConnectionMultiplier</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum number of connections allowed per host for this MongoClient instance. Those connections will be kept in a pool when idle. Once the pool is exhausted, any operation requiring a connection will block waiting for an available connection.</p></td>
-        <td style="vertical-align: top">100</td>
-        <td style="vertical-align: top">Any natural number</td>
-    </tr>
-    <tr>
         <td style="vertical-align: top">maxConnectionLifeTime</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum life time of a pooled connection.  A zero value indicates no limit to the life time.  A pooled connection that has exceeded its life time will be closed and replaced when necessary by a new connection.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any positive integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">socketKeepAlive</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether to keep a connection alive through firewalls</p></td>
-        <td style="vertical-align: top">false</td>
-        <td style="vertical-align: top">true<br>false</td>
     </tr>
     <tr>
         <td style="vertical-align: top">socketTimeout</td>
@@ -932,18 +926,6 @@
         <td style="vertical-align: top">serverSelectionTimeout</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Specifies how long (in milliseconds) to block for server selection before throwing an exception. A value of 0 means that it will timeout immediately if no server is available.  A negative value means to wait indefinitely.</p></td>
         <td style="vertical-align: top">30000</td>
-        <td style="vertical-align: top">Any integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">heartbeatSocketTimeout</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The socket timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
-        <td style="vertical-align: top">20000</td>
-        <td style="vertical-align: top">Any integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">heartbeatConnectTimeout</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The connect timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
-        <td style="vertical-align: top">20000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
@@ -1007,13 +989,13 @@ define table FooTable (symbol string, price float, volume long);
           </a>
         
         
-          <a href="../2.1.4/" title="2.1.4" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../3.0.0/" title="3.0.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.1.4
+                3.0.0
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
