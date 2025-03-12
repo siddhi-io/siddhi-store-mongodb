@@ -17,6 +17,7 @@
  */
 package io.siddhi.extension.store.mongodb;
 
+import com.mongodb.AuthenticationMechanism;
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
 import com.mongodb.MongoException;
@@ -52,7 +53,9 @@ import javax.net.ssl.TrustManagerFactory;
 public class MongoDBConnectionSSLTest {
     private static final Log log = LogFactory.getLog(MongoDBConnectionSSLTest.class);
 
-    private static String uri = MongoTableTestUtils.resolveBaseUri();
+    private static final String baseUri = MongoTableTestUtils.resolveBaseUri();
+    private static final String mongoUri =
+            String.format("%s?authMechanism=%s", baseUri, AuthenticationMechanism.MONGODB_X509);
     private static MongoClientSettings.Builder mongoClientSettingsBuilder = getOptionsWithSSLEnabled();
     private static String keyStorePath;
 
@@ -76,7 +79,7 @@ public class MongoDBConnectionSSLTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@store(type = 'mongodb', " +
-                "mongodb.uri='" + uri + "?authMechanism=MONGODB-X509&ssl=true&sslInvalidHostNameAllowed=true', " +
+                "mongodb.uri='" + mongoUri + "&ssl=true&sslInvalidHostNameAllowed=true', " +
                 "secure.connection='true', " +
                 "key.store='" + keyStorePath + "', " +
                 "key.store.password='123456', " +
@@ -101,7 +104,7 @@ public class MongoDBConnectionSSLTest {
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "" +
                 "@store(type = 'mongodb', " +
-                "mongodb.uri='" + uri + "?authMechanism=MONGODB-X509&ssl=true&sslInvalidHostNameAllowed=true', " +
+                "mongodb.uri='" + mongoUri + "&ssl=true&sslInvalidHostNameAllowed=true', " +
                 "secure.connection='true', " +
                 "key.store='" + keyStorePath + "', " +
                 "key.store.password='123456', " +
@@ -118,7 +121,7 @@ public class MongoDBConnectionSSLTest {
 
     private void dropCollection() {
         MongoClientSettings mongoClientSettings = mongoClientSettingsBuilder.applyConnectionString(
-                new ConnectionString(uri + "?authMechanism=MONGODB-X509")).build();
+                new ConnectionString(mongoUri)).build();
         try (MongoClient mongoClient = MongoClients.create(mongoClientSettings)) {
             mongoClient.getDatabase("admin").getCollection("FooTable").drop();
         } catch (MongoException e) {
@@ -129,7 +132,7 @@ public class MongoDBConnectionSSLTest {
 
     private boolean doesCollectionExists() {
         MongoClientSettings mongoClientSettings = mongoClientSettingsBuilder.applyConnectionString(
-                new ConnectionString(uri + "?authMechanism=MONGODB-X509")).build();
+                new ConnectionString(mongoUri)).build();
         try (MongoClient mongoClient = MongoClients.create(mongoClientSettings)) {
             for (String collectionName : mongoClient.getDatabase("admin").listCollectionNames()) {
                 if ("FooTable".equals(collectionName)) {
