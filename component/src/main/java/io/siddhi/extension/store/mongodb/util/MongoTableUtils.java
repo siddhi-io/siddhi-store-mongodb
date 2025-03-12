@@ -523,6 +523,10 @@ public class MongoTableUtils {
                         Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")),
                         TimeUnit.MILLISECONDS
                 );
+                builder.readTimeout(
+                        Integer.parseInt(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")),
+                        TimeUnit.MILLISECONDS
+                );
             });
 
             mongoClientSettingsBuilder.applyToSslSettings(builder -> {

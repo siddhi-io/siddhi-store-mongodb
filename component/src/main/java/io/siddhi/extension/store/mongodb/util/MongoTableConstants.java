@@ -95,6 +95,7 @@ public class MongoTableConstants {
     public static final String MIN_CONNECTIONS_PER_HOST = "minConnectionsPerHost";
     public static final String MIN_HEARTBEAT_FREQUENCY = "minHeartbeatFrequency";
     public static final String SERVER_SELECTION_TIMEOUT = "serverSelectionTimeout";
+    public static final String SOCKET_TIMEOUT = "socketTimeout";
     public static final String SSL_ENABLED = "sslEnabled";
     public static final String ENCRYPTION_PROTOCOL = "encryptionProtocol";
     public static final String REQUIRED_REPLICA_SET_NAME = "requiredReplicaSetName";

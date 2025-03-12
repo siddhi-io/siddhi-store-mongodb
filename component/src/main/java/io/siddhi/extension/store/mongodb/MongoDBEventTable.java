@@ -188,6 +188,11 @@ import static io.siddhi.core.util.SiddhiConstants.ANNOTATION_STORE;
                                 "will be closed and replaced when necessary by a new connection.",
                         defaultValue = "0",
                         possibleParameters = "Any positive integer"),
+                @SystemParameter(name = "socketTimeout",
+                        description = "The time in milliseconds to attempt a send or receive on a socket " +
+                                "before the attempt times out. Default 0 means never to timeout.",
+                        defaultValue = "0",
+                        possibleParameters = "Any natural integer"),
                 @SystemParameter(name = "writeConcern",
                         description = "The write concern to use.",
                         defaultValue = "acknowledged",
