@@ -38,7 +38,7 @@
     
     
       
-        <title>2.1.1 - Siddhi Store MongoDB</title>
+        <title>3.0.1 - Siddhi Store MongoDB</title>
       
     
     
@@ -114,7 +114,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#api-docs-v211" tabindex="1" class="md-skip">
+      <a href="#api-docs-v301" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -140,7 +140,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                2.1.1
+                3.0.1
               
             </span>
           
@@ -294,11 +294,62 @@
           
           
 
+  
 
-  <li class="md-nav__item">
-    <a href="../3.0.1/" title="3.0.1" class="md-nav__link">
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        3.0.1
+      </label>
+    
+    <a href="./" title="3.0.1" class="md-nav__link md-nav__link--active">
       3.0.1
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#store" title="Store" class="md-nav__link">
+    Store
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mongodb-store" title="mongodb (Store)" class="md-nav__link">
+    mongodb (Store)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
   </li>
 
         
@@ -354,62 +405,11 @@
           
           
 
-  
 
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-      
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
-        2.1.1
-      </label>
-    
-    <a href="./" title="2.1.1" class="md-nav__link md-nav__link--active">
+  <li class="md-nav__item">
+    <a href="../2.1.1/" title="2.1.1" class="md-nav__link">
       2.1.1
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#store" title="Store" class="md-nav__link">
-    Store
-  </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#mongodb-store" title="mongodb (Store)" class="md-nav__link">
-    mongodb (Store)
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-      
-      
-      
-      
-    </ul>
-  
-</nav>
-    
   </li>
 
         
@@ -738,12 +738,12 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/siddhi-io/siddhi-store-mongodb/blob/master/api/2.1.1.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/siddhi-io/siddhi-store-mongodb/blob/master/api/3.0.1.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="api-docs-v211">API Docs - v2.1.1</h1>
+                <h1 id="api-docs-v301">API Docs - v3.0.1</h1>
 <div class="admonition info">
-<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.13</a></em></p>
+<p class="admonition-title">Tested Siddhi Core version: <em><a target="_blank" href="http://siddhi.io/en/v5.1/docs/query-guide/">5.1.23</a></em></p>
 <p>It could also support other Siddhi Core minor versions.</p>
 </div>
 <h2 id="store">Store</h2>
@@ -839,12 +839,6 @@
         <td style="vertical-align: top">the logical name of the application using this MongoClient. The UTF-8 encoding may not exceed 128 bytes.</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">cursorFinalizerEnabled</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether cursor finalizers are enabled.</p></td>
-        <td style="vertical-align: top">true</td>
-        <td style="vertical-align: top">true<br>false</td>
-    </tr>
-    <tr>
         <td style="vertical-align: top">requiredReplicaSetName</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The name of the replica set</p></td>
         <td style="vertical-align: top">null</td>
@@ -855,6 +849,12 @@
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether to initiate connection with TSL/SSL enabled. true: Initiate the connection with TLS/SSL. false: Initiate the connection without TLS/SSL.</p></td>
         <td style="vertical-align: top">false</td>
         <td style="vertical-align: top">true<br>false</td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">encryptionProtocol</td>
+        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Encryption protocol.</p></td>
+        <td style="vertical-align: top">TLSv1.3</td>
+        <td style="vertical-align: top">SSL<br>TLSv1.2<br>TLSv1.3</td>
     </tr>
     <tr>
         <td style="vertical-align: top">trustStore</td>
@@ -911,22 +911,10 @@
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
-        <td style="vertical-align: top">threadsAllowedToBlockForConnectionMultiplier</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum number of connections allowed per host for this MongoClient instance. Those connections will be kept in a pool when idle. Once the pool is exhausted, any operation requiring a connection will block waiting for an available connection.</p></td>
-        <td style="vertical-align: top">100</td>
-        <td style="vertical-align: top">Any natural number</td>
-    </tr>
-    <tr>
         <td style="vertical-align: top">maxConnectionLifeTime</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The maximum life time of a pooled connection.  A zero value indicates no limit to the life time.  A pooled connection that has exceeded its life time will be closed and replaced when necessary by a new connection.</p></td>
         <td style="vertical-align: top">0</td>
         <td style="vertical-align: top">Any positive integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">socketKeepAlive</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Sets whether to keep a connection alive through firewalls</p></td>
-        <td style="vertical-align: top">false</td>
-        <td style="vertical-align: top">true<br>false</td>
     </tr>
     <tr>
         <td style="vertical-align: top">socketTimeout</td>
@@ -962,18 +950,6 @@
         <td style="vertical-align: top">serverSelectionTimeout</td>
         <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">Specifies how long (in milliseconds) to block for server selection before throwing an exception. A value of 0 means that it will timeout immediately if no server is available.  A negative value means to wait indefinitely.</p></td>
         <td style="vertical-align: top">30000</td>
-        <td style="vertical-align: top">Any integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">heartbeatSocketTimeout</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The socket timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
-        <td style="vertical-align: top">20000</td>
-        <td style="vertical-align: top">Any integer</td>
-    </tr>
-    <tr>
-        <td style="vertical-align: top">heartbeatConnectTimeout</td>
-        <td style="vertical-align: top;"><p style="word-wrap: break-word;margin: 0;">The connect timeout for connections used for the cluster heartbeat. A value of 0 means that it will timeout immediately if no cluster member is available.  A negative value means to wait indefinitely.</p></td>
-        <td style="vertical-align: top">20000</td>
         <td style="vertical-align: top">Any integer</td>
     </tr>
     <tr>
@@ -1022,7 +998,7 @@ define table FooTable (symbol string, price float, volume long);
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../2.1.2/" title="2.1.2" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../latest/" title="latest" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1031,19 +1007,19 @@ define table FooTable (symbol string, price float, volume long);
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                2.1.2
+                latest
               </span>
             </div>
           </a>
         
         
-          <a href="../2.1.0/" title="2.1.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../3.0.0/" title="3.0.0" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                2.1.0
+                3.0.0
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">
