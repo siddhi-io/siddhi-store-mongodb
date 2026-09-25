@@ -27,7 +27,7 @@ Latest API Docs is <a target="_blank" href="https://siddhi-io.github.io/siddhi-s
 
 ## Dependencies 
 
-MongoDB connector jar and its dependencies should be added to the runtime (mongodb-java-driver-3.4.2, includes all the dependencies). For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
+MongoDB Java Driver 5.11.1 and its runtime dependencies (`mongodb-driver-sync`, `mongodb-driver-core`, `bson`, and `bson-record-codec`) should be added to the runtime. For installing third party connectors on various Siddhi execution environments refer Siddhi documentation section on <a target="_blank" href="https://siddhi.io/redirect/add-extensions.html">adding third party libraries</a>.
 
 ## Installation
 
@@ -61,8 +61,8 @@ The MongoDB functionality are tested with the docker base integration test frame
            
             mvn verify -P mongod-ssl -Ddocker.removeVolumes=true
     
-    * MongoDB 4.2 
-            mvn verify -P mongod4 -Ddocker.removeVolumes=true
+    * MongoDB 8.0 
+            mvn verify -P mongod8 -Ddocker.removeVolumes=true
 
 ## Support and Contribution
 
@@ -71,4 +71,3 @@ The MongoDB functionality are tested with the docker base integration test frame
 * If you find any issues related to the extension please report them on <a target="_blank" href="https://github.com/siddhi-io/siddhi-execution-string/issues">the issue tracker</a>.
 
 * For production support and other contribution related information refer <a target="_blank" href="https://siddhi.io/community/">Siddhi Community</a> documentation.
-

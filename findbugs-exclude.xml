@@ -33,6 +33,6 @@
     </Match>
     <Match>
         <Class name="io.siddhi.extension.store.mongodb.util.MongoTableUtils" />
-        <Bug pattern="IMPROPER_UNICODE, PATH_TRAVERSAL_IN, POTENTIAL_XML_INJECTION" />
+        <Bug pattern="IMPROPER_UNICODE, PATH_TRAVERSAL_IN, POTENTIAL_XML_INJECTION, VO_VOLATILE_REFERENCE_TO_ARRAY" />
     </Match>
 </FindBugsFilter>

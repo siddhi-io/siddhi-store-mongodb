@@ -3,6 +3,7 @@
 <suite name="MonogStoreTestSuite" verbose="1">
     <test name="MonogoStoreTest - Standalone">
         <classes>
+            <class name="io.siddhi.extension.store.mongodb.MongoTableUtilsTest"/>
             <class name="io.siddhi.extension.store.mongodb.DefineMongoTableTest"/>
             <class name="io.siddhi.extension.store.mongodb.ConditionVisitorTest"/>
             <class name="io.siddhi.extension.store.mongodb.ContainsMongoTableTest"/>
