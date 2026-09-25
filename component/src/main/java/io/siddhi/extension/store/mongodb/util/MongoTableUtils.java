@@ -489,12 +489,12 @@ public class MongoTableUtils {
 
             mongoClientSettingsBuilder.applyToClusterSettings(builder -> {
                 builder.serverSelectionTimeout(
-                        Integer.parseInt(
+                        Long.parseLong(
                                 configReader.readConfig(MongoTableConstants.SERVER_SELECTION_TIMEOUT, "30000")),
                         TimeUnit.MILLISECONDS
                 );
                 builder.localThreshold(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.LOCAL_THRESHOLD, "15")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.LOCAL_THRESHOLD, "15")),
                         TimeUnit.MILLISECONDS);
             });
 
@@ -502,7 +502,7 @@ public class MongoTableUtils {
                 builder.maxSize(
                         Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECTIONS_PER_HOST, "100")));
                 builder.maxWaitTime(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.MAX_WAIT_TIME, "120000")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.MAX_WAIT_TIME, "120000")),
                         TimeUnit.MILLISECONDS);
                 builder.minSize(
                         Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_CONNECTIONS_PER_HOST, "0")));
@@ -510,21 +510,21 @@ public class MongoTableUtils {
 
             mongoClientSettingsBuilder.applyToServerSettings(builder -> {
                 builder.heartbeatFrequency(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.HEARTBEAT_FREQUENCY, "10000")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.HEARTBEAT_FREQUENCY, "10000")),
                         TimeUnit.MILLISECONDS
                 );
                 builder.minHeartbeatFrequency(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.MIN_HEARTBEAT_FREQUENCY, "500")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.MIN_HEARTBEAT_FREQUENCY, "500")),
                         TimeUnit.MILLISECONDS);
             });
 
             mongoClientSettingsBuilder.applyToSocketSettings(builder -> {
                 builder.connectTimeout(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.CONNECT_TIMEOUT, "10000")),
                         TimeUnit.MILLISECONDS
                 );
                 builder.readTimeout(
-                        Integer.parseInt(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")),
+                        Long.parseLong(configReader.readConfig(MongoTableConstants.SOCKET_TIMEOUT, "0")),
                         TimeUnit.MILLISECONDS
                 );
             });
@@ -544,14 +544,14 @@ public class MongoTableUtils {
                 mongoClientSettingsBuilder.readConcern(new ReadConcern(ReadConcernLevel.fromString(readConcern)));
             }
 
-            int maxConnectionIdleTime = Integer.parseInt(
+            long maxConnectionIdleTime = Long.parseLong(
                     configReader.readConfig(MongoTableConstants.MAX_CONNECTION_IDLE_TIME, "0"));
             if (maxConnectionIdleTime != 0) {
                 mongoClientSettingsBuilder.applyToConnectionPoolSettings(
                         builder -> builder.maxConnectionIdleTime(maxConnectionIdleTime, TimeUnit.MILLISECONDS));
             }
 
-            int maxConnectionLifeTime = Integer.parseInt(
+            long maxConnectionLifeTime = Long.parseLong(
                     configReader.readConfig(MongoTableConstants.MAX_CONNECTION_LIFE_TIME, "0"));
             if (maxConnectionLifeTime != 0) {
                 mongoClientSettingsBuilder.applyToConnectionPoolSettings(
@@ -726,4 +726,3 @@ public class MongoTableUtils {
         return compareOperator;
     }
 }
-
